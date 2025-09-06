@@ -1,4 +1,5 @@
 import uuid
+from datetime import timedelta
 
 from dependency_injector import containers, providers
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -6,9 +7,10 @@ from sqlalchemy.orm import sessionmaker
 
 from src.configuration.conf.settings import DatabaseConnectionSettings
 from src.configuration.database.connection import get_async_session
-from src.core.users.application.usecases import RegisterUserUseCase
+from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase
 from src.core.users.infrastructure.services.password_hasher import BcryptPasswordHasher
-from src.core.users.infrastructure.user_repository import UserRepository
+from src.core.users.infrastructure.services.pyjwt_token import PyJWTTokenService
+from src.core.users.infrastructure.user_repository import UserRepository, AuthTokenRepository
 
 
 class DependencyContainer(containers.DeclarativeContainer):
@@ -51,4 +53,33 @@ class DependencyContainer(containers.DeclarativeContainer):
         hasher=password_hasher
     )
 
+    token_service = providers.Singleton(
+        PyJWTTokenService,
+        secret_key=config.SECRET_KEY,
+        algorithm=config.ALGORITHM,
 
+        access_token_lifetime=providers.Factory(
+            timedelta,
+            minutes=config.ACCESS_TOKEN_LIFETIME.as_int()
+        ),
+        refresh_token_lifetime=providers.Factory(
+            timedelta,
+            days=config.REFRESH_TOKEN_LIFETIME.as_int()
+        ),
+        email_token_lifetime=providers.Factory(
+            timedelta,
+            hours=config.EMAIL_TOKEN_LIFETIME.as_int()
+        )
+    )
+
+    token_repository = providers.Factory(
+        AuthTokenRepository,
+        session=async_session
+    )
+
+    login_usecase = providers.Factory(
+        LoginUserUseCase,
+        user_repo=user_repository,
+        token_service=token_service,
+        token_repository=token_repository
+    )
