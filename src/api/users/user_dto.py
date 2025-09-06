@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Union, Optional
 
 from pydantic import BaseModel, Field, EmailStr, model_validator
@@ -42,3 +43,19 @@ class BusinessUserDTO(BaseModel):
 
 class UserAuthDTO(BaseModel):
     password: str
+
+
+class LoginUserDTO(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class TokenDataDTO(BaseModel):
+    token_str: str
+    expires_at: datetime
+
+
+class LoginResponseDTO(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "Bearer"

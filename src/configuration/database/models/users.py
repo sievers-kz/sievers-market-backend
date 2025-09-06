@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy import UUID, String, DateTime, func, ForeignKey, Enum, Boolean, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.core.users.domain.enums import UserRoleEnum, BusinessTypeEnum
+from src.core.users.domain.enums import UserRoleEnum, BusinessTypeEnum, TokenTypeEnum
 from src.configuration.database.connection import Base
 
 
@@ -73,13 +73,8 @@ class UserAuth(BaseModel):
 class AuthToken(BaseModel):
     __tablename__ = "auth_tokens"
 
-    class TokenTypes(enum.Enum):
-        REFRESH_TOKEN = "refresh_token"
-        EMAIL_TOKEN = "email_token"
-        PASSWORD_RESET_TOKEN = "password_reset_token"
-
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    token_type: Mapped[TokenTypes] = mapped_column(Enum(TokenTypes), nullable=False)
+    token_type: Mapped[TokenTypeEnum] = mapped_column(Enum(TokenTypeEnum), nullable=False)
     token_value: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
     is_revoked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     user: Mapped["User"] = relationship(back_populates="tokens")

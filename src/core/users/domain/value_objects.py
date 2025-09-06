@@ -93,3 +93,6 @@ class Password:
         hashed_str = BcryptPasswordHasher.hash_password(raw_password)
         return cls(hashed_str)
 
+    def matches(self, raw_password: str) -> bool:
+        verify = BcryptPasswordHasher.verify_password(raw_password, self.hashed_password)
+        return verify

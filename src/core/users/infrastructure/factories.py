@@ -1,15 +1,17 @@
 import uuid
+from datetime import datetime
 
 from src.api.users.user_dto import UserDTO, IndividualUserDTO, BusinessUserDTO, UserAuthDTO
-from src.core.users.domain.entities import IndividualUserEntity, BusinessUserEntity, UserAggregate, UserAuthEntity
-from src.core.users.domain.enums import UserRoleEnum
+from src.core.users.domain.entities import IndividualUserEntity, BusinessUserEntity, UserAggregate, UserAuthEntity, \
+    AuthTokenAggregate
+from src.core.users.domain.enums import UserRoleEnum, TokenTypeEnum
 from src.core.users.domain.value_objects import Fullname, Email, Phone, OrganizationFullname, IIN, BIN, Password
 
 
 class UserFactory:
     @staticmethod
     def create(user_dto: UserDTO):
-        profile = UserFactory._create_profile(user_dto.role, user_dto.profile)
+        profile = UserProfileFactory.create(user_dto)
         authentication = UserAuthFactory.create(user_dto.authentication)
 
         return UserAggregate(
@@ -22,15 +24,17 @@ class UserFactory:
             authentication=authentication
         )
 
+
+class UserProfileFactory:
     @staticmethod
-    def _create_profile(role: UserRoleEnum, profile_dto):
-        match role:
-            case UserRoleEnum.INDIVIDUAL:
-                return IndividualUserFactory.create(profile_dto)
-            case UserRoleEnum.BUSINESS:
-                return BusinessUserFactory.create(profile_dto)
-            case _:
-                raise ValueError(f"Unsupported aggregate role: {role}")
+    def create(user_dto: UserDTO):
+        if user_dto.role == UserRoleEnum.INDIVIDUAL:
+            return IndividualUserFactory.create(user_dto.profile)
+
+        if user_dto.role == UserRoleEnum.BUSINESS:
+            return BusinessUserFactory.create(user_dto.profile)
+
+        raise ValueError("Unsupported profile type...")
 
 
 class IndividualUserFactory:
@@ -55,4 +59,48 @@ class UserAuthFactory:
     def create(auth_dto: UserAuthDTO):
         return UserAuthEntity(
             password=Password.from_raw(auth_dto.password)
+        )
+
+
+class AuthTokenFactory:
+    @staticmethod
+    def create_refresh_token(
+        user_id: uuid.UUID,
+        token_value: str,
+        expires_at: datetime
+    ):
+        return AuthTokenFactory._create(
+            user_id=user_id,
+            token_type=TokenTypeEnum.REFRESH_TOKEN,
+            token_value=token_value,
+            expires_at=expires_at
+        )
+
+    @staticmethod
+    def create_email_token(
+        user_id: uuid.UUID,
+        token_value: str,
+        expires_at: datetime
+    ):
+        return AuthTokenFactory._create(
+            user_id=user_id,
+            token_type=TokenTypeEnum.EMAIL_CONFIRMATION_TOKEN,
+            token_value=token_value,
+            expires_at=expires_at
+        )
+
+    @staticmethod
+    def _create(
+        user_id: uuid.UUID,
+        token_type: TokenTypeEnum,
+        token_value: str,
+        expires_at: datetime
+    ):
+        return AuthTokenAggregate(
+            id=uuid.uuid4(),
+            user_id=user_id,
+            token_type=token_type,
+            token_value=token_value,
+            is_revoked=False,
+            expires_at=expires_at
         )

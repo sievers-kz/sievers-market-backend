@@ -1,12 +1,16 @@
-from src.core.users.domain.entities import UserAggregate, UserAuthEntity
+from typing import Union
+
+from src.core.users.domain.entities import UserAggregate, UserAuthEntity, IndividualUserEntity, BusinessUserEntity, \
+    AuthTokenAggregate
 from src.core.users.domain.enums import UserRoleEnum
-from src.configuration.database.models.users import User, IndividualProfile, BusinessProfile, UserAuth
+from src.configuration.database.models.users import User, IndividualProfile, BusinessProfile, UserAuth, AuthToken
+from src.core.users.domain.value_objects import Fullname, Email, Phone, OrganizationFullname, IIN, BIN, Password
 
 
-class UserORMMapper:
+class UserMapper:
     @staticmethod
     def to_orm(user_aggregate: UserAggregate) -> User:
-        user_orm = User(
+        user_model = User(
             id=user_aggregate.id,
             role=user_aggregate.role,
             first_name=user_aggregate.fullname.first_name,
@@ -16,39 +20,76 @@ class UserORMMapper:
             phone=user_aggregate.phone.phone,
         )
 
-        profile_orm = UserORMMapper._attach_profile(user_aggregate)
-        user_orm.auth = UserAuthMapper.to_orm(user_aggregate)
+        profile_model = UserProfileMapper.to_orm(user_aggregate)
+        user_model.auth = UserAuthMapper.to_orm(user_aggregate)
 
-        match profile_orm:
+        match profile_model:
             case IndividualProfile():
-                user_orm.individual_profile = profile_orm
+                user_model.individual_profile = profile_model
             case BusinessProfile():
-                user_orm.business_profile = profile_orm
+                user_model.business_profile = profile_model
             case _:
-                raise ValueError(f"Unsupported profile type: {type(profile_orm)}")
+                raise ValueError(f"Unsupported profile type: {type(profile_model)}")
 
-        return user_orm
+        return user_model
 
     @staticmethod
-    def _attach_profile(user_aggregate: UserAggregate):
-        match user_aggregate.role:
-            case UserRoleEnum.INDIVIDUAL:
-                return IndividualUserORMMapper.to_orm(user_aggregate)
-            case UserRoleEnum.BUSINESS:
-                return BusinessUserORMMapper.to_orm(user_aggregate)
-            case _:
-                raise ValueError(f"Unsupported role type: {user_aggregate.role}")
+    def to_domain(user_model: User):
+        profile = UserProfileMapper.to_domain(user_model)
+        authentication = UserAuthMapper.to_domain(user_model.auth)
+
+        return UserAggregate(
+            id=user_model.id,
+            role=user_model.role,
+            fullname=Fullname(
+                first_name=user_model.first_name,
+                last_name=user_model.last_name,
+                patronymic=user_model.patronymic
+            ),
+            email=Email(user_model.email),
+            phone=Phone.from_raw(user_model.phone),
+            profile=profile,
+            authentication=authentication
+        )
 
 
-class IndividualUserORMMapper:
+class UserProfileMapper:
+    @staticmethod
+    def to_orm(user_aggregate: UserAggregate) -> Union[IndividualProfile, BusinessProfile]:
+        if user_aggregate.role == UserRoleEnum.INDIVIDUAL:
+            return IndividualUserMapper.to_orm(user_aggregate)
+
+        if user_aggregate.role == UserRoleEnum.BUSINESS:
+            return BusinessUserMapper.to_orm(user_aggregate)
+
+        raise ValueError("Unsupported profile type ...")
+
+    @staticmethod
+    def to_domain(user_model: User) -> Union[IndividualUserEntity, BusinessUserEntity]:
+        if user_model.individual_profile:
+            return IndividualUserMapper.to_domain(user_model.individual_profile)
+
+        if user_model.business_profile:
+            return BusinessUserMapper.to_domain(user_model.business_profile)
+
+        raise ValueError("Unsupported profile type ...")
+
+
+class IndividualUserMapper:
     @staticmethod
     def to_orm(user_aggregate: UserAggregate) -> IndividualProfile:
         return IndividualProfile(
             user_id=user_aggregate.id
         )
 
+    @staticmethod
+    def to_domain(individual_model: IndividualProfile) -> IndividualUserEntity:
+        return IndividualUserEntity(
 
-class BusinessUserORMMapper:
+        )
+
+
+class BusinessUserMapper:
     @staticmethod
     def to_orm(user_aggregate: UserAggregate) -> BusinessProfile:
         return BusinessProfile(
@@ -59,6 +100,15 @@ class BusinessUserORMMapper:
             bin=user_aggregate.profile.bin.bin
         )
 
+    @staticmethod
+    def to_domain(business_model: BusinessProfile) -> BusinessUserEntity:
+        return BusinessUserEntity(
+            business_type=business_model.business_type,
+            organization_fullname=OrganizationFullname(business_model.organization_fullname),
+            iin=IIN(business_model.iin),
+            bin=BIN(business_model.bin)
+        )
+
 
 class UserAuthMapper:
     @staticmethod
@@ -66,4 +116,34 @@ class UserAuthMapper:
         return UserAuth(
             user_id=user_aggregate.id,
             hashed_password=user_aggregate.authentication.password.hashed_password
+        )
+
+    @staticmethod
+    def to_domain(auth_model: UserAuth) -> UserAuthEntity:
+        return UserAuthEntity(
+            password=Password(auth_model.hashed_password)
+        )
+
+
+class AuthTokenMapper:
+    @staticmethod
+    def to_orm(token_aggregate: AuthTokenAggregate) -> AuthToken:
+        return AuthToken(
+            id=token_aggregate.id,
+            user_id=token_aggregate.user_id,
+            token_type=token_aggregate.token_type,
+            token_value=token_aggregate.token_value,
+            is_revoked=token_aggregate.is_revoked,
+            expires_at=token_aggregate.expires_at
+        )
+
+    @staticmethod
+    def to_domain(token_model: AuthToken) -> AuthTokenAggregate:
+        return AuthTokenAggregate(
+            id=token_model.id,
+            user_id=token_model.user_id,
+            token_type=token_model.token_type,
+            token_value=token_model.token_value,
+            is_revoked=token_model.is_revoked,
+            expires_at=token_model.expires_at
         )
