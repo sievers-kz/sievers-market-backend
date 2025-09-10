@@ -37,8 +37,8 @@ class IndividualUserDTO(BaseModel):
 class BusinessUserDTO(BaseModel):
     business_type: BusinessTypeEnum
     organization_fullname: str
-    iin: str
-    bin: str
+    iin: str | None = None
+    bin: str | None = None
 
 
 class UserAuthDTO(BaseModel):

@@ -5,7 +5,7 @@ from src.api.users.user_dto import UserDTO, IndividualUserDTO, BusinessUserDTO, 
 from src.core.users.domain.entities import IndividualUserEntity, BusinessUserEntity, UserAggregate, UserAuthEntity, \
     AuthTokenAggregate
 from src.core.users.domain.enums import UserRoleEnum, TokenTypeEnum
-from src.core.users.domain.value_objects import Fullname, Email, Phone, OrganizationFullname, IIN, BIN, Password
+from src.core.users.domain.value_objects import Fullname, Email, Phone, OrganizationFullname, IIN, BIN, HashedPassword
 
 
 class UserFactory:
@@ -17,8 +17,8 @@ class UserFactory:
         return UserAggregate(
             id=uuid.uuid4(),
             role=user_dto.role,
-            fullname=Fullname.from_dict(user_dto.dict()),
-            email=Email(user_dto.email),
+            fullname=Fullname.from_raw(user_dto.first_name, user_dto.last_name, user_dto.patronymic),
+            email=Email.from_raw(user_dto.email),
             phone=Phone.from_raw(user_dto.phone),
             profile=profile,
             authentication=authentication
@@ -48,9 +48,9 @@ class BusinessUserFactory:
     def create(business_dto: BusinessUserDTO):
         return BusinessUserEntity(
             business_type=business_dto.business_type,
-            organization_fullname=OrganizationFullname(business_dto.organization_fullname),
-            iin=IIN(business_dto.iin),
-            bin=BIN(business_dto.bin)
+            organization_fullname=OrganizationFullname.from_raw(business_dto.organization_fullname),
+            iin=IIN.from_raw(business_dto.iin),
+            bin=BIN.from_raw(business_dto.bin)
         )
 
 
@@ -58,7 +58,7 @@ class UserAuthFactory:
     @staticmethod
     def create(auth_dto: UserAuthDTO):
         return UserAuthEntity(
-            password=Password.from_raw(auth_dto.password)
+            password=HashedPassword.from_raw(auth_dto.password)
         )
 
 
