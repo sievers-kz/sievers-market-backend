@@ -4,7 +4,7 @@ from src.core.users.domain.entities import UserAggregate, UserAuthEntity, Indivi
     AuthTokenAggregate
 from src.core.users.domain.enums import UserRoleEnum
 from src.configuration.database.models.users import User, IndividualProfile, BusinessProfile, UserAuth, AuthToken
-from src.core.users.domain.value_objects import Fullname, Email, Phone, OrganizationFullname, IIN, BIN, Password
+from src.core.users.domain.value_objects import Fullname, Email, Phone, OrganizationFullname, IIN, BIN, HashedPassword
 
 
 class UserMapper:
@@ -16,8 +16,8 @@ class UserMapper:
             first_name=user_aggregate.fullname.first_name,
             last_name=user_aggregate.fullname.last_name,
             patronymic=user_aggregate.fullname.patronymic,
-            email=user_aggregate.email.email,
-            phone=user_aggregate.phone.phone,
+            email=user_aggregate.email.value,
+            phone=user_aggregate.phone.value,
         )
 
         profile_model = UserProfileMapper.to_orm(user_aggregate)
@@ -41,12 +41,12 @@ class UserMapper:
         return UserAggregate(
             id=user_model.id,
             role=user_model.role,
-            fullname=Fullname(
+            fullname=Fullname.from_raw(
                 first_name=user_model.first_name,
                 last_name=user_model.last_name,
                 patronymic=user_model.patronymic
             ),
-            email=Email(user_model.email),
+            email=Email.from_raw(user_model.email),
             phone=Phone.from_raw(user_model.phone),
             profile=profile,
             authentication=authentication
@@ -95,18 +95,18 @@ class BusinessUserMapper:
         return BusinessProfile(
             user_id=user_aggregate.id,
             business_type=user_aggregate.profile.business_type,
-            organization_fullname=user_aggregate.profile.organization_fullname.organization_fullname,
-            iin=user_aggregate.profile.iin.iin,
-            bin=user_aggregate.profile.bin.bin
+            organization_fullname=user_aggregate.profile.organization_fullname.value,
+            iin=user_aggregate.profile.iin.value,
+            bin=user_aggregate.profile.bin.value
         )
 
     @staticmethod
     def to_domain(business_model: BusinessProfile) -> BusinessUserEntity:
         return BusinessUserEntity(
             business_type=business_model.business_type,
-            organization_fullname=OrganizationFullname(business_model.organization_fullname),
-            iin=IIN(business_model.iin),
-            bin=BIN(business_model.bin)
+            organization_fullname=OrganizationFullname.from_raw(business_model.organization_fullname),
+            iin=IIN.from_raw(business_model.iin),
+            bin=BIN.from_raw(business_model.bin)
         )
 
 
@@ -121,7 +121,7 @@ class UserAuthMapper:
     @staticmethod
     def to_domain(auth_model: UserAuth) -> UserAuthEntity:
         return UserAuthEntity(
-            password=Password(auth_model.hashed_password)
+            password=HashedPassword.from_hash(auth_model.hashed_password)
         )
 
 

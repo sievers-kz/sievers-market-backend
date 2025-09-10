@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Union
 
 from src.core.users.domain.enums import UserRoleEnum, BusinessTypeEnum, TokenTypeEnum
-from src.core.users.domain.value_objects import Fullname, Email, Phone, OrganizationFullname, IIN, BIN, Password
+from src.core.users.domain.value_objects import Fullname, Email, Phone, OrganizationFullname, IIN, BIN, HashedPassword
 
 
 @dataclass
@@ -33,7 +33,7 @@ class BusinessUserEntity:
 
 @dataclass
 class UserAuthEntity:
-    password: Password
+    password: HashedPassword
 
 
 @dataclass
