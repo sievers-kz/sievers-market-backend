@@ -1,16 +1,13 @@
-import uuid
 from datetime import timedelta
 
 from dependency_injector import containers, providers
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from src.configuration.conf.settings import DatabaseConnectionSettings
-from src.configuration.database.connection import get_async_session
 from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase
 from src.core.users.infrastructure.services.password_hasher import BcryptPasswordHasher
 from src.core.users.infrastructure.services.pyjwt_token import PyJWTTokenService
-from src.core.users.infrastructure.user_repository import UserRepository, AuthTokenRepository
+from src.core.users.infrastructure.user_unit_of_work import UserUnitOfWork
 
 
 class DependencyContainer(containers.DeclarativeContainer):
@@ -35,21 +32,15 @@ class DependencyContainer(containers.DeclarativeContainer):
         expire_on_commit=False
     )
 
-    async_session = providers.Resource(
-        get_async_session,
-        session_maker=async_session_maker
+    unit_of_work = providers.Factory(
+        UserUnitOfWork,
+        session_factory=async_session_maker
     )
-
-    user_repository = providers.Factory(
-        UserRepository,
-        session=async_session
-    )
-
     password_hasher = providers.Singleton(BcryptPasswordHasher)
 
     register_usecase = providers.Factory(
         RegisterUserUseCase,
-        user_repo=user_repository,
+        unit_of_work=unit_of_work,
         hasher=password_hasher
     )
 
@@ -72,14 +63,8 @@ class DependencyContainer(containers.DeclarativeContainer):
         )
     )
 
-    token_repository = providers.Factory(
-        AuthTokenRepository,
-        session=async_session
-    )
-
     login_usecase = providers.Factory(
         LoginUserUseCase,
-        user_repo=user_repository,
+        unit_of_work=unit_of_work,
         token_service=token_service,
-        token_repository=token_repository
     )
