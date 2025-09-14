@@ -18,6 +18,7 @@ class UserMapper:
             patronymic=user_aggregate.fullname.patronymic,
             email=user_aggregate.email.value,
             phone=user_aggregate.phone.value,
+            is_active=user_aggregate.is_active
         )
 
         profile_model = UserProfileMapper.to_orm(user_aggregate)
@@ -48,6 +49,7 @@ class UserMapper:
             ),
             email=Email.from_raw(user_model.email),
             phone=Phone.from_raw(user_model.phone),
+            is_active=user_model.is_active,
             profile=profile,
             authentication=authentication
         )
@@ -79,13 +81,14 @@ class IndividualUserMapper:
     @staticmethod
     def to_orm(user_aggregate: UserAggregate) -> IndividualProfile:
         return IndividualProfile(
+            id=user_aggregate.profile.id,
             user_id=user_aggregate.id
         )
 
     @staticmethod
     def to_domain(individual_model: IndividualProfile) -> IndividualUserEntity:
         return IndividualUserEntity(
-
+            id=individual_model.id
         )
 
 
@@ -93,6 +96,7 @@ class BusinessUserMapper:
     @staticmethod
     def to_orm(user_aggregate: UserAggregate) -> BusinessProfile:
         return BusinessProfile(
+            id=user_aggregate.profile.id,
             user_id=user_aggregate.id,
             business_type=user_aggregate.profile.business_type,
             organization_fullname=user_aggregate.profile.organization_fullname.value,
@@ -103,6 +107,7 @@ class BusinessUserMapper:
     @staticmethod
     def to_domain(business_model: BusinessProfile) -> BusinessUserEntity:
         return BusinessUserEntity(
+            id=business_model.id,
             business_type=business_model.business_type,
             organization_fullname=OrganizationFullname.from_raw(business_model.organization_fullname),
             iin=IIN.from_raw(business_model.iin),
@@ -114,6 +119,7 @@ class UserAuthMapper:
     @staticmethod
     def to_orm(user_aggregate: UserAggregate) -> UserAuth:
         return UserAuth(
+            id=user_aggregate.authentication.id,
             user_id=user_aggregate.id,
             hashed_password=user_aggregate.authentication.password.hashed_password
         )
@@ -121,6 +127,7 @@ class UserAuthMapper:
     @staticmethod
     def to_domain(auth_model: UserAuth) -> UserAuthEntity:
         return UserAuthEntity(
+            id=auth_model.id,
             password=HashedPassword.from_hash(auth_model.hashed_password)
         )
 

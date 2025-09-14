@@ -3,9 +3,9 @@ from typing import Annotated
 from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, Depends
 
-from src.api.users.user_dto import UserDTO, LoginUserDTO, LoginResponseDTO
+from src.api.users.user_dto import UserDTO, LoginUserDTO, LoginResponseDTO, EmailConfirmationDTO
 from src.configuration.dependencies.depends import DependencyContainer
-from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase
+from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase, EmailConfirmationUseCase
 
 users_router = APIRouter(prefix="/api/v1", tags=["Users"])
 
@@ -16,7 +16,11 @@ async def register_user(
     user_data: UserDTO,
     register_usecase: Annotated[
         RegisterUserUseCase,
-        Depends(Provide[DependencyContainer.register_usecase])
+        Depends(
+            Provide[
+                DependencyContainer.register_usecase
+            ]
+        )
     ]
 ):
     await register_usecase.execute(user_dto=user_data)
@@ -29,7 +33,28 @@ async def login_user(
     user_data: LoginUserDTO,
     login_usecase: Annotated[
         LoginUserUseCase,
-        Depends(Provide[DependencyContainer.login_usecase])
+        Depends(
+            Provide[
+                DependencyContainer.login_usecase
+            ]
+        )
     ]
 ):
     return await login_usecase.execute(user_data)
+
+
+@users_router.post("/auth/email_confirmation")
+@inject
+async def confirm_email(
+    confirmation_code: EmailConfirmationDTO,
+    confirmation_usecase: Annotated[
+        EmailConfirmationUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.confirmation_usecase
+            ]
+        )
+    ]
+):
+    await confirmation_usecase.execute(confirmation_code)
+    return {"message": "Successfully confirmation!"}
