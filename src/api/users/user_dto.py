@@ -59,3 +59,7 @@ class LoginResponseDTO(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "Bearer"
+
+
+class EmailConfirmationDTO(BaseModel):
+    confirmation_code: str

@@ -15,14 +15,26 @@ class UserRepository(AbstractRepository):
         self.session = session
 
     async def get_by_id(self, user_id: uuid.UUID) -> "":
-        statement = select(User).where(User.id == user_id)
+        statement = (
+            select(User)
+            .options(
+                joinedload(User.individual_profile),
+                joinedload(User.business_profile),
+                joinedload(User.auth)
+            ).where(User.id == user_id)
+        )
+
         result = await self.session.execute(statement)
-        return result.scalar_one_or_none()
+        user_model = result.scalar_one_or_none()
+
+        if user_model is None:
+            return None
+
+        return UserMapper.to_domain(user_model)
 
     async def save(self, user: UserAggregate) -> None:
         user_orm = UserMapper.to_orm(user)
-        self.session.add(user_orm)
-        await self.session.commit()
+        await self.session.merge(user_orm)
 
     async def get_by_email(self, email: str) -> UserAggregate:
         statement = (
@@ -43,7 +55,7 @@ class UserRepository(AbstractRepository):
         return UserMapper.to_domain(user_model)
 
 
-class AuthTokenRepository:
+class AuthTokenRepository: # FIXME: Set a simple validation if result return None
     def __init__(self, session: AsyncSession):
         self._session = session
 
@@ -65,4 +77,3 @@ class AuthTokenRepository:
     async def save(self, token_aggregate: AuthTokenAggregate) -> None:
         token_model = AuthTokenMapper.to_orm(token_aggregate)
         self._session.add(token_model)
-        await self._session.commit()

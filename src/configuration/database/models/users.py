@@ -39,6 +39,7 @@ class User(BaseModel):
     patronymic: Mapped[str] = mapped_column(String(50), nullable=True)
     phone: Mapped[str] = mapped_column(String(25), unique=True, nullable=True)
     email: Mapped[str] = mapped_column(String(256), unique=True, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     individual_profile: Mapped["IndividualProfile"] = relationship(back_populates="user", uselist=False)
     business_profile: Mapped["BusinessProfile"] = relationship(back_populates="user", uselist=False)

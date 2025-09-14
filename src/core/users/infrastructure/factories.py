@@ -20,6 +20,7 @@ class UserFactory:
             fullname=Fullname.from_raw(user_dto.first_name, user_dto.last_name, user_dto.patronymic),
             email=Email.from_raw(user_dto.email),
             phone=Phone.from_raw(user_dto.phone),
+            is_active=False,
             profile=profile,
             authentication=authentication
         )
@@ -40,13 +41,14 @@ class UserProfileFactory:
 class IndividualUserFactory:
     @staticmethod
     def create(individual_dto: IndividualUserDTO):
-        return IndividualUserEntity()
+        return IndividualUserEntity(id=uuid.uuid4())
 
 
 class BusinessUserFactory:
     @staticmethod
     def create(business_dto: BusinessUserDTO):
         return BusinessUserEntity(
+            id=uuid.uuid4(),
             business_type=business_dto.business_type,
             organization_fullname=OrganizationFullname.from_raw(business_dto.organization_fullname),
             iin=IIN.from_raw(business_dto.iin),
@@ -58,6 +60,7 @@ class UserAuthFactory:
     @staticmethod
     def create(auth_dto: UserAuthDTO):
         return UserAuthEntity(
+            id=uuid.uuid4(),
             password=HashedPassword.from_raw(auth_dto.password)
         )
 

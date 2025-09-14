@@ -4,7 +4,8 @@ from dependency_injector import containers, providers
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase
+from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase, EmailConfirmationUseCase
+from src.core.users.infrastructure.services.email_sender import ConsoleEmailSender
 from src.core.users.infrastructure.services.password_hasher import BcryptPasswordHasher
 from src.core.users.infrastructure.services.pyjwt_token import PyJWTTokenService
 from src.core.users.infrastructure.user_unit_of_work import UserUnitOfWork
@@ -37,12 +38,7 @@ class DependencyContainer(containers.DeclarativeContainer):
         session_factory=async_session_maker
     )
     password_hasher = providers.Singleton(BcryptPasswordHasher)
-
-    register_usecase = providers.Factory(
-        RegisterUserUseCase,
-        unit_of_work=unit_of_work,
-        hasher=password_hasher
-    )
+    email_sender = providers.Singleton(ConsoleEmailSender)
 
     token_service = providers.Singleton(
         PyJWTTokenService,
@@ -63,8 +59,20 @@ class DependencyContainer(containers.DeclarativeContainer):
         )
     )
 
+    register_usecase = providers.Factory(
+        RegisterUserUseCase,
+        unit_of_work=unit_of_work,
+        sender=email_sender,
+        token_service=token_service
+    )
+
     login_usecase = providers.Factory(
         LoginUserUseCase,
         unit_of_work=unit_of_work,
         token_service=token_service,
+    )
+
+    confirmation_usecase = providers.Factory(
+        EmailConfirmationUseCase,
+        unit_of_work=unit_of_work
     )
