@@ -63,3 +63,7 @@ class LoginResponseDTO(BaseModel):
 
 class EmailConfirmationDTO(BaseModel):
     confirmation_code: str
+
+
+class RefreshTokenDTO(BaseModel):
+    refresh_token: str

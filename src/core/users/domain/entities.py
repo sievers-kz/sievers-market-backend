@@ -56,3 +56,8 @@ class AuthTokenAggregate:
     def is_expired(self):
         current_time = datetime.now(timezone.utc)
         return current_time > self.expires_at
+
+    def revoke_token(self):
+        if self.is_revoked:
+            raise ValueError("Токен уже отозван!")
+        self.is_revoked = True
