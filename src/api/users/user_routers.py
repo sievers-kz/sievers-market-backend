@@ -3,9 +3,10 @@ from typing import Annotated
 from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, Depends
 
-from src.api.users.user_dto import UserDTO, LoginUserDTO, LoginResponseDTO, EmailConfirmationDTO
+from src.api.users.user_dto import UserDTO, LoginUserDTO, LoginResponseDTO, EmailConfirmationDTO, RefreshTokenDTO
 from src.configuration.dependencies.depends import DependencyContainer
-from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase, EmailConfirmationUseCase
+from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase, EmailConfirmationUseCase, \
+    RefreshTokenUseCase
 
 users_router = APIRouter(prefix="/api/v1", tags=["Users"])
 
@@ -58,3 +59,20 @@ async def confirm_email(
 ):
     await confirmation_usecase.execute(confirmation_code)
     return {"message": "Successfully confirmation!"}
+
+
+@users_router.post("/auth/refresh", response_model=LoginResponseDTO)
+@inject
+async def refresh_token(
+    token_data: RefreshTokenDTO,
+    refresh_usecase: Annotated[
+        RefreshTokenUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.refresh_usecase
+            ]
+        )
+    ]
+):
+    return await refresh_usecase.execute(token_data)
+

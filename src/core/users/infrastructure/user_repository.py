@@ -76,4 +76,4 @@ class AuthTokenRepository: # FIXME: Set a simple validation if result return Non
 
     async def save(self, token_aggregate: AuthTokenAggregate) -> None:
         token_model = AuthTokenMapper.to_orm(token_aggregate)
-        self._session.add(token_model)
+        await self._session.merge(token_model)

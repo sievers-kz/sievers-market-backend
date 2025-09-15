@@ -49,8 +49,10 @@ class PyJWTTokenService:
             payload = jwt.decode(token, self._secret_key, algorithms=[self._algorithm])
 
             token_type = payload.get("token_type")
-            if not token_type or token_type != expected_type:
+            if not token_type or token_type != expected_type.value:
                 raise ValueError("Wrong token type!")
+
+            return payload
 
         except jwt.PyJWTError as e:
             raise ValueError(f"Invalid token ...: {e}")
