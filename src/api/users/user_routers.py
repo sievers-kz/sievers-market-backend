@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from src.api.users.user_dto import UserDTO, LoginUserDTO, LoginResponseDTO, EmailConfirmationDTO, RefreshTokenDTO
 from src.configuration.dependencies.depends import DependencyContainer
 from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase, EmailConfirmationUseCase, \
-    RefreshTokenUseCase
+    RefreshTokenUseCase, LogoutUserUseCase
 
 users_router = APIRouter(prefix="/api/v1", tags=["Users"])
 
@@ -76,3 +76,19 @@ async def refresh_token(
 ):
     return await refresh_usecase.execute(token_data)
 
+
+@users_router.post("/auth/logout")
+@inject
+async def logout_user(
+    token_data: RefreshTokenDTO,
+    logout_usecase: Annotated[
+        LogoutUserUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.logout_usecase
+            ]
+        )
+    ]
+):
+    await logout_usecase.execute(token_data)
+    return {"message": "Logout has been successfully!"}

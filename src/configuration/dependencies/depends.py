@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase, EmailConfirmationUseCase, \
-    RefreshTokenUseCase
+    RefreshTokenUseCase, LogoutUserUseCase
 from src.core.users.infrastructure.services.email_sender import ConsoleEmailSender
 from src.core.users.infrastructure.services.password_hasher import BcryptPasswordHasher
 from src.core.users.infrastructure.services.pyjwt_token import PyJWTTokenService
@@ -80,6 +80,12 @@ class DependencyContainer(containers.DeclarativeContainer):
 
     refresh_usecase = providers.Factory(
         RefreshTokenUseCase,
+        unit_of_work=unit_of_work,
+        token_service=token_service
+    )
+
+    logout_usecase = providers.Factory(
+        LogoutUserUseCase,
         unit_of_work=unit_of_work,
         token_service=token_service
     )
