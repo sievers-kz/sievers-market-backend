@@ -3,10 +3,11 @@ from typing import Annotated
 from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, Depends
 
-from src.api.users.user_dto import UserDTO, LoginUserDTO, LoginResponseDTO, EmailConfirmationDTO, RefreshTokenDTO
+from src.api.users.user_dto import UserDTO, LoginUserDTO, LoginResponseDTO, EmailConfirmationDTO, RefreshTokenDTO, \
+    ForgotPasswordDTO, ResetPasswordDTO
 from src.configuration.dependencies.depends import DependencyContainer
 from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase, EmailConfirmationUseCase, \
-    RefreshTokenUseCase, LogoutUserUseCase
+    RefreshTokenUseCase, LogoutUserUseCase, ForgotPasswordUseCase, ResetPasswordUseCase
 
 users_router = APIRouter(prefix="/api/v1", tags=["Users"])
 
@@ -92,3 +93,38 @@ async def logout_user(
 ):
     await logout_usecase.execute(token_data)
     return {"message": "Logout has been successfully!"}
+
+
+@users_router.post("/auth/forgot-password")
+@inject
+async def request_forgot_password(
+    forgot_password_dto: ForgotPasswordDTO,
+    forgot_password_usecase: Annotated[
+        ForgotPasswordUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.forgot_password_usecase
+            ]
+        )
+    ]
+):
+    await forgot_password_usecase.execute(forgot_password_dto)
+    return {"message": "Если указанная вами почта существует, мы отправили письмо с подтверждением"}
+
+
+@users_router.post("/auth/reset-password")
+@inject
+async def reset_user_password(
+    reset_password_dto: ResetPasswordDTO,
+    reset_password_usecase: Annotated[
+        ResetPasswordUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.reset_password_usecase
+            ]
+        )
+    ]
+):
+    await reset_password_usecase.execute(reset_password_dto)
+    return {"message": "Пароль успешно изменён! Пожалуйста, войдите систему с новым паролем."}
+

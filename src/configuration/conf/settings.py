@@ -14,6 +14,7 @@ class DatabaseConnectionSettings(BaseSettings):
     ACCESS_TOKEN_LIFETIME: int
     REFRESH_TOKEN_LIFETIME: int
     EMAIL_TOKEN_LIFETIME: int
+    PASSWORD_RESET_TOKEN_LIFETIME: int
 
     @computed_field(return_type=str)
     @property

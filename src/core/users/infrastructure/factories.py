@@ -93,6 +93,19 @@ class AuthTokenFactory:
         )
 
     @staticmethod
+    def create_password_reset_token(
+        user_id: uuid.UUID,
+        token_value: str,
+        expires_at: datetime
+    ):
+        return AuthTokenFactory._create(
+            user_id=user_id,
+            token_type=TokenTypeEnum.PASSWORD_RESET_TOKEN,
+            token_value=token_value,
+            expires_at=expires_at
+        )
+
+    @staticmethod
     def _create(
         user_id: uuid.UUID,
         token_type: TokenTypeEnum,

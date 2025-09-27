@@ -15,13 +15,15 @@ class PyJWTTokenService:
         algorithm: str,
         access_token_lifetime: timedelta,
         refresh_token_lifetime: timedelta,
-        email_token_lifetime: timedelta
+        email_token_lifetime: timedelta,
+        password_reset_token_lifetime: timedelta
     ):
         self._secret_key = secret_key
         self._algorithm = algorithm
         self._access_token_lifetime = access_token_lifetime
         self._refresh_token_lifetime = refresh_token_lifetime
         self._email_token_lifetime = email_token_lifetime
+        self._password_reset_token_lifetime = password_reset_token_lifetime
 
     def create_refresh_token(self, user_id: uuid.UUID) -> TokenDataDTO:
         expires_at = datetime.now(timezone.utc) + self._refresh_token_lifetime
@@ -35,9 +37,15 @@ class PyJWTTokenService:
         token_str = jwt.encode(payload=payload, key=self._secret_key, algorithm=self._algorithm)
         return TokenDataDTO(token_str=token_str, expires_at=expires_at)
 
-    def create_email_token(self, email: str) -> TokenDataDTO:
+    def create_email_token(self, user_id: uuid.UUID) -> TokenDataDTO:
         expires_at = datetime.now(timezone.utc) + self._email_token_lifetime
-        payload = {"sub": email, "exp": expires_at, "token_type": TokenTypeEnum.EMAIL_CONFIRMATION_TOKEN.value}
+        payload = {"sub": str(user_id), "exp": expires_at, "token_type": TokenTypeEnum.EMAIL_CONFIRMATION_TOKEN.value}
+        token_str = jwt.encode(payload=payload, key=self._secret_key, algorithm=self._algorithm)
+        return TokenDataDTO(token_str=token_str, expires_at=expires_at)
+
+    def create_password_reset_token(self, user_id: uuid.UUID) -> TokenDataDTO:
+        expires_at = datetime.now(timezone.utc) + self._password_reset_token_lifetime
+        payload = {"sub": str(user_id), "exp": expires_at, "token_type": TokenTypeEnum.PASSWORD_RESET_TOKEN.value}
         token_str = jwt.encode(payload=payload, key=self._secret_key, algorithm=self._algorithm)
         return TokenDataDTO(token_str=token_str, expires_at=expires_at)
 
