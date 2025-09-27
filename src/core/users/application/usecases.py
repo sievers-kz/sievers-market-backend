@@ -1,5 +1,5 @@
+import asyncio
 import uuid
-from datetime import datetime, timedelta, timezone
 from typing import Tuple
 
 from src.api.users.user_dto import UserDTO, LoginUserDTO, LoginResponseDTO, TokenDataDTO, EmailConfirmationDTO, \
@@ -8,7 +8,7 @@ from src.core.users.application.uow import AbstractUserUnitOfWork
 from src.core.users.domain.entities import UserAggregate
 from src.core.users.domain.enums import TokenTypeEnum
 from src.core.users.infrastructure.factories import UserFactory, AuthTokenFactory
-from src.core.users.infrastructure.services.email_sender import ConsoleEmailSender
+from src.core.users.infrastructure.services.email_sender import AbstractEmailSender
 from src.core.users.infrastructure.services.pyjwt_token import PyJWTTokenService
 
 
@@ -16,11 +16,11 @@ class RegisterUserUseCase:
     def __init__(
         self,
         unit_of_work: AbstractUserUnitOfWork,
-        sender: ConsoleEmailSender, # FIXME: Use some abstraction interface (AbstractEmailSender)
+        email_sender: AbstractEmailSender,
         token_service: PyJWTTokenService # FIXME: Use some abstraction interface (AbstractTokenService)
     ):
         self.unit_of_work = unit_of_work
-        self.sender = sender
+        self.email_sender = email_sender
         self.token_service = token_service
 
     async def execute(self, user_dto: UserDTO):
@@ -28,22 +28,27 @@ class RegisterUserUseCase:
             user = UserFactory.create(user_dto)
             await uow.user.save(user)
 
-            token, code = await self._create_confirmation_code(user)
-            await uow.token.save(token)
+            token_aggregate, email_token = await self._create_confirmation_token(user)
+            await uow.token.save(token_aggregate)
 
             await uow.commit()
 
-        await self.sender.send_confirmation_email(to=user.email.value, code=code)
-
-    async def _create_confirmation_code(self, user):
-        code = self.token_service.create_confirmation_code()
-        expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
-        token_entity = AuthTokenFactory.create_email_token(
-            user_id=user.id,
-            expires_at=expires_at,
-            token_value=code
+        await self.email_sender.send_email_confirmation(
+            to_email=user.email.value,
+            template_data={
+                "confirmation_token": email_token.token_str,
+                "first_name": user.fullname.first_name
+            }
         )
-        return token_entity, code
+
+    async def _create_confirmation_token(self, user):
+        email_token = self.token_service.create_email_token(user.id)
+        token_aggregate = AuthTokenFactory.create_email_token(
+            user_id=user.id,
+            expires_at=email_token.expires_at,
+            token_value=email_token.token_str
+        )
+        return token_aggregate, email_token
 
 
 class LoginUserUseCase:
@@ -121,6 +126,9 @@ class EmailConfirmationUseCase:
             user = await uow.user.get_by_id(token.user_id)
             user.confirm_email()
             await uow.user.save(user)
+
+            token.revoke_token()
+            await uow.token.save(token)
             await uow.commit()
 
 
@@ -219,7 +227,7 @@ class ForgotPasswordUseCase:
         self,
         unit_of_work: AbstractUserUnitOfWork,
         token_service: PyJWTTokenService,
-        email_sender: ConsoleEmailSender
+        email_sender: AbstractEmailSender
     ):
         self.unit_of_work = unit_of_work
         self.token_service = token_service
@@ -228,17 +236,27 @@ class ForgotPasswordUseCase:
     async def execute(self, forgot_password_dto: ForgotPasswordDTO):
         async with self.unit_of_work as uow:
             user = await uow.user.get_by_email(forgot_password_dto.email)
-            if user:
-                token = self.token_service.create_password_reset_token(user.id)
-                token_aggregate = AuthTokenFactory.create_password_reset_token(
-                    user_id=user.id,
-                    token_value=token.token_str,
-                    expires_at=token.expires_at
-                )
+            if not user:
+                await asyncio.sleep(0.5)
+                return
 
-                await uow.token.save(token_aggregate)
-                await uow.commit()
-            await self.email_sender.send_confirmation_email(to=user.email.value, code=token.token_str)
+            token = self.token_service.create_password_reset_token(user.id)
+            token_aggregate = AuthTokenFactory.create_password_reset_token(
+                user_id=user.id,
+                token_value=token.token_str,
+                expires_at=token.expires_at
+            )
+
+            await uow.token.save(token_aggregate)
+            await uow.commit()
+
+            await self.email_sender.send_password_reset_confirmation(
+                to_email=user.email.value,
+                template_data={
+                    "reset_password_token": token_aggregate.token_value,
+                    "first_name": user.fullname.first_name
+                }
+            )
 
 
 class ResetPasswordUseCase:

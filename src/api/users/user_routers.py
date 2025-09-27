@@ -59,7 +59,7 @@ async def confirm_email(
     ]
 ):
     await confirmation_usecase.execute(confirmation_code)
-    return {"message": "Successfully confirmation!"}
+    return {"message": "Ваша электронная почта успешно подтверждена!"}
 
 
 @users_router.post("/auth/refresh", response_model=LoginResponseDTO)

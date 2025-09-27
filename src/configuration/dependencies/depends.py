@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase, EmailConfirmationUseCase, \
     RefreshTokenUseCase, LogoutUserUseCase, ForgotPasswordUseCase, ResetPasswordUseCase
-from src.core.users.infrastructure.services.email_sender import ConsoleEmailSender
+from src.core.users.infrastructure.services.email_sender import ConsoleEmailSender, SendGridEmailSender
 from src.core.users.infrastructure.services.password_hasher import BcryptPasswordHasher
 from src.core.users.infrastructure.services.pyjwt_token import PyJWTTokenService
 from src.core.users.infrastructure.user_unit_of_work import UserUnitOfWork
@@ -41,6 +41,14 @@ class DependencyContainer(containers.DeclarativeContainer):
     password_hasher = providers.Singleton(BcryptPasswordHasher)
     email_sender = providers.Singleton(ConsoleEmailSender)
 
+    sendgrid_email_sender = providers.Singleton(
+        SendGridEmailSender,
+        api_key=config.SEND_GRID_API_KEY,
+        from_email=config.FROM_EMAIL,
+        email_confirmation_template_id=config.EMAIL_CONFIRMATION_TEMPLATE_ID,
+        password_reset_template_id=config.PASSWORD_RESET_TEMPLATE_ID
+    )
+
     token_service = providers.Singleton(
         PyJWTTokenService,
         secret_key=config.SECRET_KEY,
@@ -67,7 +75,7 @@ class DependencyContainer(containers.DeclarativeContainer):
     register_usecase = providers.Factory(
         RegisterUserUseCase,
         unit_of_work=unit_of_work,
-        sender=email_sender,
+        email_sender=sendgrid_email_sender,
         token_service=token_service
     )
 
@@ -98,7 +106,7 @@ class DependencyContainer(containers.DeclarativeContainer):
         ForgotPasswordUseCase,
         unit_of_work=unit_of_work,
         token_service=token_service,
-        email_sender=email_sender
+        email_sender=sendgrid_email_sender
     )
 
     reset_password_usecase = providers.Factory(

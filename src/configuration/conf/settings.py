@@ -16,6 +16,11 @@ class DatabaseConnectionSettings(BaseSettings):
     EMAIL_TOKEN_LIFETIME: int
     PASSWORD_RESET_TOKEN_LIFETIME: int
 
+    SEND_GRID_API_KEY: str
+    FROM_EMAIL: str
+    EMAIL_CONFIRMATION_TEMPLATE_ID: str
+    PASSWORD_RESET_TEMPLATE_ID: str
+
     @computed_field(return_type=str)
     @property
     def database_url(self):
