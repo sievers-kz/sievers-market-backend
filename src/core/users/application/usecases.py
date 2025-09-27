@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Tuple
 
 from src.api.users.user_dto import UserDTO, LoginUserDTO, LoginResponseDTO, TokenDataDTO, EmailConfirmationDTO, \
-    RefreshTokenDTO
+    RefreshTokenDTO, ForgotPasswordDTO, ResetPasswordDTO
 from src.core.users.application.uow import AbstractUserUnitOfWork
 from src.core.users.domain.entities import UserAggregate
 from src.core.users.domain.enums import TokenTypeEnum
@@ -203,6 +203,80 @@ class LogoutUserUseCase:
 
     def _validate_token_cryptography(self, token_data: RefreshTokenDTO):
         payload = self.token_service.verify_token(token_data.refresh_token, TokenTypeEnum.REFRESH_TOKEN)
+        if not payload:
+            raise ValueError("Неправильный токен!")
+        return payload
+
+    def _validate_token_state(self, db_token, user_id_from_jwt):
+        if not db_token:
+            raise ValueError("Токен не найден!")
+        if db_token.user_id != user_id_from_jwt:
+            raise ValueError("Неверный владелец токена!")
+
+
+class ForgotPasswordUseCase:
+    def __init__(
+        self,
+        unit_of_work: AbstractUserUnitOfWork,
+        token_service: PyJWTTokenService,
+        email_sender: ConsoleEmailSender
+    ):
+        self.unit_of_work = unit_of_work
+        self.token_service = token_service
+        self.email_sender = email_sender
+
+    async def execute(self, forgot_password_dto: ForgotPasswordDTO):
+        async with self.unit_of_work as uow:
+            user = await uow.user.get_by_email(forgot_password_dto.email)
+            if user:
+                token = self.token_service.create_password_reset_token(user.id)
+                token_aggregate = AuthTokenFactory.create_password_reset_token(
+                    user_id=user.id,
+                    token_value=token.token_str,
+                    expires_at=token.expires_at
+                )
+
+                await uow.token.save(token_aggregate)
+                await uow.commit()
+            await self.email_sender.send_confirmation_email(to=user.email.value, code=token.token_str)
+
+
+class ResetPasswordUseCase:
+    def __init__(
+        self,
+        unit_of_work: AbstractUserUnitOfWork,
+        token_service: PyJWTTokenService
+    ):
+        self.unit_of_work = unit_of_work
+        self.token_service = token_service
+
+    async def execute(self, reset_password_dto: ResetPasswordDTO):
+        payload = self._validate_token_cryptography(reset_password_dto)
+        user_id_from_jwt = uuid.UUID(payload.get("sub"))
+
+        async with self.unit_of_work as uow:
+            db_token = await uow.token.find_by_value(reset_password_dto.reset_password_token)
+            self._validate_token_state(db_token, user_id_from_jwt)
+
+            user = await uow.user.get_by_id(db_token.user_id)
+            if not user:
+                raise ValueError("Такого пользователя не существует!")
+
+            user.change_password(reset_password_dto.new_password)
+            await uow.user.save(user)
+
+            db_token.revoke_token()
+            await uow.token.save(db_token)
+
+            active_refresh_tokens = await uow.token.find_all_refresh_tokens_by_user_id(user.id)
+            for token in active_refresh_tokens:
+                token.revoke_token()
+                await uow.token.save(token)
+
+            await uow.commit()
+
+    def _validate_token_cryptography(self, token_data: ResetPasswordDTO):
+        payload = self.token_service.verify_token(token_data.reset_password_token, TokenTypeEnum.PASSWORD_RESET_TOKEN)
         if not payload:
             raise ValueError("Неправильный токен!")
         return payload

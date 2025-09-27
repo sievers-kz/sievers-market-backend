@@ -23,6 +23,10 @@ class UserAggregate:
             raise ValueError("Email уже подтвержден!")
         self.is_active = True
 
+    def change_password(self, new_raw_password: str):
+        new_hashed_password = HashedPassword.from_raw(raw_password=new_raw_password)
+        self.authentication.password = new_hashed_password
+
 
 @dataclass
 class IndividualUserEntity:

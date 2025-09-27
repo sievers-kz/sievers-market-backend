@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase, EmailConfirmationUseCase, \
-    RefreshTokenUseCase, LogoutUserUseCase
+    RefreshTokenUseCase, LogoutUserUseCase, ForgotPasswordUseCase, ResetPasswordUseCase
 from src.core.users.infrastructure.services.email_sender import ConsoleEmailSender
 from src.core.users.infrastructure.services.password_hasher import BcryptPasswordHasher
 from src.core.users.infrastructure.services.pyjwt_token import PyJWTTokenService
@@ -57,6 +57,10 @@ class DependencyContainer(containers.DeclarativeContainer):
         email_token_lifetime=providers.Factory(
             timedelta,
             hours=config.EMAIL_TOKEN_LIFETIME.as_int()
+        ),
+        password_reset_token_lifetime=providers.Factory(
+            timedelta,
+            hours=config.PASSWORD_RESET_TOKEN_LIFETIME.as_int()
         )
     )
 
@@ -86,6 +90,19 @@ class DependencyContainer(containers.DeclarativeContainer):
 
     logout_usecase = providers.Factory(
         LogoutUserUseCase,
+        unit_of_work=unit_of_work,
+        token_service=token_service
+    )
+
+    forgot_password_usecase = providers.Factory(
+        ForgotPasswordUseCase,
+        unit_of_work=unit_of_work,
+        token_service=token_service,
+        email_sender=email_sender
+    )
+
+    reset_password_usecase = providers.Factory(
+        ResetPasswordUseCase,
         unit_of_work=unit_of_work,
         token_service=token_service
     )

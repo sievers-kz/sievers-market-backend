@@ -67,3 +67,12 @@ class EmailConfirmationDTO(BaseModel):
 
 class RefreshTokenDTO(BaseModel):
     refresh_token: str
+
+
+class ForgotPasswordDTO(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordDTO(BaseModel):
+    reset_password_token: str
+    new_password: str
