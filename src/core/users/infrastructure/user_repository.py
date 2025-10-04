@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import select, inspect
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -35,7 +35,13 @@ class UserRepository(AbstractRepository):
 
     async def save(self, user: UserAggregate) -> None:
         user_orm = UserMapper.to_orm(user)
-        await self.session.merge(user_orm)
+
+        if inspect(user_orm).transient:
+            self.session.add(user_orm)
+        else:
+            await self.session.merge(user_orm)
+
+        await self.session.flush()
 
     async def get_by_email(self, email: str) -> UserAggregate:
         statement = (
@@ -91,4 +97,10 @@ class AuthTokenRepository: # FIXME: Set a simple validation if result return Non
 
     async def save(self, token_aggregate: AuthTokenAggregate) -> None:
         token_model = AuthTokenMapper.to_orm(token_aggregate)
-        await self._session.merge(token_model)
+
+        if inspect(token_model).transient:
+            self._session.add(token_model)
+        else:
+            await self._session.merge(token_model)
+
+        await self._session.flush()
