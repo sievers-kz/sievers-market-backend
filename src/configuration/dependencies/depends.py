@@ -31,7 +31,8 @@ class DependencyContainer(containers.DeclarativeContainer):
         sessionmaker,
         bind=async_engine,
         class_=AsyncSession,
-        expire_on_commit=False
+        expire_on_commit=False,
+        autoflush=False
     )
 
     unit_of_work = providers.Factory(
