@@ -6,6 +6,8 @@ import jwt
 
 from src.api.users.user_dto import TokenDataDTO
 from src.core.users.domain.enums import TokenTypeEnum
+from src.core.users.infrastructure.exceptions.exception_classes import TokenExpiredError, InvalidTokenError, \
+    TokenGeneratorService
 
 
 class PyJWTTokenService:
@@ -62,5 +64,20 @@ class PyJWTTokenService:
 
             return payload
 
-        except jwt.PyJWTError as e:
-            raise ValueError(f"Invalid token ...: {e}")
+        except jwt.ExpiredSignatureError as exc:
+            raise TokenExpiredError(
+                code="token_expired_error",
+                details=str(exc),
+            ) from exc
+
+        except jwt.InvalidTokenError as exc:
+            raise InvalidTokenError(
+                code="invalid_token_error",
+                details=str(exc)
+            ) from exc
+
+        except jwt.PyJWTError as exc:
+            raise TokenGeneratorService(
+                code="unexpected_error",
+                details=str(exc)
+            ) from exc

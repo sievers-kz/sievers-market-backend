@@ -3,6 +3,8 @@ from abc import abstractmethod, ABC
 from dataclasses import dataclass
 from typing import TypeVar, Generic
 
+from src.core.users.domain.exceptions.exception_classes import MissingRequiredFieldError, InvalidInputError
+from src.core.users.infrastructure.exceptions.exception_classes import PhoneNormalizerServiceError
 from src.core.users.infrastructure.services.phone_normalizer import PhoneNormalizer
 from src.core.users.infrastructure.services.password_hasher import BcryptPasswordHasher
 
@@ -37,19 +39,58 @@ class Fullname:
     @classmethod
     def from_raw(cls, first_name: str, last_name: str, patronymic: str | None) -> "Fullname":
         if not first_name:
-            raise ValueError("Имя обязательное поле!")
+            raise MissingRequiredFieldError(
+                code="missing_required_field",
+                context={
+                    "field": "first_name",
+                    "verbose_name": "Имя"
+                }
+            )
+
         if not last_name:
-            raise ValueError("Фамилия обязательное поле!")
-        return cls(first_name=first_name, last_name=last_name, patronymic=patronymic)
+            raise MissingRequiredFieldError(
+                code="missing_required_field",
+                context={
+                    "field": "last_name",
+                    "verbose_name": "Фамилия"
+                }
+            )
+
+        return cls(
+            first_name=first_name,
+            last_name=last_name,
+            patronymic=patronymic
+        )
 
     def _validate(self):
         fullname_format = r"^[а-яА-ЯёЁ\s-]+$"
+
         if not re.match(fullname_format, self.first_name):
-            raise ValueError("Имя должно содержать только кириллицу!")
+            raise InvalidInputError(
+                code="invalid_fullname_format",
+                context={
+                    "field": "first_name",
+                    "verbose_name": "Имя"
+                }
+            )
+
         if not re.match(fullname_format, self.last_name):
-            raise ValueError("Фамилия должна содержать только кириллицу!")
+            raise InvalidInputError(
+                code="invalid_fullname_format",
+                context={
+                    "field": "last_name",
+                    "verbose_name": "Фамилия"
+                }
+            )
+
         if self.patronymic and not re.match(fullname_format, self.patronymic):
-            raise ValueError("Отчество должно содержать только кириллицу!")
+            raise InvalidInputError(
+                code="invalid_fullname_format",
+                context={
+                    "field": "patronymic",
+                    "verbose_name": "Отчество"
+                }
+            )
 
 
 @dataclass(frozen=True)
@@ -57,7 +98,13 @@ class Email(ValueObject[str]):
     @classmethod
     def from_raw(cls, raw_email: str) -> "Email":
         if not raw_email:
-            raise ValueError("Email обязательное поле!")
+            raise MissingRequiredFieldError(
+                code="missing_required_field",
+                context={
+                    "field": "email",
+                    "verbose_name": "Email"
+                }
+            )
 
         normalize = raw_email.lower().strip()
         return cls(value=normalize)
@@ -65,7 +112,13 @@ class Email(ValueObject[str]):
     def _validate(self):
         email_format = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         if not re.match(email_format, self.value):
-            raise ValueError("Некорректный формат email адреса!")
+            raise InvalidInputError(
+                code="invalid_email_format",
+                context={
+                    "field": "email",
+                    "verbose_name": "Email"
+                }
+            )
 
 
 @dataclass(frozen=True)
@@ -75,8 +128,18 @@ class Phone(ValueObject[str]):
         if not raw_phone:
             return cls(value=None)
 
-        normalize = PhoneNormalizer.normalize(raw_phone)
-        return cls(value=normalize)
+        try:
+            normalize = PhoneNormalizer.normalize(raw_phone)
+            return cls(value=normalize)
+
+        except PhoneNormalizerServiceError as exc:
+            raise InvalidInputError(
+                code="invalid_phone_format",
+                context={
+                    "field": "phone",
+                    "verbose_name": "Номер телефона"
+                }
+            ) from exc
 
     def _validate(self):
         pass
@@ -87,7 +150,13 @@ class OrganizationFullname(ValueObject[str]):
     @classmethod
     def from_raw(cls, raw_organization_fullname: str) -> "OrganizationFullname":
         if not raw_organization_fullname:
-            raise ValueError("Наименование организации обязательное поле!")
+            raise MissingRequiredFieldError(
+                code="missing_required_field",
+                context={
+                    "field": "organization_fullname",
+                    "verbose_name": "Наименование организации"
+                }
+            )
 
         normalize = raw_organization_fullname.strip()
         return cls(value=normalize)
@@ -108,9 +177,22 @@ class IIN(ValueObject[str]):
 
     def _validate(self):
         if not self.value.isdigit():
-            raise ValueError("ИИН должен содержать только цифры!")
+            raise InvalidInputError(
+                code="invalid_identification_number_format.type",
+                context={
+                    "field": "iin",
+                    "verbose_name": "ИИН"
+                }
+            )
+
         if len(self.value) != 12:
-            raise ValueError("Длина ИИН должна быть равной 12!")
+            raise InvalidInputError(
+                code="invalid_identification_number_format.length",
+                context={
+                    "field": "iin",
+                    "verbose_name": "ИИН"
+                }
+            )
 
 
 @dataclass(frozen=True)
@@ -125,9 +207,22 @@ class BIN(ValueObject[str]):
 
     def _validate(self):
         if not self.value.isdigit():
-            raise ValueError("БИН должен содержать только цифры!")
+            raise InvalidInputError(
+                code="invalid_identification_number_format.type",
+                context={
+                    "field": "bin",
+                    "verbose_name": "БИН"
+                }
+            )
+
         if len(self.value) != 12:
-            raise ValueError("Длина БИН должна быть равной 12!")
+            raise InvalidInputError(
+                code="invalid_identification_number_format.length",
+                context={
+                    "field": "bin",
+                    "verbose_name": "БИН"
+                }
+            )
 
 
 @dataclass(frozen=True)
@@ -137,7 +232,13 @@ class HashedPassword:
     @classmethod
     def from_raw(cls, raw_password: str) -> "HashedPassword":
         if not raw_password:
-            raise ValueError("Пароль обязательное поле!")
+            raise MissingRequiredFieldError(
+                code="missing_required_field",
+                context={
+                    "field": "password",
+                    "verbose_name": "Пароль"
+                }
+            )
 
         hashed = BcryptPasswordHasher.hash_password(raw_password)
         return cls(hashed_password=hashed)

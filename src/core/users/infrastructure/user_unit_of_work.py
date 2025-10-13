@@ -4,6 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.users.application.uow import AbstractUserUnitOfWork, AbstractUnitOfWork
+from src.core.users.infrastructure.exceptions.exception_classes import DatabaseConnectionError, UnitOfWorkError
 from src.core.users.infrastructure.user_repository import UserRepository, AuthTokenRepository
 
 
@@ -13,8 +14,23 @@ class SQLAlchemyUnitOfWork(AbstractUnitOfWork):
         self._session = None
 
     async def _connect(self):
-        self._session = self._session_factory()
-        await self._session.execute(text("SELECT 1"))
+        try:
+            self._session = self._session_factory()
+            await self._session.execute(text("SELECT 1"))
+
+        except (TimeoutError, OSError) as exc:
+            raise DatabaseConnectionError(
+                code="database_connection_error",
+                details=str(exc),
+                context={"operation": "connect"}
+            ) from exc
+
+        except Exception as exc:
+            raise UnitOfWorkError(
+                code="unexpected_error",
+                details=str(exc),
+                context={"operation": "connect"}
+            ) from exc
 
     async def _close(self):
         await self._session.close()

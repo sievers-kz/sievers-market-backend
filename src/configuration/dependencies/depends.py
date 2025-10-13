@@ -4,8 +4,16 @@ from dependency_injector import containers, providers
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase, EmailConfirmationUseCase, \
-    RefreshTokenUseCase, LogoutUserUseCase, ForgotPasswordUseCase, ResetPasswordUseCase
+from src.core.users.application.usecases import (
+    RegisterUserUseCase,
+    LoginUserUseCase,
+    EmailConfirmationUseCase,
+    RefreshTokenUseCase,
+    LogoutUserUseCase,
+    ForgotPasswordUseCase,
+    ResetPasswordUseCase
+)
+
 from src.core.users.infrastructure.services.email_sender import ConsoleEmailSender, SendGridEmailSender
 from src.core.users.infrastructure.services.password_hasher import BcryptPasswordHasher
 from src.core.users.infrastructure.services.pyjwt_token import PyJWTTokenService
@@ -40,7 +48,7 @@ class DependencyContainer(containers.DeclarativeContainer):
         session_factory=async_session_maker
     )
     password_hasher = providers.Singleton(BcryptPasswordHasher)
-    email_sender = providers.Singleton(ConsoleEmailSender)
+    console_email_sender = providers.Singleton(ConsoleEmailSender)
 
     sendgrid_email_sender = providers.Singleton(
         SendGridEmailSender,
@@ -76,7 +84,7 @@ class DependencyContainer(containers.DeclarativeContainer):
     register_usecase = providers.Factory(
         RegisterUserUseCase,
         unit_of_work=unit_of_work,
-        email_sender=sendgrid_email_sender,
+        email_sender=console_email_sender,
         token_service=token_service
     )
 
@@ -107,7 +115,7 @@ class DependencyContainer(containers.DeclarativeContainer):
         ForgotPasswordUseCase,
         unit_of_work=unit_of_work,
         token_service=token_service,
-        email_sender=sendgrid_email_sender
+        email_sender=console_email_sender
     )
 
     reset_password_usecase = providers.Factory(

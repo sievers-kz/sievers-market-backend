@@ -1,7 +1,11 @@
 import asyncio
 from abc import ABC, abstractmethod
 
+from python_http_client import UnauthorizedError, ForbiddenError, BadRequestsError
 from sendgrid import SendGridAPIClient, Mail
+
+from src.core.users.infrastructure.exceptions.exception_classes import EmailSenderError, EmailSenderConfigurationError, \
+    EmailSenderRequestsError
 
 
 class AbstractEmailSender(ABC):
@@ -27,34 +31,57 @@ class SendGridEmailSender(AbstractEmailSender):
         self._email_confirmation_template_id = email_confirmation_template_id
         self._password_reset_template_id = password_reset_template_id
 
-    async def send_email_confirmation(self, to_email: str, template_data: dict | None = None):
+    async def _send_email_confirmation(self, to_email: str, template_id: str, template_data: dict | None = None):
         message = Mail(from_email=self._from_email, to_emails=to_email)
-        message.template_id = self._email_confirmation_template_id
-
-        dynamic_data = {**(template_data or {})}
-        message.dynamic_template_data = dynamic_data
+        message.template_id = template_id
+        message.dynamic_template_data = template_data or {}
 
         try:
             await asyncio.to_thread(self._client.send, message)
-        except Exception as e:
-            raise ValueError(f"Не удалось отправить письмо на почту: {to_email}. Ошибка: {e}")
+
+        except (UnauthorizedError, ForbiddenError) as exc:
+            raise EmailSenderConfigurationError(
+                code="email_sender_configuration_error",
+                details=str(exc)
+            ) from exc
+
+        except BadRequestsError as exc:
+            raise EmailSenderRequestsError(
+                code="email_sender_requests_error",
+                details=str(exc),
+                context={
+                    "to_email": to_email,
+                    "template_id": template_id,
+                    "template_data": template_data
+                }
+            ) from exc
+
+        except Exception as exc:
+            raise EmailSenderError(
+                code="unexpected_error",
+                details=str(exc)
+            ) from exc
+
+    async def send_email_confirmation(self, to_email: str, template_data: dict | None = None):
+        await self._send_email_confirmation(to_email, self._email_confirmation_template_id, template_data)
 
     async def send_password_reset_confirmation(self, to_email: str, template_data: dict | None = None):
-        message = Mail(from_email=self._from_email, to_emails=to_email)
-        message.template_id = self._password_reset_template_id
-
-        dynamic_data = {**(template_data or {})}
-        message.dynamic_template_data = dynamic_data
-
-        try:
-            await asyncio.to_thread(self._client.send, message)
-        except Exception as e:
-            raise ValueError(f"Не удалось отправить письмо на почту: {to_email}. Ошибка: {e}")
+        await self._send_email_confirmation(to_email, self._password_reset_template_id, template_data)
 
 
 class ConsoleEmailSender:
-    async def send_confirmation_email(self, to: str, code: str):
-        print("="*20, " MOCK EMAIL ", "="*20)
-        print(f"TO: {to}")
-        print(f"CODE: {code}")
-        print("="*54)
+    async def send_email_confirmation(self, to_email: str, template_data: dict | None = None):
+        print("="*24, "EMAIL VERIFICATION MESSAGE", "="*24)
+        print(f"FROM: noreply@agrow.asia")
+        print(f"TO: {to_email}")
+        print(f"SUBJECT: Hello! Confirm your email. Just copy and paste this token:")
+        print(f"TOKEN: {template_data.get('confirmation_token')}")
+        print("="*32, ""*32)
+
+    async def send_password_reset_confirmation(self, to_email: str, template_data: dict | None = None):
+        print("="*24, "PASSWORD RESET CONFIRMATION", "="*24)
+        print(f"FROM: noreply@agrow.asia")
+        print(f"TO: {to_email}")
+        print(f"SUBJECT: Hello! Let's to reset your password. Just use this token:")
+        print(f"TOKEN: {template_data.get('reset_password_token')}")
+        print("="*32, ""*32)

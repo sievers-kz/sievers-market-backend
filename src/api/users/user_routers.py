@@ -3,11 +3,28 @@ from typing import Annotated
 from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, Depends
 
-from src.api.users.user_dto import UserDTO, LoginUserDTO, LoginResponseDTO, EmailConfirmationDTO, RefreshTokenDTO, \
-    ForgotPasswordDTO, ResetPasswordDTO
+from src.api.users.user_dto import (
+    UserDTO,
+    LoginUserDTO,
+    LoginResponseDTO,
+    EmailConfirmationDTO,
+    RefreshTokenDTO,
+    ForgotPasswordDTO,
+    ResetPasswordDTO
+)
+
 from src.configuration.dependencies.depends import DependencyContainer
-from src.core.users.application.usecases import RegisterUserUseCase, LoginUserUseCase, EmailConfirmationUseCase, \
-    RefreshTokenUseCase, LogoutUserUseCase, ForgotPasswordUseCase, ResetPasswordUseCase
+
+from src.core.users.application.usecases import (
+    RegisterUserUseCase,
+    LoginUserUseCase,
+    EmailConfirmationUseCase,
+    RefreshTokenUseCase,
+    LogoutUserUseCase,
+    ForgotPasswordUseCase,
+    ResetPasswordUseCase
+)
+
 
 users_router = APIRouter(prefix="/api/v1", tags=["Users"])
 
@@ -26,7 +43,7 @@ async def register_user(
     ]
 ):
     await register_usecase.execute(user_dto=user_data)
-    return {"message": "success"}
+    return {"message": "Регистрация прошла успешно. Пожалуйста, подтвердите свою почту для завершения"}
 
 
 @users_router.post("/auth/login", response_model=LoginResponseDTO)
@@ -92,7 +109,7 @@ async def logout_user(
     ]
 ):
     await logout_usecase.execute(token_data)
-    return {"message": "Logout has been successfully!"}
+    return {"message": "Вы вышли из системы"}
 
 
 @users_router.post("/auth/forgot-password")

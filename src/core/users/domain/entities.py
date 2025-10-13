@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from typing import Union
 
 from src.core.users.domain.enums import UserRoleEnum, BusinessTypeEnum, TokenTypeEnum
+from src.core.users.domain.exceptions.exception_classes import EmailAlreadyConfirmedError, TokenAlreadyRevokedError
 from src.core.users.domain.value_objects import Fullname, Email, Phone, OrganizationFullname, IIN, BIN, HashedPassword
 
 
@@ -20,7 +21,7 @@ class UserAggregate:
 
     def confirm_email(self):
         if self.is_active:
-            raise ValueError("Email уже подтвержден!")
+            raise EmailAlreadyConfirmedError(code="email_already_confirmed")
         self.is_active = True
 
     def change_password(self, new_raw_password: str):
@@ -63,5 +64,5 @@ class AuthTokenAggregate:
 
     def revoke_token(self):
         if self.is_revoked:
-            raise ValueError("Токен уже отозван!")
+            raise TokenAlreadyRevokedError(code="token_already_revoked")
         self.is_revoked = True
