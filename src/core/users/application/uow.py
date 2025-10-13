@@ -14,9 +14,6 @@ class AbstractUnitOfWork(ABC):
         raise NotImplementedError
 
     async def __aenter__(self):
-        if not self._connect():
-            raise RuntimeError("Session unavailable")
-
         await self._connect()
         return self
 

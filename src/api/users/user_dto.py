@@ -8,11 +8,11 @@ from src.core.users.domain.enums import BusinessTypeEnum, UserRoleEnum
 
 class UserDTO(BaseModel):
     role: UserRoleEnum
-    first_name: str = Field(min_length=2, max_length=32)
-    last_name: str = Field(min_length=2, max_length=32)
-    patronymic: Optional[str] = Field(None, min_length=2, max_length=32)
-    email: EmailStr
-    phone: Optional[str] = Field(None)
+    first_name: str = Field(min_length=2, max_length=32, title="Имя")
+    last_name: str = Field(min_length=2, max_length=32, title="Фамилия")
+    patronymic: Optional[str] = Field(None, min_length=2, max_length=32, title="Отчество")
+    email: str = Field(title="Email")
+    phone: Optional[str] = Field(None, title="Номер телефона")
     profile: Union["IndividualUserDTO", "BusinessUserDTO"]
     authentication: "UserAuthDTO"
 
@@ -35,14 +35,14 @@ class IndividualUserDTO(BaseModel):
 
 
 class BusinessUserDTO(BaseModel):
-    business_type: BusinessTypeEnum
-    organization_fullname: str
-    iin: str | None = None
-    bin: str | None = None
+    business_type: BusinessTypeEnum = Field(title="Тип юридического лица")
+    organization_fullname: str = Field(title="Наименование организации")
+    iin: str | None = Field(None, title="ИИН")
+    bin: str | None = Field(None, title="БИН")
 
 
 class UserAuthDTO(BaseModel):
-    password: str
+    password: str = Field(title="Пароль")
 
 
 class LoginUserDTO(BaseModel):
