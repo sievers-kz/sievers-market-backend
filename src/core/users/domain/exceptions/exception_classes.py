@@ -1,4 +1,4 @@
-from src.base_exception import BaseApplicationError
+from src.core.shared.application.exceptions.base_exception import BaseApplicationError
 
 
 class DomainLayerError(BaseApplicationError):
@@ -14,10 +14,6 @@ class InvalidInputError(DomainLayerError):
 
 
 class MissingRequiredFieldError(DomainLayerError):
-    pass
-
-
-class InvalidCredentialsError(DomainLayerError):
     pass
 
 
@@ -42,18 +38,7 @@ class EmailAlreadyConfirmedError(DomainLayerError):
     pass
 
 
-# ==========================================================
-# TOKENS ERRORS
-# ==========================================================
 
 
-class TokenAlreadyRevokedError(DomainLayerError):
-    pass
 
 
-class TokenCryptographyError(DomainLayerError):
-    pass
-
-
-class TokenStateError(DomainLayerError):
-    pass

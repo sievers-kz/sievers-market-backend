@@ -25,4 +25,18 @@ class ResultNotFoundError(RepositoryError):
     pass
 
 
+# ===========================================================
+# TOKEN SERVICES ERRORS
+# ===========================================================
 
+
+class TokenGeneratorService(InfrastructureLayerError):
+    pass
+
+
+class TokenExpiredError(TokenGeneratorService):
+    pass
+
+
+class InvalidTokenError(TokenGeneratorService):
+    pass

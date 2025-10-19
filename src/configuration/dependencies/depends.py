@@ -4,26 +4,33 @@ from dependency_injector import containers, providers
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from src.core.users.application.usecases import (
-    RegisterUserUseCase,
+from src.core.auth.application.usecases import (
     LoginUserUseCase,
-    EmailConfirmationUseCase,
     RefreshTokenUseCase,
     LogoutUserUseCase,
     ForgotPasswordUseCase,
-    ResetPasswordUseCase
 )
 
-from src.core.users.infrastructure.services.email_sender import ConsoleEmailSender, SendGridEmailSender
-from src.core.users.infrastructure.services.password_hasher import BcryptPasswordHasher
-from src.core.users.infrastructure.services.pyjwt_token import PyJWTTokenService
+from src.core.users.application.usecases import (
+    RegisterUserUseCase,
+    ResetPasswordUseCase,
+    EmailConfirmationUseCase
+)
+
+from src.core.auth.infrastructure.auth_unit_of_work import AuthUnitOfWork
+
+from src.core.shared.infrastructure.services.email_sender import ConsoleEmailSender, SendGridEmailSender
+from src.core.shared.infrastructure.services.password_hasher import BcryptPasswordHasher
+from src.core.auth.infrastructure.services.pyjwt_token import PyJWTTokenService
+from src.core.shared.infrastructure.composite_uow import UserAuthUnitOfWork
 from src.core.users.infrastructure.user_unit_of_work import UserUnitOfWork
 
 
 class DependencyContainer(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
         modules=[
-            "src.api.users.user_routers"
+            "src.api.users.user_routers",
+            "src.api.auth.auth_routers"
         ]
     )
 
@@ -43,10 +50,20 @@ class DependencyContainer(containers.DeclarativeContainer):
         autoflush=False
     )
 
-    unit_of_work = providers.Factory(
+    user_unit_of_work = providers.Factory(
         UserUnitOfWork,
         session_factory=async_session_maker
     )
+    auth_unit_of_work = providers.Factory(
+        AuthUnitOfWork,
+        session_factory=async_session_maker
+    )
+
+    user_auth_unit_of_work = providers.Factory(
+        UserAuthUnitOfWork,
+        session_factory=async_session_maker
+    )
+
     password_hasher = providers.Singleton(BcryptPasswordHasher)
     console_email_sender = providers.Singleton(ConsoleEmailSender)
 
@@ -83,43 +100,43 @@ class DependencyContainer(containers.DeclarativeContainer):
 
     register_usecase = providers.Factory(
         RegisterUserUseCase,
-        unit_of_work=unit_of_work,
+        unit_of_work=user_auth_unit_of_work,
         email_sender=console_email_sender,
         token_service=token_service
     )
 
     login_usecase = providers.Factory(
         LoginUserUseCase,
-        unit_of_work=unit_of_work,
+        unit_of_work=user_auth_unit_of_work,
         token_service=token_service,
     )
 
     confirmation_usecase = providers.Factory(
         EmailConfirmationUseCase,
-        unit_of_work=unit_of_work
+        unit_of_work=user_auth_unit_of_work
     )
 
     refresh_usecase = providers.Factory(
         RefreshTokenUseCase,
-        unit_of_work=unit_of_work,
+        unit_of_work=user_auth_unit_of_work,
         token_service=token_service
     )
 
     logout_usecase = providers.Factory(
         LogoutUserUseCase,
-        unit_of_work=unit_of_work,
+        unit_of_work=user_auth_unit_of_work,
         token_service=token_service
     )
 
     forgot_password_usecase = providers.Factory(
         ForgotPasswordUseCase,
-        unit_of_work=unit_of_work,
+        unit_of_work=user_auth_unit_of_work,
         token_service=token_service,
         email_sender=console_email_sender
     )
 
     reset_password_usecase = providers.Factory(
         ResetPasswordUseCase,
-        unit_of_work=unit_of_work,
+        unit_of_work=user_auth_unit_of_work,
         token_service=token_service
     )

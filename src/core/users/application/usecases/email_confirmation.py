@@ -1,21 +1,18 @@
 from src.api.users.user_dto import EmailConfirmationDTO
-from src.core.users.application.exceptions.exception_classes import ServiceUnavailableError, InternalServerError
-from src.core.users.application.uow import AbstractUserUnitOfWork
+from src.core.auth.application.exceptions.exception_classes import ServiceUnavailableError, InternalServerError
+from src.core.shared.application.abstract_uow import AbstractUserAuthUnitOfWork
 
 from src.core.users.domain.exceptions.exception_classes import (
     InvalidEmailConfirmationCodeError,
     ConfirmationCodeExpiredError
 )
 
-from src.core.users.infrastructure.exceptions.exception_classes import (
-    UnitOfWorkError,
-    DatabaseConnectionError,
-    RepositoryError
-)
+from src.core.auth.infrastructure.exceptions.exception_classes import RepositoryError
+from src.core.shared.infrastructure.exceptions.exception_classes import DatabaseConnectionError, UnitOfWorkError
 
 
 class EmailConfirmationUseCase:
-    def __init__(self, unit_of_work: AbstractUserUnitOfWork):
+    def __init__(self, unit_of_work: AbstractUserAuthUnitOfWork):
         self.unit_of_work = unit_of_work
 
     async def execute(self, confirmation_data: EmailConfirmationDTO):
@@ -45,7 +42,11 @@ class EmailConfirmationUseCase:
                 context=exc.meta.context
             ) from exc
 
-    async def _validate_confirmation_token(self, confirmation_data: EmailConfirmationDTO, uow: AbstractUserUnitOfWork):
+    async def _validate_confirmation_token(
+            self,
+            confirmation_data: EmailConfirmationDTO,
+            uow: AbstractUserAuthUnitOfWork
+    ):
         token = await uow.token.find_by_value(confirmation_data.confirmation_code)
         if not token:
             raise InvalidEmailConfirmationCodeError(code="invalid_confirmation_code")

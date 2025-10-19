@@ -1,25 +1,25 @@
 import uuid
 
-from src.api.users.user_dto import RefreshTokenDTO
-from src.core.users.application.exceptions.exception_classes import InternalServerError, ServiceUnavailableError
-from src.core.users.application.uow import AbstractUserUnitOfWork
-from src.core.users.domain.enums import TokenTypeEnum
-from src.core.users.domain.exceptions.exception_classes import TokenCryptographyError, TokenStateError
+from src.api.auth.auth_dto import RefreshTokenDTO
+from src.core.auth.application.abstract_auth_uow import AbstractAuthUnitOfWork
+from src.core.auth.application.exceptions.exception_classes import InternalServerError, ServiceUnavailableError
+from src.core.auth.domain.enums import TokenTypeEnum
+from src.core.auth.domain.exceptions.exception_classes import TokenCryptographyError, TokenStateError
 
-from src.core.users.infrastructure.exceptions.exception_classes import (
+from src.core.shared.infrastructure.exceptions.exception_classes import DatabaseConnectionError, UnitOfWorkError
+
+from src.core.auth.infrastructure.exceptions.exception_classes import (
     RepositoryError,
     TokenGeneratorService,
-    UnitOfWorkError,
-    DatabaseConnectionError,
     TokenExpiredError,
     InvalidTokenError
 )
 
-from src.core.users.infrastructure.services.pyjwt_token import PyJWTTokenService
+from src.core.auth.infrastructure.services.pyjwt_token import PyJWTTokenService
 
 
 class LogoutUserUseCase:
-    def __init__(self, unit_of_work: AbstractUserUnitOfWork, token_service: PyJWTTokenService):
+    def __init__(self, unit_of_work: AbstractAuthUnitOfWork, token_service: PyJWTTokenService):
         self.unit_of_work = unit_of_work
         self.token_service = token_service
 

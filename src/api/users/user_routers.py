@@ -5,24 +5,16 @@ from fastapi import APIRouter, Depends
 
 from src.api.users.user_dto import (
     UserDTO,
-    LoginUserDTO,
-    LoginResponseDTO,
     EmailConfirmationDTO,
-    RefreshTokenDTO,
-    ForgotPasswordDTO,
     ResetPasswordDTO
 )
 
 from src.configuration.dependencies.depends import DependencyContainer
 
 from src.core.users.application.usecases import (
-    RegisterUserUseCase,
-    LoginUserUseCase,
     EmailConfirmationUseCase,
-    RefreshTokenUseCase,
-    LogoutUserUseCase,
-    ForgotPasswordUseCase,
-    ResetPasswordUseCase
+    ResetPasswordUseCase,
+    RegisterUserUseCase,
 )
 
 
@@ -46,22 +38,6 @@ async def register_user(
     return {"message": "Регистрация прошла успешно. Пожалуйста, подтвердите свою почту для завершения"}
 
 
-@users_router.post("/auth/login", response_model=LoginResponseDTO)
-@inject
-async def login_user(
-    user_data: LoginUserDTO,
-    login_usecase: Annotated[
-        LoginUserUseCase,
-        Depends(
-            Provide[
-                DependencyContainer.login_usecase
-            ]
-        )
-    ]
-):
-    return await login_usecase.execute(user_data)
-
-
 @users_router.post("/auth/email_confirmation")
 @inject
 async def confirm_email(
@@ -77,56 +53,6 @@ async def confirm_email(
 ):
     await confirmation_usecase.execute(confirmation_code)
     return {"message": "Ваша электронная почта успешно подтверждена!"}
-
-
-@users_router.post("/auth/refresh", response_model=LoginResponseDTO)
-@inject
-async def refresh_token(
-    token_data: RefreshTokenDTO,
-    refresh_usecase: Annotated[
-        RefreshTokenUseCase,
-        Depends(
-            Provide[
-                DependencyContainer.refresh_usecase
-            ]
-        )
-    ]
-):
-    return await refresh_usecase.execute(token_data)
-
-
-@users_router.post("/auth/logout")
-@inject
-async def logout_user(
-    token_data: RefreshTokenDTO,
-    logout_usecase: Annotated[
-        LogoutUserUseCase,
-        Depends(
-            Provide[
-                DependencyContainer.logout_usecase
-            ]
-        )
-    ]
-):
-    await logout_usecase.execute(token_data)
-    return {"message": "Вы вышли из системы"}
-
-
-@users_router.post("/auth/forgot-password")
-@inject
-async def request_forgot_password(
-    forgot_password_dto: ForgotPasswordDTO,
-    forgot_password_usecase: Annotated[
-        ForgotPasswordUseCase,
-        Depends(
-            Provide[
-                DependencyContainer.forgot_password_usecase
-            ]
-        )
-    ]
-):
-    await forgot_password_usecase.execute(forgot_password_dto)
-    return {"message": "Если указанная вами почта существует, мы отправили письмо с подтверждением"}
 
 
 @users_router.post("/auth/reset-password")

@@ -5,9 +5,13 @@ from datetime import timedelta, datetime, timezone
 import jwt
 
 from src.api.users.user_dto import TokenDataDTO
-from src.core.users.domain.enums import TokenTypeEnum
-from src.core.users.infrastructure.exceptions.exception_classes import TokenExpiredError, InvalidTokenError, \
+from src.core.auth.domain.enums import TokenTypeEnum
+
+from src.core.auth.infrastructure.exceptions.exception_classes import (
+    TokenExpiredError,
+    InvalidTokenError,
     TokenGeneratorService
+)
 
 
 class PyJWTTokenService:

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Union, Optional
 
-from pydantic import BaseModel, Field, EmailStr, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 from src.core.users.domain.enums import BusinessTypeEnum, UserRoleEnum
 
@@ -45,32 +45,13 @@ class UserAuthDTO(BaseModel):
     password: str = Field(title="Пароль")
 
 
-class LoginUserDTO(BaseModel):
-    email: EmailStr
-    password: str
-
-
 class TokenDataDTO(BaseModel):
     token_str: str
     expires_at: datetime
 
 
-class LoginResponseDTO(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "Bearer"
-
-
 class EmailConfirmationDTO(BaseModel):
     confirmation_code: str
-
-
-class RefreshTokenDTO(BaseModel):
-    refresh_token: str
-
-
-class ForgotPasswordDTO(BaseModel):
-    email: EmailStr
 
 
 class ResetPasswordDTO(BaseModel):

@@ -1,7 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Optional
-
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class AbstractUnitOfWork(ABC):
@@ -33,7 +30,8 @@ class AbstractUnitOfWork(ABC):
         raise NotImplementedError
 
 
-class AbstractUserUnitOfWork(AbstractUnitOfWork):
+class AbstractUserAuthUnitOfWork(AbstractUnitOfWork):
+
     @property
     @abstractmethod
     def user(self):
@@ -43,5 +41,3 @@ class AbstractUserUnitOfWork(AbstractUnitOfWork):
     @abstractmethod
     def token(self):
         raise NotImplementedError
-
-

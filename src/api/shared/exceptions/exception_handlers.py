@@ -4,15 +4,15 @@ from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from starlette.responses import JSONResponse
 
-from src.api.users.exceptions.error_messages import HTTP_STATUS_MAP, get_error_message, get_pydantic_error_message
-from src.base_exception import BaseApplicationError
+from src.api.shared.exceptions.error_messages import APPLICATION_HTTP_STATUS_MAP, get_unified_error_message
+from src.core.shared.application.exceptions.base_exception import BaseApplicationError
 
 
-async def application_exception_handler(request, exc: BaseApplicationError):
+async def application_exception_handler(request: Request, exc: BaseApplicationError):
     logging.error(f"{exc.__class__.__name__}: {exc.meta.code}", extra=exc.to_internal())
 
-    status_code = HTTP_STATUS_MAP.get(type(exc), 500)
-    message = get_error_message(exc.meta.code, exc.meta.context.get("verbose_name"))
+    status_code = APPLICATION_HTTP_STATUS_MAP.get(type(exc), 500)
+    message = get_unified_error_message(exc.meta.code, exc.meta.context.get("verbose_name"))
 
     client_msg = exc.to_client()
     return JSONResponse(
@@ -60,7 +60,7 @@ async def pydantic_exception_handler(request: Request, exc: RequestValidationErr
         logging.warning(f"Could not extract verbose_name for field {field_name}: {e}")
 
     # 3. Формируем сообщение
-    message = get_pydantic_error_message(error_type, verbose_name)
+    message = get_unified_error_message(error_type, verbose_name)
 
     # 4. Логируем
     logging.info(
@@ -79,6 +79,3 @@ async def pydantic_exception_handler(request: Request, exc: RequestValidationErr
             }
         }
     )
-
-
-
