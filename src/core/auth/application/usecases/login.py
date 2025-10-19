@@ -1,27 +1,24 @@
 import uuid
 from typing import Tuple
 
-from src.api.users.user_dto import LoginUserDTO, TokenDataDTO, LoginResponseDTO
-from src.core.users.application.exceptions.exception_classes import InternalServerError, ServiceUnavailableError
-from src.core.users.application.uow import AbstractUserUnitOfWork
+from src.api.users.user_dto import TokenDataDTO
+from src.api.auth.auth_dto import LoginUserDTO, LoginResponseDTO
+from src.core.auth.application.exceptions.exception_classes import InternalServerError, ServiceUnavailableError
+from src.core.shared.application.abstract_uow import AbstractUserAuthUnitOfWork
 from src.core.users.domain.entities import UserAggregate
-from src.core.users.domain.exceptions.exception_classes import InvalidCredentialsError, EmailNotConfirmedError
+from src.core.users.domain.exceptions.exception_classes import EmailNotConfirmedError
+from src.core.auth.domain.exceptions.exception_classes import InvalidCredentialsError
+from src.core.shared.infrastructure.exceptions.exception_classes import DatabaseConnectionError, UnitOfWorkError
+from src.core.auth.infrastructure.exceptions.exception_classes import RepositoryError, TokenGeneratorService
 
-from src.core.users.infrastructure.exceptions.exception_classes import (
-    RepositoryError,
-    UnitOfWorkError,
-    TokenGeneratorService,
-    DatabaseConnectionError
-)
-
-from src.core.users.infrastructure.factories import AuthTokenFactory
-from src.core.users.infrastructure.services.pyjwt_token import PyJWTTokenService
+from src.core.auth.infrastructure.factories import AuthTokenFactory
+from src.core.auth.infrastructure.services.pyjwt_token import PyJWTTokenService
 
 
 class LoginUserUseCase:
     def __init__(
         self,
-        unit_of_work: AbstractUserUnitOfWork,
+        unit_of_work: AbstractUserAuthUnitOfWork,
         token_service: PyJWTTokenService, # FIXME: Use some abstraction interface for clean (AbstractTokenService)
     ):
         self.unit_of_work = unit_of_work
@@ -51,7 +48,7 @@ class LoginUserUseCase:
                 context=exc.meta.context
             ) from exc
 
-    async def _get_validated_user(self, login_data: LoginUserDTO, uow: AbstractUserUnitOfWork):
+    async def _get_validated_user(self, login_data: LoginUserDTO, uow: AbstractUserAuthUnitOfWork):
         user = await uow.user.get_by_email(login_data.email)
         if not user:
             raise InvalidCredentialsError(code="invalid_login_credentials")
@@ -76,7 +73,7 @@ class LoginUserUseCase:
         self,
         user_id: uuid.UUID,
         refresh_token: TokenDataDTO,
-        uow: AbstractUserUnitOfWork
+        uow: AbstractUserAuthUnitOfWork
     ):
         refresh_token_aggregate = AuthTokenFactory.create_refresh_token(
             user_id=user_id,

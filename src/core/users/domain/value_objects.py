@@ -4,9 +4,9 @@ from dataclasses import dataclass
 from typing import TypeVar, Generic
 
 from src.core.users.domain.exceptions.exception_classes import MissingRequiredFieldError, InvalidInputError
-from src.core.users.infrastructure.exceptions.exception_classes import PhoneNormalizerServiceError
-from src.core.users.infrastructure.services.phone_normalizer import PhoneNormalizer
-from src.core.users.infrastructure.services.password_hasher import BcryptPasswordHasher
+from src.core.shared.infrastructure.exceptions.exception_classes import PhoneNormalizerServiceError
+from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormalizer
+from src.core.shared.infrastructure.services.password_hasher import BcryptPasswordHasher
 
 
 TValueObject = TypeVar("TValueObject")

@@ -1,27 +1,24 @@
 from src.api.users.user_dto import UserDTO, TokenDataDTO
-from src.core.users.application.exceptions.exception_classes import InternalServerError, ServiceUnavailableError
-from src.core.users.application.uow import AbstractUserUnitOfWork
+from src.core.auth.application.exceptions.exception_classes import InternalServerError, ServiceUnavailableError
+from src.core.shared.application.abstract_uow import AbstractUserAuthUnitOfWork
 from src.core.users.domain.entities import UserAggregate
 from src.core.users.domain.exceptions.exception_classes import UserAlreadyExistsError
 
-from src.core.users.infrastructure.exceptions.exception_classes import (
-    UniqueConstraintError,
-    RepositoryError,
-    TokenGeneratorService,
-    UnitOfWorkError,
-    DatabaseConnectionError,
-    EmailSenderError
-)
+from src.core.users.infrastructure.exceptions.exception_classes import UniqueConstraintError, RepositoryError
+from src.core.auth.infrastructure.exceptions.exception_classes import TokenGeneratorService
+from src.core.shared.infrastructure.exceptions.exception_classes import DatabaseConnectionError, UnitOfWorkError
 
-from src.core.users.infrastructure.factories import UserFactory, AuthTokenFactory
-from src.core.users.infrastructure.services.email_sender import AbstractEmailSender
-from src.core.users.infrastructure.services.pyjwt_token import PyJWTTokenService
+from src.core.shared.infrastructure.exceptions.exception_classes import EmailSenderError
+from src.core.users.infrastructure.factories import UserFactory
+from src.core.auth.infrastructure.factories import AuthTokenFactory
+from src.core.shared.infrastructure.services.email_sender import AbstractEmailSender
+from src.core.auth.infrastructure.services.pyjwt_token import PyJWTTokenService
 
 
 class RegisterUserUseCase:
     def __init__(
         self,
-        unit_of_work: AbstractUserUnitOfWork,
+        unit_of_work: AbstractUserAuthUnitOfWork,
         email_sender: AbstractEmailSender,
         token_service: PyJWTTokenService # FIXME: Use some abstraction interface (AbstractTokenService)
     ):

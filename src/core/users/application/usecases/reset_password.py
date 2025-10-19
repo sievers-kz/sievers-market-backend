@@ -1,28 +1,29 @@
 import uuid
 
 from src.api.users.user_dto import ResetPasswordDTO
-from src.core.users.application.exceptions.exception_classes import InternalServerError, ServiceUnavailableError
-from src.core.users.application.uow import AbstractUserUnitOfWork
-from src.core.users.domain.entities import AuthTokenAggregate, UserAggregate
-from src.core.users.domain.enums import TokenTypeEnum
-from src.core.users.domain.exceptions.exception_classes import TokenCryptographyError, TokenStateError
+from src.core.auth.application.exceptions.exception_classes import InternalServerError, ServiceUnavailableError
+from src.core.shared.application.abstract_uow import AbstractUserAuthUnitOfWork
+from src.core.users.domain.entities import UserAggregate
+from src.core.auth.domain.entities import AuthTokenAggregate
+from src.core.auth.domain.enums import TokenTypeEnum
+from src.core.auth.domain.exceptions.exception_classes import TokenCryptographyError, TokenStateError
 
-from src.core.users.infrastructure.exceptions.exception_classes import (
+from src.core.auth.infrastructure.exceptions.exception_classes import (
     RepositoryError,
     TokenGeneratorService,
-    UnitOfWorkError,
-    DatabaseConnectionError,
     TokenExpiredError,
     InvalidTokenError
 )
 
-from src.core.users.infrastructure.services.pyjwt_token import PyJWTTokenService
+from src.core.shared.infrastructure.exceptions.exception_classes import DatabaseConnectionError, UnitOfWorkError
+
+from src.core.auth.infrastructure.services.pyjwt_token import PyJWTTokenService
 
 
 class ResetPasswordUseCase:
     def __init__(
         self,
-        unit_of_work: AbstractUserUnitOfWork,
+        unit_of_work: AbstractUserAuthUnitOfWork,
         token_service: PyJWTTokenService
     ):
         self.unit_of_work = unit_of_work
@@ -63,7 +64,11 @@ class ResetPasswordUseCase:
 
     def _validate_token_cryptography(self, token_data: ResetPasswordDTO):
         try:
-            payload = self.token_service.verify_token(token_data.reset_password_token, TokenTypeEnum.PASSWORD_RESET_TOKEN)
+            payload = self.token_service.verify_token(
+                token_data.reset_password_token,
+                TokenTypeEnum.PASSWORD_RESET_TOKEN
+            )
+
             if not payload:
                 raise TokenCryptographyError(code="token_cryptography_error")
             return payload
@@ -98,7 +103,12 @@ class ResetPasswordUseCase:
             raise TokenCryptographyError(code="token_cryptography_error")
         return uuid.UUID(sub)
 
-    async def _get_user(self, db_token: AuthTokenAggregate, uow: AbstractUserUnitOfWork) -> UserAggregate:
+    async def _get_user(
+            self,
+            db_token: AuthTokenAggregate,
+            uow: AbstractUserAuthUnitOfWork
+    ) -> UserAggregate:
+
         user = await uow.user.get_by_id(db_token.user_id)
         if not user:
             raise InternalServerError(
@@ -108,7 +118,11 @@ class ResetPasswordUseCase:
 
         return user
 
-    async def _revoke_all_refresh_tokens(self, user_id: uuid.UUID, uow: AbstractUserUnitOfWork):
+    async def _revoke_all_refresh_tokens(
+            self,
+            user_id: uuid.UUID,
+            uow: AbstractUserAuthUnitOfWork
+    ):
         active_refresh_tokens = await uow.token.find_all_refresh_tokens_by_user_id(user_id)
         for token in active_refresh_tokens:
             token.revoke_token()

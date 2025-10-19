@@ -1,27 +1,25 @@
 import asyncio
 
-from src.api.users.user_dto import ForgotPasswordDTO, TokenDataDTO
-from src.core.users.application.exceptions.exception_classes import InternalServerError, ServiceUnavailableError
-from src.core.users.application.uow import AbstractUserUnitOfWork
-from src.core.users.domain.entities import UserAggregate, AuthTokenAggregate
+from src.api.users.user_dto import TokenDataDTO
+from src.api.auth.auth_dto import ForgotPasswordDTO
+from src.core.auth.application.exceptions.exception_classes import InternalServerError, ServiceUnavailableError
+from src.core.shared.application.abstract_uow import AbstractUserAuthUnitOfWork
+from src.core.users.domain.entities import UserAggregate
+from src.core.auth.domain.entities import AuthTokenAggregate
 
-from src.core.users.infrastructure.exceptions.exception_classes import (
-    RepositoryError,
-    TokenGeneratorService,
-    UnitOfWorkError,
-    DatabaseConnectionError,
-    EmailSenderError
-)
+from src.core.shared.infrastructure.exceptions.exception_classes import DatabaseConnectionError, UnitOfWorkError
+from src.core.auth.infrastructure.exceptions.exception_classes import RepositoryError, TokenGeneratorService
 
-from src.core.users.infrastructure.factories import AuthTokenFactory
-from src.core.users.infrastructure.services.email_sender import AbstractEmailSender
-from src.core.users.infrastructure.services.pyjwt_token import PyJWTTokenService
+from src.core.shared.infrastructure.exceptions.exception_classes import EmailSenderError
+from src.core.auth.infrastructure.factories import AuthTokenFactory
+from src.core.shared.infrastructure.services.email_sender import AbstractEmailSender
+from src.core.auth.infrastructure.services.pyjwt_token import PyJWTTokenService
 
 
 class ForgotPasswordUseCase:
     def __init__(
         self,
-        unit_of_work: AbstractUserUnitOfWork,
+        unit_of_work: AbstractUserAuthUnitOfWork,
         token_service: PyJWTTokenService,
         email_sender: AbstractEmailSender
     ):

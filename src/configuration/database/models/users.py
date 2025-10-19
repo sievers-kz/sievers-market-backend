@@ -5,7 +5,8 @@ from datetime import datetime
 from sqlalchemy import UUID, String, DateTime, func, ForeignKey, Enum, Boolean, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.core.users.domain.enums import UserRoleEnum, BusinessTypeEnum, TokenTypeEnum
+from src.core.users.domain.enums import UserRoleEnum, BusinessTypeEnum
+from src.core.auth.domain.enums import TokenTypeEnum
 from src.configuration.database.connection import Base
 
 

@@ -1,7 +1,7 @@
 import phonenumbers
 from phonenumbers import PhoneNumberFormat
 
-from src.core.users.infrastructure.exceptions.exception_classes import PhoneNormalizerServiceError
+from src.core.shared.infrastructure.exceptions.exception_classes import PhoneNormalizerServiceError
 
 
 class PhoneNormalizer:
