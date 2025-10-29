@@ -1,134 +1,103 @@
-from typing import Union
+from src.core.users.domain.value_objects import Email, Phone, Fullname, OrganizationFullname
 
-from src.core.users.domain.entities import UserAggregate, UserAuthEntity, IndividualUserEntity, BusinessUserEntity
-from src.core.users.domain.enums import UserRoleEnum
-from src.configuration.database.models.users import User, IndividualProfile, BusinessProfile, UserAuth
-from src.core.users.domain.value_objects import Fullname, Email, Phone, OrganizationFullname, IIN, BIN, HashedPassword
+from src.core.users.infrastructure.models import (
+    User as UserModel,
+    UserProfile as UserProfileModel,
+    BusinessDetails as BusinessDetailsModel
+)
+
+from src.core.users.domain.entities import (
+    User as DomainUser,
+    UserProfile as DomainUserProfile,
+    BusinessDetails as DomainBusinessDetails
+)
 
 
 class UserMapper:
     @staticmethod
-    def to_orm(user_aggregate: UserAggregate) -> User:
-        user_model = User(
-            id=user_aggregate.id,
-            role=user_aggregate.role,
-            first_name=user_aggregate.fullname.first_name,
-            last_name=user_aggregate.fullname.last_name,
-            patronymic=user_aggregate.fullname.patronymic,
-            email=user_aggregate.email.value,
-            phone=user_aggregate.phone.value,
-            is_active=user_aggregate.is_active
-        )
+    def to_domain(orm_model: UserModel) -> DomainUser:
+        profile = _UserProfileMapper.to_domain(orm_model.profile)
 
-        profile_model = UserProfileMapper.to_orm(user_aggregate)
-        user_model.auth = UserAuthMapper.to_orm(user_aggregate)
+        if orm_model.business_details is not None:
+            business_details = _BusinessDetailsMapper.to_domain(orm_model.business_details)
+        else:
+            business_details = None
 
-        match profile_model:
-            case IndividualProfile():
-                user_model.individual_profile = profile_model
-            case BusinessProfile():
-                user_model.business_profile = profile_model
-            case _:
-                raise ValueError(f"Unsupported profile type: {type(profile_model)}")
-
-        return user_model
-
-    @staticmethod
-    def to_domain(user_model: User):
-        profile = UserProfileMapper.to_domain(user_model)
-        authentication = UserAuthMapper.to_domain(user_model.auth)
-
-        return UserAggregate(
-            id=user_model.id,
-            role=user_model.role,
-            fullname=Fullname.from_raw(
-                first_name=user_model.first_name,
-                last_name=user_model.last_name,
-                patronymic=user_model.patronymic
-            ),
-            email=Email.from_raw(user_model.email),
-            phone=Phone.from_raw(user_model.phone),
-            is_active=user_model.is_active,
+        return DomainUser(
+            id=orm_model.id,
+            role=orm_model.role,
+            email=Email.from_raw(orm_model.email),
+            phone=Phone.from_raw(orm_model.phone),
+            is_active=orm_model.is_active,
             profile=profile,
-            authentication=authentication
-        )
-
-
-class UserProfileMapper:
-    @staticmethod
-    def to_orm(user_aggregate: UserAggregate) -> Union[IndividualProfile, BusinessProfile]:
-        if user_aggregate.role == UserRoleEnum.INDIVIDUAL:
-            return IndividualUserMapper.to_orm(user_aggregate)
-
-        if user_aggregate.role == UserRoleEnum.BUSINESS:
-            return BusinessUserMapper.to_orm(user_aggregate)
-
-        raise ValueError("Unsupported profile type ...")
-
-    @staticmethod
-    def to_domain(user_model: User) -> Union[IndividualUserEntity, BusinessUserEntity]:
-        if user_model.individual_profile:
-            return IndividualUserMapper.to_domain(user_model.individual_profile)
-
-        if user_model.business_profile:
-            return BusinessUserMapper.to_domain(user_model.business_profile)
-
-        raise ValueError("Unsupported profile type ...")
-
-
-class IndividualUserMapper:
-    @staticmethod
-    def to_orm(user_aggregate: UserAggregate) -> IndividualProfile:
-        return IndividualProfile(
-            id=user_aggregate.profile.id,
-            user_id=user_aggregate.id
+            business_details=business_details
         )
 
     @staticmethod
-    def to_domain(individual_model: IndividualProfile) -> IndividualUserEntity:
-        return IndividualUserEntity(
-            id=individual_model.id
+    def to_orm(domain_model: DomainUser) -> UserModel:
+        profile = _UserProfileMapper.to_orm(domain_model.profile)
+
+        if domain_model.business_details is not None:
+            business_details = _BusinessDetailsMapper.to_domain(domain_model.business_details)
+        else:
+            business_details = None
+
+        return UserModel(
+            id=domain_model.id,
+            role=domain_model.role,
+            email=domain_model.email.value,
+            phone=domain_model.phone.value,
+            is_active=domain_model.is_active,
+            profile=profile,
+            business_details=business_details
         )
 
 
-class BusinessUserMapper:
+class _UserProfileMapper:
     @staticmethod
-    def to_orm(user_aggregate: UserAggregate) -> BusinessProfile:
-        return BusinessProfile(
-            id=user_aggregate.profile.id,
-            user_id=user_aggregate.id,
-            business_type=user_aggregate.profile.business_type,
-            organization_fullname=user_aggregate.profile.organization_fullname.value,
-            iin=user_aggregate.profile.iin.value,
-            bin=user_aggregate.profile.bin.value
-        )
-
-    @staticmethod
-    def to_domain(business_model: BusinessProfile) -> BusinessUserEntity:
-        return BusinessUserEntity(
-            id=business_model.id,
-            business_type=business_model.business_type,
-            organization_fullname=OrganizationFullname.from_raw(business_model.organization_fullname),
-            iin=IIN.from_raw(business_model.iin),
-            bin=BIN.from_raw(business_model.bin)
-        )
-
-
-class UserAuthMapper:
-    @staticmethod
-    def to_orm(user_aggregate: UserAggregate) -> UserAuth:
-        return UserAuth(
-            id=user_aggregate.authentication.id,
-            user_id=user_aggregate.id,
-            hashed_password=user_aggregate.authentication.password.hashed_password
+    def to_domain(orm_model: UserProfileModel) -> DomainUserProfile:
+        return DomainUserProfile(
+            id=orm_model.id,
+            user_id=orm_model.user_id,
+            fullname=Fullname.from_raw(
+                first_name=orm_model.first_name,
+                last_name=orm_model.last_name,
+                patronymic=orm_model.patronymic
+            ),
+            avatar_url=orm_model.avatar_url,
         )
 
     @staticmethod
-    def to_domain(auth_model: UserAuth) -> UserAuthEntity:
-        return UserAuthEntity(
-            id=auth_model.id,
-            password=HashedPassword.from_hash(auth_model.hashed_password)
+    def to_orm(domain_model: DomainUserProfile) -> UserProfileModel:
+        return UserProfileModel(
+            id=domain_model.id,
+            user_id=domain_model.user_id,
+            first_name=domain_model.fullname.first_name,
+            last_name=domain_model.fullname.last_name,
+            patronymic=domain_model.fullname.patronymic,
+            avatar_url=domain_model.avatar_url,
         )
 
 
+class _BusinessDetailsMapper:
+    @staticmethod
+    def to_domain(orm_model: BusinessDetailsModel) -> DomainBusinessDetails:
+        return DomainBusinessDetails(
+            id=orm_model.id,
+            user_id=orm_model.user_id,
+            business_type=orm_model.business_type,
+            organization_fullname=OrganizationFullname.from_raw(orm_model.organization_fullname),
+            document_type=orm_model.document_type,
+            document_value=orm_model.document_value
+        )
 
+    @staticmethod
+    def to_orm(domain_model: DomainBusinessDetails) -> BusinessDetailsModel:
+        return BusinessDetailsModel(
+            id=domain_model.id,
+            user_id=domain_model.user_id,
+            business_type=domain_model.business_type,
+            organization_fullname=domain_model.organization_fullname.value,
+            document_type=domain_model.document_type,
+            document_value=domain_model.document_value
+        )

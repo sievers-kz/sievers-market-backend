@@ -1,9 +1,30 @@
+from datetime import datetime
+
 from pydantic import BaseModel, EmailStr
+
+from src.core.auth.domain.enums import TokenTypeEnum
+
+
+class UserIdentityDTO(BaseModel):
+    credentials: "UserCredentialsDTO"
+    tokens: "AuthTokenDTO"
+
+
+class UserCredentialsDTO(BaseModel):
+    raw_password: str
+    # password_changed_at: datetime
+
+
+class AuthTokenDTO(BaseModel):
+    token_type: TokenTypeEnum
+    token_value: str
+    is_revoked: bool
+    expires_at: datetime
 
 
 class LoginUserDTO(BaseModel):
     email: EmailStr
-    password: str
+    raw_password: str
 
 
 class RefreshTokenDTO(BaseModel):

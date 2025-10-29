@@ -1,8 +1,7 @@
-from typing import Callable, Optional
+from typing import Callable
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.auth.infrastructure.auth_repository import AuthTokenRepository
 from src.core.shared.infrastructure.sql_alchemy_uow import SQLAlchemyUnitOfWork
 from src.core.users.infrastructure.user_repository import UserRepository
 

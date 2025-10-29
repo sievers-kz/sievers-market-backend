@@ -4,7 +4,7 @@ from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, Depends
 
 from src.api.users.user_dto import (
-    UserDTO,
+    CreateUserDTO,
     EmailConfirmationDTO,
     ResetPasswordDTO
 )
@@ -12,29 +12,29 @@ from src.api.users.user_dto import (
 from src.configuration.dependencies.depends import DependencyContainer
 
 from src.core.users.application.usecases import (
+    CreateUserUseCase,
     EmailConfirmationUseCase,
-    ResetPasswordUseCase,
-    RegisterUserUseCase,
+    ResetPasswordUseCase
 )
 
 
 users_router = APIRouter(prefix="/api/v1", tags=["Users"])
 
 
-@users_router.post("/auth/register")
+@users_router.post("/auth/registration/")
 @inject
-async def register_user(
-    user_data: UserDTO,
-    register_usecase: Annotated[
-        RegisterUserUseCase,
+async def create_user(
+    user_data: CreateUserDTO,
+    create_user_usecase: Annotated[
+        CreateUserUseCase,
         Depends(
             Provide[
-                DependencyContainer.register_usecase
+                DependencyContainer.create_user_usecase
             ]
         )
     ]
 ):
-    await register_usecase.execute(user_dto=user_data)
+    await create_user_usecase.execute(user_data=user_data)
     return {"message": "Регистрация прошла успешно. Пожалуйста, подтвердите свою почту для завершения"}
 
 
@@ -42,16 +42,16 @@ async def register_user(
 @inject
 async def confirm_email(
     confirmation_code: EmailConfirmationDTO,
-    confirmation_usecase: Annotated[
+    email_confirmation_usecase: Annotated[
         EmailConfirmationUseCase,
         Depends(
             Provide[
-                DependencyContainer.confirmation_usecase
+                DependencyContainer.email_confirmation_usecase
             ]
         )
     ]
 ):
-    await confirmation_usecase.execute(confirmation_code)
+    await email_confirmation_usecase.execute(confirmation_code)
     return {"message": "Ваша электронная почта успешно подтверждена!"}
 
 
@@ -70,4 +70,3 @@ async def reset_user_password(
 ):
     await reset_password_usecase.execute(reset_password_dto)
     return {"message": "Пароль успешно изменён! Пожалуйста, войдите систему с новым паролем."}
-

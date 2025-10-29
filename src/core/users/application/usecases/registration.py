@@ -1,86 +1,42 @@
-from src.api.users.user_dto import UserDTO, TokenDataDTO
-from src.core.auth.application.exceptions.exception_classes import InternalServerError, ServiceUnavailableError
-from src.core.shared.application.abstract_uow import AbstractUserAuthUnitOfWork
-from src.core.users.domain.entities import UserAggregate
-from src.core.users.domain.exceptions.exception_classes import UserAlreadyExistsError
-
-from src.core.users.infrastructure.exceptions.exception_classes import UniqueConstraintError, RepositoryError
-from src.core.auth.infrastructure.exceptions.exception_classes import TokenGeneratorService
-from src.core.shared.infrastructure.exceptions.exception_classes import DatabaseConnectionError, UnitOfWorkError
-
-from src.core.shared.infrastructure.exceptions.exception_classes import EmailSenderError
-from src.core.users.infrastructure.factories import UserFactory
-from src.core.auth.infrastructure.factories import AuthTokenFactory
-from src.core.shared.infrastructure.services.email_sender import AbstractEmailSender
+from src.api.users.user_dto import CreateUserDTO
+from src.core.auth.domain.enums import TokenTypeEnum
+from src.core.auth.infrastructure.factories import UserIdentityFactory
 from src.core.auth.infrastructure.services.pyjwt_token import PyJWTTokenService
+from src.core.shared.application.abstract_uow import AbstractUserIdentityUnitOfWork
+from src.core.shared.infrastructure.services.email_sender import AbstractEmailSender
+from src.core.users.domain.enums import UserRoleEnum
+from src.core.users.infrastructure.factories import UserFactory
 
 
-class RegisterUserUseCase:
+class CreateUserUseCase:
     def __init__(
         self,
-        unit_of_work: AbstractUserAuthUnitOfWork,
+        unit_of_work: AbstractUserIdentityUnitOfWork,
         email_sender: AbstractEmailSender,
-        token_service: PyJWTTokenService # FIXME: Use some abstraction interface (AbstractTokenService)
+        token_service: PyJWTTokenService
     ):
         self.unit_of_work = unit_of_work
         self.email_sender = email_sender
         self.token_service = token_service
 
-    async def execute(self, user_dto: UserDTO):
-        try:
-            async with self.unit_of_work as uow:
-                user = UserFactory.create(user_dto)
-                await uow.user.save(user)
+    async def execute(self, user_data: CreateUserDTO):
+        async with self.unit_of_work as uow:
+            if user_data.role == UserRoleEnum.INDIVIDUAL:
+                user = UserFactory.create_individual_user(user_data)
+            else:
+                user = UserFactory.create_business_user(user_data)
+            await uow.user.save(user)
 
-                token_aggregate, email_token = await self._create_confirmation_token(user)
-                await uow.token.save(token_aggregate)
+            credentials = user_data.credentials
+            tokens = self.token_service.create_auth_token(user_id=user.id, token_type=TokenTypeEnum.EMAIL_CONFIRMATION_TOKEN)
+            identity = UserIdentityFactory.create(user_id=user.id, credentials=credentials, tokens=[tokens])
 
-                await uow.commit()
-                await self._send_email_confirmation(user, email_token)
+            await uow.identity.save(identity)
+            await uow.commit()
 
-        except UniqueConstraintError as exc:
-            raise UserAlreadyExistsError(
-                code="user_already_exists",
-                details=exc.meta.details,
-                context=exc.meta.context
-            ) from exc
-
-        except (RepositoryError, TokenGeneratorService) as exc:
-            raise InternalServerError(
-                code="internal_server_error",
-                details=exc.meta.details,
-                context=exc.meta.context
-            ) from exc
-
-        except (UnitOfWorkError, DatabaseConnectionError) as exc:
-            raise ServiceUnavailableError(
-                code="service_unavailable_error",
-                details=exc.meta.details,
-                context=exc.meta.context
-            ) from exc
-
-    async def _create_confirmation_token(self, user):
-        email_token = self.token_service.create_email_token(user.id)
-        token_aggregate = AuthTokenFactory.create_email_token(
-            user_id=user.id,
-            expires_at=email_token.expires_at,
-            token_value=email_token.token_str
+        await self.email_sender.send_email_confirmation(
+            to_email=user.email.value,
+            template_data={
+                "confirmation_token": tokens.token_value
+            }
         )
-        return token_aggregate, email_token
-
-    async def _send_email_confirmation(self, user: UserAggregate, email_token: TokenDataDTO):
-        try:
-            await self.email_sender.send_email_confirmation(
-                to_email=user.email.value,
-                template_data={
-                    "confirmation_token": email_token.token_str,
-                    "first_name": user.fullname.first_name
-                }
-            )
-
-        except EmailSenderError as exc:
-            raise ServiceUnavailableError(
-                code="service_unavailable_error",
-                details=exc.meta.details,
-                context=exc.meta.context
-            ) from exc

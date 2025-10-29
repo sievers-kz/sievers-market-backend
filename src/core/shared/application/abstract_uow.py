@@ -30,7 +30,7 @@ class AbstractUnitOfWork(ABC):
         raise NotImplementedError
 
 
-class AbstractUserAuthUnitOfWork(AbstractUnitOfWork):
+class AbstractUserIdentityUnitOfWork(AbstractUnitOfWork):
 
     @property
     @abstractmethod
@@ -39,5 +39,5 @@ class AbstractUserAuthUnitOfWork(AbstractUnitOfWork):
 
     @property
     @abstractmethod
-    def token(self):
+    def identity(self):
         raise NotImplementedError

@@ -5,13 +5,7 @@ from fastapi import APIRouter, Depends
 
 from src.api.auth.auth_dto import LoginUserDTO, LoginResponseDTO, RefreshTokenDTO, ForgotPasswordDTO
 from src.configuration.dependencies.depends import DependencyContainer
-
-from src.core.auth.application.usecases import (
-    LoginUserUseCase,
-    RefreshTokenUseCase,
-    LogoutUserUseCase,
-    ForgotPasswordUseCase
-)
+from src.core.auth.application.usecases import LoginUserUseCase, RefreshTokenUseCase, LogoutUserUseCase, ForgotPasswordUseCase
 
 
 auth_router = APIRouter(prefix="/api/v1", tags=["Auth"])
@@ -21,48 +15,48 @@ auth_router = APIRouter(prefix="/api/v1", tags=["Auth"])
 @inject
 async def login_user(
     user_data: LoginUserDTO,
-    login_usecase: Annotated[
+    login_user_usecase: Annotated[
         LoginUserUseCase,
         Depends(
             Provide[
-                DependencyContainer.login_usecase
+                DependencyContainer.login_user_usecase
             ]
         )
     ]
 ):
-    return await login_usecase.execute(user_data)
+    return await login_user_usecase.execute(user_data)
 
 
 @auth_router.post("/auth/refresh", response_model=LoginResponseDTO)
 @inject
 async def refresh_token(
     token_data: RefreshTokenDTO,
-    refresh_usecase: Annotated[
+    refresh_token_usecase: Annotated[
         RefreshTokenUseCase,
         Depends(
             Provide[
-                DependencyContainer.refresh_usecase
+                DependencyContainer.refresh_token_usecase
             ]
         )
     ]
 ):
-    return await refresh_usecase.execute(token_data)
+    return await refresh_token_usecase.execute(token_data)
 
 
 @auth_router.post("/auth/logout")
 @inject
 async def logout_user(
     token_data: RefreshTokenDTO,
-    logout_usecase: Annotated[
+    logout_user_usecase: Annotated[
         LogoutUserUseCase,
         Depends(
             Provide[
-                DependencyContainer.logout_usecase
+                DependencyContainer.logout_user_usecase
             ]
         )
     ]
 ):
-    await logout_usecase.execute(token_data)
+    await logout_user_usecase.execute(token_data)
     return {"message": "Вы вышли из системы"}
 
 

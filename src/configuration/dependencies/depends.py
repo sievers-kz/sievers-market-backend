@@ -8,13 +8,13 @@ from src.core.auth.application.usecases import (
     LoginUserUseCase,
     RefreshTokenUseCase,
     LogoutUserUseCase,
-    ForgotPasswordUseCase,
+    ForgotPasswordUseCase
 )
 
 from src.core.users.application.usecases import (
-    RegisterUserUseCase,
-    ResetPasswordUseCase,
-    EmailConfirmationUseCase
+    CreateUserUseCase,
+    EmailConfirmationUseCase,
+    ResetPasswordUseCase
 )
 
 from src.core.auth.infrastructure.auth_unit_of_work import AuthUnitOfWork
@@ -22,7 +22,7 @@ from src.core.auth.infrastructure.auth_unit_of_work import AuthUnitOfWork
 from src.core.shared.infrastructure.services.email_sender import ConsoleEmailSender, SendGridEmailSender
 from src.core.shared.infrastructure.services.password_hasher import BcryptPasswordHasher
 from src.core.auth.infrastructure.services.pyjwt_token import PyJWTTokenService
-from src.core.shared.infrastructure.composite_uow import UserAuthUnitOfWork
+from src.core.shared.infrastructure.composite_uow import UserIdentityUnitOfWork
 from src.core.users.infrastructure.user_unit_of_work import UserUnitOfWork
 
 
@@ -54,13 +54,13 @@ class DependencyContainer(containers.DeclarativeContainer):
         UserUnitOfWork,
         session_factory=async_session_maker
     )
-    auth_unit_of_work = providers.Factory(
+    identity_unit_of_work = providers.Factory(
         AuthUnitOfWork,
         session_factory=async_session_maker
     )
 
-    user_auth_unit_of_work = providers.Factory(
-        UserAuthUnitOfWork,
+    user_identity_unit_of_work = providers.Factory(
+        UserIdentityUnitOfWork,
         session_factory=async_session_maker
     )
 
@@ -98,45 +98,45 @@ class DependencyContainer(containers.DeclarativeContainer):
         )
     )
 
-    register_usecase = providers.Factory(
-        RegisterUserUseCase,
-        unit_of_work=user_auth_unit_of_work,
+    create_user_usecase = providers.Factory(
+        CreateUserUseCase,
+        unit_of_work=user_identity_unit_of_work,
         email_sender=console_email_sender,
         token_service=token_service
     )
 
-    login_usecase = providers.Factory(
-        LoginUserUseCase,
-        unit_of_work=user_auth_unit_of_work,
-        token_service=token_service,
-    )
-
-    confirmation_usecase = providers.Factory(
+    email_confirmation_usecase = providers.Factory(
         EmailConfirmationUseCase,
-        unit_of_work=user_auth_unit_of_work
+        unit_of_work=user_identity_unit_of_work
     )
 
-    refresh_usecase = providers.Factory(
-        RefreshTokenUseCase,
-        unit_of_work=user_auth_unit_of_work,
+    login_user_usecase = providers.Factory(
+        LoginUserUseCase,
+        unit_of_work=user_identity_unit_of_work,
         token_service=token_service
     )
 
-    logout_usecase = providers.Factory(
+    refresh_token_usecase = providers.Factory(
+        RefreshTokenUseCase,
+        unit_of_work=identity_unit_of_work,
+        token_service=token_service
+    )
+
+    logout_user_usecase = providers.Factory(
         LogoutUserUseCase,
-        unit_of_work=user_auth_unit_of_work,
+        unit_of_work=identity_unit_of_work,
         token_service=token_service
     )
 
     forgot_password_usecase = providers.Factory(
         ForgotPasswordUseCase,
-        unit_of_work=user_auth_unit_of_work,
+        unit_of_work=user_identity_unit_of_work,
         token_service=token_service,
         email_sender=console_email_sender
     )
 
     reset_password_usecase = providers.Factory(
         ResetPasswordUseCase,
-        unit_of_work=user_auth_unit_of_work,
+        unit_of_work=user_identity_unit_of_work,
         token_service=token_service
     )

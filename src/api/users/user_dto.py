@@ -1,53 +1,32 @@
-from datetime import datetime
-from typing import Union, Optional
+from typing import Optional
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel
 
-from src.core.users.domain.enums import BusinessTypeEnum, UserRoleEnum
+from src.api.auth.auth_dto import UserCredentialsDTO
+from src.core.users.domain.enums import BusinessTypeEnum, UserRoleEnum, DocumentTypeEnum
 
 
-class UserDTO(BaseModel):
+class CreateUserDTO(BaseModel):
     role: UserRoleEnum
-    first_name: str = Field(min_length=2, max_length=32, title="Имя")
-    last_name: str = Field(min_length=2, max_length=32, title="Фамилия")
-    patronymic: Optional[str] = Field(None, min_length=2, max_length=32, title="Отчество")
-    email: str = Field(title="Email")
-    phone: Optional[str] = Field(None, title="Номер телефона")
-    profile: Union["IndividualUserDTO", "BusinessUserDTO"]
-    authentication: "UserAuthDTO"
-
-    @model_validator(mode="before")
-    @classmethod
-    def parse_profile(cls, data):
-        role = data.get('role')
-        profile_data = data.get('profile')
-
-        if role == UserRoleEnum.BUSINESS or role == "business":
-            data['profile'] = BusinessUserDTO(**profile_data)
-        elif role == UserRoleEnum.INDIVIDUAL or role == "individual":
-            data['profile'] = IndividualUserDTO(**profile_data)
-
-        return data
+    email: str
+    phone: str
+    profile: "UserProfileDTO"
+    credentials: "UserCredentialsDTO"
+    business_details: Optional["BusinessDetailsDTO"] = None
 
 
-class IndividualUserDTO(BaseModel):
-    pass
+class UserProfileDTO(BaseModel):
+    last_name: str
+    first_name: str
+    patronymic: str | None = None
+    avatar_url: str | None = None
 
 
-class BusinessUserDTO(BaseModel):
-    business_type: BusinessTypeEnum = Field(title="Тип юридического лица")
-    organization_fullname: str = Field(title="Наименование организации")
-    iin: str | None = Field(None, title="ИИН")
-    bin: str | None = Field(None, title="БИН")
-
-
-class UserAuthDTO(BaseModel):
-    password: str = Field(title="Пароль")
-
-
-class TokenDataDTO(BaseModel):
-    token_str: str
-    expires_at: datetime
+class BusinessDetailsDTO(BaseModel):
+    business_type: BusinessTypeEnum
+    organization_fullname: str
+    document_type: DocumentTypeEnum
+    document_value: str
 
 
 class EmailConfirmationDTO(BaseModel):

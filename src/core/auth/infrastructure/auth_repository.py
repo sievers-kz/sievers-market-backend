@@ -2,52 +2,63 @@ import uuid
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
-from src.configuration.database.models.users import AuthToken
-from src.core.auth.domain.entities import AuthTokenAggregate
-from src.core.auth.domain.enums import TokenTypeEnum
-from src.core.auth.infrastructure.mappers import AuthTokenMapper
+from src.core.auth.infrastructure.mappers import UserIdentityMapper
+
+from src.core.auth.infrastructure.models import (
+    UserIdentity as UserIdentityModel,
+    UserCredentialsIdentity as UserCredentialsIdentityModel,
+    UserTokenIdentity as UserTokenIdentityModel
+)
+
+from src.core.auth.domain.entities import UserIdentity as DomainUserIdentity
 
 
-class AuthTokenRepository: # FIXME: Set a simple validation if result return None
+class UserIdentityRepository:
     def __init__(self, session: AsyncSession):
         self._session = session
+        self._auth_model = UserIdentityModel
+        self._credential_model = UserCredentialsIdentityModel
+        self._token_model = UserTokenIdentityModel
 
-    async def find_by_value(self, token_value: str) -> AuthTokenAggregate:
-        statement = select(AuthToken).where(AuthToken.token_value == token_value)
+    async def get_user_identity(self, user_id: uuid.UUID) -> DomainUserIdentity:
+        statement = (
+            select(self._auth_model)
+            .options(
+                joinedload(self._auth_model.credentials),
+                joinedload(self._auth_model.tokens)
+            ).where(self._auth_model.user_id == user_id)
+        )
+
         query_result = await self._session.execute(statement)
-        token_model = query_result.scalar_one_or_none()
+        orm_model = query_result.unique().scalar_one_or_none()
 
-        if token_model is None:
+        if orm_model is None:
             return None
 
-        return AuthTokenMapper.to_domain(token_model)
+        return UserIdentityMapper.to_domain(orm_model)
 
-    async def find_by_user_id(self, user_id: uuid.UUID) -> list[AuthTokenAggregate]:
-        statement = select(AuthToken).where(AuthToken.user_id == user_id)
-        query_result = await self._session.execute(statement)
-        return AuthTokenMapper.to_domain(query_result.scalars().all())
-
-    async def find_by_token_id(self, token_id: uuid.UUID) -> AuthTokenAggregate:
-        statement = select(AuthToken).where(AuthToken.id == token_id)
-        query_result = await self._session.execute(statement)
-        return AuthTokenMapper.to_domain(query_result.scalar_one_or_none())
-
-    async def find_all_refresh_tokens_by_user_id(self, user_id: uuid.UUID) -> list[AuthTokenAggregate]:
+    async def find_by_token_value(self, token_value: str) -> DomainUserIdentity:
         statement = (
-            select(AuthToken)
-            .where(
-                AuthToken.user_id == user_id,
-                AuthToken.token_type == TokenTypeEnum.REFRESH_TOKEN,
-                AuthToken.is_revoked == False
+            select(self._auth_model)
+            .join(self._token_model)
+            .where(self._token_model.token_value == token_value)
+            .options(
+                joinedload(self._auth_model.credentials),
+                joinedload(self._auth_model.tokens)
             )
         )
 
         query_result = await self._session.execute(statement)
-        orm_tokens = query_result.scalars().all()
-        return [AuthTokenMapper.to_domain(token) for token in orm_tokens]
+        orm_model = query_result.unique().scalar_one_or_none()
 
-    async def save(self, token_aggregate: AuthTokenAggregate) -> None:
-        token_model = AuthTokenMapper.to_orm(token_aggregate)
-        await self._session.merge(token_model)
+        if orm_model is None:
+            return None
+
+        return UserIdentityMapper.to_domain(orm_model)
+
+    async def save(self, user_auth: DomainUserIdentity) -> None:
+        orm_model = UserIdentityMapper.to_orm(user_auth)
+        await self._session.merge(orm_model)
         await self._session.flush()

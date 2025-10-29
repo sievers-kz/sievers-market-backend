@@ -3,8 +3,9 @@ from abc import abstractmethod
 from src.core.shared.application.abstract_uow import AbstractUnitOfWork
 
 
-class AbstractAuthUnitOfWork(AbstractUnitOfWork):
+class AbstractIdentityUnitOfWork(AbstractUnitOfWork):
     @property
     @abstractmethod
-    def token(self):
+    def identity(self):
         raise NotImplementedError
+

@@ -8,14 +8,10 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from src.configuration.conf.settings import DatabaseConnectionSettings
 from src.configuration.database.connection import Base
-from src.configuration.database.models.users import (
-    BaseModel,
-    User,
-    IndividualProfile,
-    BusinessProfile,
-    UserAuth,
-    AuthToken
-)
+from src.core.shared.infrastructure.base_model import BaseModel
+from src.core.auth.infrastructure.models import UserIdentity, UserCredentialsIdentity, UserTokenIdentity
+from src.core.users.infrastructure.models import User, UserProfile
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 database_settings = DatabaseConnectionSettings()
