@@ -2,7 +2,8 @@ from typing import Callable
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.auth.infrastructure.auth_repository import AuthTokenRepository
+from src.core.auth.infrastructure.auth_repository import UserIdentityRepository
+
 from src.core.users.infrastructure.user_unit_of_work import SQLAlchemyUnitOfWork
 
 
@@ -11,7 +12,7 @@ class AuthUnitOfWork(SQLAlchemyUnitOfWork):
         super().__init__(session_factory=session_factory)
 
     @property
-    def token(self):
+    def identity(self):
         if self._session is None:
             raise RuntimeError("UoW not initialized!")
-        return AuthTokenRepository(self._session)
+        return UserIdentityRepository(self._session)

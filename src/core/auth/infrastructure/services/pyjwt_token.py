@@ -1,10 +1,10 @@
-import secrets
 import uuid
+from abc import ABC, abstractmethod
 from datetime import timedelta, datetime, timezone
 
 import jwt
 
-from src.api.users.user_dto import TokenDataDTO
+from src.api.auth.auth_dto import AuthTokenDTO
 from src.core.auth.domain.enums import TokenTypeEnum
 
 from src.core.auth.infrastructure.exceptions.exception_classes import (
@@ -14,7 +14,17 @@ from src.core.auth.infrastructure.exceptions.exception_classes import (
 )
 
 
-class PyJWTTokenService:
+class AbstractTokenService(ABC):
+    @abstractmethod
+    def create_auth_token(self, user_id: uuid.UUID, token_type: TokenTypeEnum) -> AuthTokenDTO:
+        raise NotImplementedError
+
+    @abstractmethod
+    def verify_token(self, token: str, expected_type: TokenTypeEnum) -> dict:
+        raise NotImplementedError
+
+
+class PyJWTTokenService(AbstractTokenService):
     def __init__(
         self,
         secret_key: str,
@@ -26,37 +36,26 @@ class PyJWTTokenService:
     ):
         self._secret_key = secret_key
         self._algorithm = algorithm
-        self._access_token_lifetime = access_token_lifetime
-        self._refresh_token_lifetime = refresh_token_lifetime
-        self._email_token_lifetime = email_token_lifetime
-        self._password_reset_token_lifetime = password_reset_token_lifetime
 
-    def create_refresh_token(self, user_id: uuid.UUID) -> TokenDataDTO:
-        expires_at = datetime.now(timezone.utc) + self._refresh_token_lifetime
-        payload = {"sub": str(user_id), "exp": expires_at, "token_type": TokenTypeEnum.REFRESH_TOKEN.value}
+        self._lifetimes = {
+            TokenTypeEnum.ACCESS_TOKEN: access_token_lifetime,
+            TokenTypeEnum.REFRESH_TOKEN: refresh_token_lifetime,
+            TokenTypeEnum.EMAIL_CONFIRMATION_TOKEN: email_token_lifetime,
+            TokenTypeEnum.PASSWORD_RESET_TOKEN: password_reset_token_lifetime
+        }
+
+    def create_auth_token(self, user_id: uuid.UUID, token_type: TokenTypeEnum) -> AuthTokenDTO:
+        lifetime = self._lifetimes.get(token_type)
+        expires_at = datetime.now(timezone.utc) + lifetime
+        payload = {"sub": str(user_id), "exp": expires_at, "token_type": token_type.value}
         token_str = jwt.encode(payload=payload, key=self._secret_key, algorithm=self._algorithm)
-        return TokenDataDTO(token_str=token_str, expires_at=expires_at)
 
-    def create_access_token(self, user_id: uuid.UUID) -> TokenDataDTO:
-        expires_at = datetime.now(timezone.utc) + self._access_token_lifetime
-        payload = {"sub": str(user_id), "exp": expires_at, "token_type": TokenTypeEnum.ACCESS_TOKEN.value}
-        token_str = jwt.encode(payload=payload, key=self._secret_key, algorithm=self._algorithm)
-        return TokenDataDTO(token_str=token_str, expires_at=expires_at)
-
-    def create_email_token(self, user_id: uuid.UUID) -> TokenDataDTO:
-        expires_at = datetime.now(timezone.utc) + self._email_token_lifetime
-        payload = {"sub": str(user_id), "exp": expires_at, "token_type": TokenTypeEnum.EMAIL_CONFIRMATION_TOKEN.value}
-        token_str = jwt.encode(payload=payload, key=self._secret_key, algorithm=self._algorithm)
-        return TokenDataDTO(token_str=token_str, expires_at=expires_at)
-
-    def create_password_reset_token(self, user_id: uuid.UUID) -> TokenDataDTO:
-        expires_at = datetime.now(timezone.utc) + self._password_reset_token_lifetime
-        payload = {"sub": str(user_id), "exp": expires_at, "token_type": TokenTypeEnum.PASSWORD_RESET_TOKEN.value}
-        token_str = jwt.encode(payload=payload, key=self._secret_key, algorithm=self._algorithm)
-        return TokenDataDTO(token_str=token_str, expires_at=expires_at)
-
-    def create_confirmation_code(self) -> str:
-        return secrets.token_hex(3).upper()
+        return AuthTokenDTO(
+            token_type=token_type,
+            token_value=token_str,
+            expires_at=expires_at,
+            is_revoked=False
+        )
 
     def verify_token(self, token: str, expected_type: TokenTypeEnum) -> dict:
         try:
@@ -64,7 +63,7 @@ class PyJWTTokenService:
 
             token_type = payload.get("token_type")
             if not token_type or token_type != expected_type.value:
-                raise ValueError("Wrong token type!")
+                raise InvalidTokenError(code="invalid_token_error")
 
             return payload
 
@@ -74,14 +73,3 @@ class PyJWTTokenService:
                 details=str(exc),
             ) from exc
 
-        except jwt.InvalidTokenError as exc:
-            raise InvalidTokenError(
-                code="invalid_token_error",
-                details=str(exc)
-            ) from exc
-
-        except jwt.PyJWTError as exc:
-            raise TokenGeneratorService(
-                code="unexpected_error",
-                details=str(exc)
-            ) from exc

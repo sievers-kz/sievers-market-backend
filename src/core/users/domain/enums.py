@@ -11,4 +11,8 @@ class BusinessTypeEnum(enum.Enum):
     TOO = "too"
 
 
+class DocumentTypeEnum(enum.Enum):
+    IIN = "iin"
+    BIN = "bin"
+
 

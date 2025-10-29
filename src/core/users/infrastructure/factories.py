@@ -1,64 +1,72 @@
 import uuid
 
-from src.api.users.user_dto import UserDTO, IndividualUserDTO, BusinessUserDTO, UserAuthDTO
-from src.core.users.domain.entities import IndividualUserEntity, BusinessUserEntity, UserAggregate, UserAuthEntity
+from src.api.users.user_dto import UserProfileDTO, BusinessDetailsDTO, CreateUserDTO
+
+from src.core.users.domain.entities import (
+    User as DomainUser,
+    UserProfile as DomainUserProfile,
+    BusinessDetails as DomainBusinessDetails
+)
 from src.core.users.domain.enums import UserRoleEnum
-from src.core.users.domain.value_objects import Fullname, Email, Phone, OrganizationFullname, IIN, BIN, HashedPassword
+
+from src.core.users.domain.value_objects import Email, Phone, Fullname, OrganizationFullname
 
 
 class UserFactory:
     @staticmethod
-    def create(user_dto: UserDTO):
-        profile = UserProfileFactory.create(user_dto)
-        authentication = UserAuthFactory.create(user_dto.authentication)
+    def create_individual_user(dto: CreateUserDTO):
+        user_id = uuid.uuid4()
+        profile = _UserProfileFactory.create(dto.profile, user_id)
 
-        return UserAggregate(
-            id=uuid.uuid4(),
-            role=user_dto.role,
-            fullname=Fullname.from_raw(user_dto.first_name, user_dto.last_name, user_dto.patronymic),
-            email=Email.from_raw(user_dto.email),
-            phone=Phone.from_raw(user_dto.phone),
+        return DomainUser(
+            id=user_id,
+            role=UserRoleEnum.INDIVIDUAL,
+            email=Email.from_raw(dto.email),
+            phone=Phone.from_raw(dto.phone),
+            is_active=False,
+            profile=profile
+        )
+
+    @staticmethod
+    def create_business_user(dto: CreateUserDTO):
+        user_id = uuid.uuid4()
+        profile = _UserProfileFactory.create(dto.profile, user_id)
+        business_details = _BusinessDetailsFactory.create(dto.business_details, user_id)
+
+        return DomainUser(
+            id=user_id,
+            role=UserRoleEnum.BUSINESS,
+            email=Email.from_raw(dto.email),
+            phone=Phone.from_raw(dto.phone),
             is_active=False,
             profile=profile,
-            authentication=authentication
+            business_details=business_details
         )
 
 
-class UserProfileFactory:
+class _UserProfileFactory:
     @staticmethod
-    def create(user_dto: UserDTO):
-        if user_dto.role == UserRoleEnum.INDIVIDUAL:
-            return IndividualUserFactory.create(user_dto.profile)
+    def create(dto: UserProfileDTO, user_id: uuid.UUID) -> DomainUserProfile:
+        return DomainUserProfile(
+            id=user_id,
+            user_id=user_id,
+            fullname=Fullname.from_raw(
+                first_name=dto.first_name,
+                last_name=dto.last_name,
+                patronymic=dto.patronymic
+            ),
+            avatar_url=dto.avatar_url,
+        )
 
-        if user_dto.role == UserRoleEnum.BUSINESS:
-            return BusinessUserFactory.create(user_dto.profile)
 
-        raise ValueError("Unsupported profile type...")
-
-
-class IndividualUserFactory:
+class _BusinessDetailsFactory:
     @staticmethod
-    def create(individual_dto: IndividualUserDTO):
-        return IndividualUserEntity(id=uuid.uuid4())
-
-
-class BusinessUserFactory:
-    @staticmethod
-    def create(business_dto: BusinessUserDTO):
-        return BusinessUserEntity(
+    def create(dto: BusinessDetailsDTO, user_id: uuid.UUID) -> DomainBusinessDetails:
+        return DomainBusinessDetails(
             id=uuid.uuid4(),
-            business_type=business_dto.business_type,
-            organization_fullname=OrganizationFullname.from_raw(business_dto.organization_fullname),
-            iin=IIN.from_raw(business_dto.iin),
-            bin=BIN.from_raw(business_dto.bin)
+            user_id=user_id,
+            business_type=dto.business_type,
+            organization_fullname=OrganizationFullname.from_raw(dto.organization_fullname),
+            document_type=dto.document_type,
+            document_value=dto.document_value
         )
-
-
-class UserAuthFactory:
-    @staticmethod
-    def create(auth_dto: UserAuthDTO):
-        return UserAuthEntity(
-            id=uuid.uuid4(),
-            password=HashedPassword.from_raw(auth_dto.password)
-        )
-

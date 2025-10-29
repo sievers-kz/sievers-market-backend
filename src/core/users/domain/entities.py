@@ -1,52 +1,42 @@
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Union
+from typing import Optional
 
-from src.core.users.domain.enums import UserRoleEnum, BusinessTypeEnum
+from src.core.shared.domain.entities import AggregateRoot, Entity
+from src.core.users.domain.enums import UserRoleEnum, BusinessTypeEnum, DocumentTypeEnum
 from src.core.users.domain.exceptions.exception_classes import EmailAlreadyConfirmedError
-from src.core.users.domain.value_objects import Fullname, Email, Phone, OrganizationFullname, IIN, BIN, HashedPassword
+from src.core.users.domain.value_objects import Email, Phone, Fullname, OrganizationFullname
 
 
-@dataclass
-class UserAggregate:
+@dataclass(frozen=False)
+class User(AggregateRoot):
     id: uuid.UUID
     role: UserRoleEnum
-    fullname: Fullname
     email: Email
     phone: Phone
     is_active: bool
-    profile: Union["IndividualUserEntity", "BusinessUserEntity"]
-    authentication: "UserAuthEntity"
+    profile: "UserProfile"
+    business_details: Optional["BusinessDetails"] = None
 
-    def confirm_email(self):
+    def confirm_user(self):
         if self.is_active:
             raise EmailAlreadyConfirmedError(code="email_already_confirmed")
         self.is_active = True
 
-    def change_password(self, new_raw_password: str):
-        new_hashed_password = HashedPassword.from_raw(raw_password=new_raw_password)
-        self.authentication.password = new_hashed_password
 
-
-@dataclass
-class IndividualUserEntity:
+@dataclass(frozen=False)
+class UserProfile(Entity):
     id: uuid.UUID
+    user_id: uuid.UUID
+    fullname: Fullname
+    avatar_url: str
 
 
-@dataclass
-class BusinessUserEntity:
+@dataclass(frozen=False)
+class BusinessDetails(Entity):
     id: uuid.UUID
+    user_id: uuid.UUID
     business_type: BusinessTypeEnum
     organization_fullname: OrganizationFullname
-    iin: IIN
-    bin: BIN
-
-
-@dataclass
-class UserAuthEntity:
-    id: uuid.UUID
-    password: HashedPassword
-
-
-
+    document_type: DocumentTypeEnum
+    document_value: str

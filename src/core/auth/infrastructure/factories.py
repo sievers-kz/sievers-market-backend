@@ -1,62 +1,58 @@
 import uuid
 from datetime import datetime
 
-from src.core.auth.domain.entities import AuthTokenAggregate
-from src.core.auth.domain.enums import TokenTypeEnum
+from src.api.auth.auth_dto import UserCredentialsDTO, AuthTokenDTO
+
+from src.core.auth.domain.entities import (
+    UserIdentity as DomainUserIdentity,
+    UserCredentialsIdentity as DomainUserCredentialsIdentity,
+    UserTokenIdentity as DomainUserTokenIdentity
+)
+
+from src.core.users.domain.value_objects import HashedPassword
 
 
-class AuthTokenFactory:
+class UserIdentityFactory:
     @staticmethod
-    def create_refresh_token(
+    def create(
         user_id: uuid.UUID,
-        token_value: str,
-        expires_at: datetime
-    ):
-        return AuthTokenFactory._create(
+        credentials: UserCredentialsDTO,
+        tokens: AuthTokenDTO
+    ) -> DomainUserIdentity:
+
+        auth_id = uuid.uuid4()
+        credentials = _UserCredentialsIdentityFactory.create(credentials, auth_id)
+        tokens = _UserTokenIdentityFactory.create(tokens, auth_id)
+
+        return DomainUserIdentity(
+            id=auth_id,
             user_id=user_id,
-            token_type=TokenTypeEnum.REFRESH_TOKEN,
-            token_value=token_value,
-            expires_at=expires_at
+            credentials=credentials,
+            tokens=tokens
         )
 
-    @staticmethod
-    def create_email_token(
-        user_id: uuid.UUID,
-        token_value: str,
-        expires_at: datetime
-    ):
-        return AuthTokenFactory._create(
-            user_id=user_id,
-            token_type=TokenTypeEnum.EMAIL_CONFIRMATION_TOKEN,
-            token_value=token_value,
-            expires_at=expires_at
-        )
 
+class _UserCredentialsIdentityFactory:
     @staticmethod
-    def create_password_reset_token(
-        user_id: uuid.UUID,
-        token_value: str,
-        expires_at: datetime
-    ):
-        return AuthTokenFactory._create(
-            user_id=user_id,
-            token_type=TokenTypeEnum.PASSWORD_RESET_TOKEN,
-            token_value=token_value,
-            expires_at=expires_at
-        )
-
-    @staticmethod
-    def _create(
-        user_id: uuid.UUID,
-        token_type: TokenTypeEnum,
-        token_value: str,
-        expires_at: datetime
-    ):
-        return AuthTokenAggregate(
+    def create(dto: UserCredentialsDTO, auth_id: uuid.UUID) -> DomainUserCredentialsIdentity:
+        return DomainUserCredentialsIdentity(
             id=uuid.uuid4(),
-            user_id=user_id,
-            token_type=token_type,
-            token_value=token_value,
-            is_revoked=False,
-            expires_at=expires_at
+            auth_id=auth_id,
+            hashed_password=HashedPassword.from_raw(dto.raw_password),
+            password_changed_at=datetime.utcnow()
         )
+
+
+class _UserTokenIdentityFactory:
+    @staticmethod
+    def create(tokens_dto: list[AuthTokenDTO], auth_id: uuid.UUID) -> DomainUserTokenIdentity:
+        return [
+            DomainUserTokenIdentity(
+                id=uuid.uuid4(),
+                auth_id=auth_id,
+                token_type=dto.token_type,
+                token_value=dto.token_value,
+                is_revoked=False,
+                expires_at=dto.expires_at
+            ) for dto in tokens_dto
+        ]

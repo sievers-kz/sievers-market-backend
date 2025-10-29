@@ -1,10 +1,10 @@
-from .registration import RegisterUserUseCase
+from .registration import CreateUserUseCase
 from .email_confirmation import EmailConfirmationUseCase
 from .reset_password import ResetPasswordUseCase
 
 
 __all__ = [
-    "RegisterUserUseCase",
+    "CreateUserUseCase",
     "EmailConfirmationUseCase",
     "ResetPasswordUseCase"
 ]
