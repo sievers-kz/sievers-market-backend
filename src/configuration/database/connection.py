@@ -8,6 +8,3 @@ class Base(DeclarativeBase):
     pass
 
 
-async def get_async_session(session_maker: sessionmaker) -> AsyncGenerator[AsyncSession, None]:
-    async with session_maker() as session:
-        yield session

@@ -4,7 +4,6 @@ from src.core.auth.infrastructure.factories import UserIdentityFactory
 from src.core.auth.infrastructure.services.pyjwt_token import PyJWTTokenService
 from src.core.shared.application.abstract_uow import AbstractUserIdentityUnitOfWork
 from src.core.shared.infrastructure.services.email_sender import AbstractEmailSender
-from src.core.users.domain.enums import UserRoleEnum
 from src.core.users.infrastructure.factories import UserFactory
 
 
@@ -21,10 +20,7 @@ class CreateUserUseCase:
 
     async def execute(self, user_data: CreateUserDTO):
         async with self.unit_of_work as uow:
-            if user_data.role == UserRoleEnum.INDIVIDUAL:
-                user = UserFactory.create_individual_user(user_data)
-            else:
-                user = UserFactory.create_business_user(user_data)
+            user = UserFactory.create(user_data)
             await uow.user.save(user)
 
             credentials = user_data.credentials

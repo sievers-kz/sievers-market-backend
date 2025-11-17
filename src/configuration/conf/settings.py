@@ -24,7 +24,11 @@ class DatabaseConnectionSettings(BaseSettings):
     @computed_field(return_type=str)
     @property
     def database_url(self):
-        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASS}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_NAME}"
+        return (
+            f"postgresql+asyncpg://{self.POSTGRES_USER}:"
+            f"{self.POSTGRES_PASS}@{self.POSTGRES_HOST}:"
+            f"{self.POSTGRES_PORT}/{self.POSTGRES_NAME}"
+        )
 
     model_config = SettingsConfigDict(env_file=".env")
 

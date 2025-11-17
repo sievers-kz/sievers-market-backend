@@ -9,7 +9,7 @@ from src.core.auth.infrastructure.models import (
     UserCredentialsIdentity as UserCredentialsIdentityModel,
     UserTokenIdentity as UserTokenIdentityModel
 )
-from src.core.users.domain.value_objects import HashedPassword
+from src.core.auth.domain.value_objects import HashedPassword
 
 
 class UserIdentityMapper:
