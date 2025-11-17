@@ -3,7 +3,8 @@ import uuid
 from src.api.auth.auth_dto import RefreshTokenDTO, LoginResponseDTO
 from src.core.auth.application.abstract_auth_uow import AbstractIdentityUnitOfWork
 from src.core.auth.domain.enums import TokenTypeEnum
-from src.core.auth.domain.exceptions.exception_classes import TokenStateError
+from src.core.auth.domain.exceptions.exception_classes import TokenStateError, TokenCryptographyError
+from src.core.auth.infrastructure.exceptions.exception_classes import InvalidTokenError, TokenExpiredError
 from src.core.auth.infrastructure.services.pyjwt_token import AbstractTokenService
 
 
@@ -17,8 +18,14 @@ class RefreshTokenUseCase:
         self.token_service = token_service
 
     async def execute(self, refresh_data: RefreshTokenDTO):
-        payload = self.token_service.verify_token(refresh_data.refresh_token, TokenTypeEnum.REFRESH_TOKEN)
-        user_id_from_jwt = uuid.UUID(payload.get("sub"))
+        try:
+            payload = self.token_service.verify_token(refresh_data.refresh_token, TokenTypeEnum.REFRESH_TOKEN)
+            user_id_from_jwt = uuid.UUID(payload.get("sub"))
+
+        except (TokenExpiredError, InvalidTokenError) as exc:
+            raise TokenCryptographyError(
+                code="token_cryptography_error",
+            ) from exc
 
         async with self.unit_of_work as uow:
             identity = await uow.identity.find_by_token_value(refresh_data.refresh_token)

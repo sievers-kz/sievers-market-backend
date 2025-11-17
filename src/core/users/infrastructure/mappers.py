@@ -1,4 +1,5 @@
-from src.core.users.domain.value_objects import Email, Phone, Fullname, OrganizationFullname
+from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormalizer
+from src.core.users.domain.value_objects import Email, Phone, Fullname, OrganizationFullname, DocumentValue
 
 from src.core.users.infrastructure.models import (
     User as UserModel,
@@ -27,7 +28,7 @@ class UserMapper:
             id=orm_model.id,
             role=orm_model.role,
             email=Email.from_raw(orm_model.email),
-            phone=Phone.from_raw(orm_model.phone),
+            phone=Phone.from_raw(PhoneNormalizer.normalize(orm_model.phone)),
             is_active=orm_model.is_active,
             profile=profile,
             business_details=business_details
@@ -38,7 +39,7 @@ class UserMapper:
         profile = _UserProfileMapper.to_orm(domain_model.profile)
 
         if domain_model.business_details is not None:
-            business_details = _BusinessDetailsMapper.to_domain(domain_model.business_details)
+            business_details = _BusinessDetailsMapper.to_orm(domain_model.business_details)
         else:
             business_details = None
 
@@ -88,7 +89,7 @@ class _BusinessDetailsMapper:
             business_type=orm_model.business_type,
             organization_fullname=OrganizationFullname.from_raw(orm_model.organization_fullname),
             document_type=orm_model.document_type,
-            document_value=orm_model.document_value
+            document_value=DocumentValue.from_raw(orm_model.document_value)
         )
 
     @staticmethod
@@ -99,5 +100,5 @@ class _BusinessDetailsMapper:
             business_type=domain_model.business_type,
             organization_fullname=domain_model.organization_fullname.value,
             document_type=domain_model.document_type,
-            document_value=domain_model.document_value
+            document_value=domain_model.document_value.value
         )

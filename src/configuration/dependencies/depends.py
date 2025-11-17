@@ -113,7 +113,8 @@ class DependencyContainer(containers.DeclarativeContainer):
     login_user_usecase = providers.Factory(
         LoginUserUseCase,
         unit_of_work=user_identity_unit_of_work,
-        token_service=token_service
+        token_service=token_service,
+        password_hasher=password_hasher
     )
 
     refresh_token_usecase = providers.Factory(
@@ -138,5 +139,6 @@ class DependencyContainer(containers.DeclarativeContainer):
     reset_password_usecase = providers.Factory(
         ResetPasswordUseCase,
         unit_of_work=user_identity_unit_of_work,
-        token_service=token_service
+        token_service=token_service,
+        password_hasher=password_hasher
     )

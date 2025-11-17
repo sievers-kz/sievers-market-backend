@@ -3,10 +3,8 @@ from abc import abstractmethod, ABC
 from dataclasses import dataclass
 from typing import TypeVar, Generic
 
+from src.core.users.domain.enums import DocumentTypeEnum, BusinessTypeEnum
 from src.core.users.domain.exceptions.exception_classes import MissingRequiredFieldError, InvalidInputError
-from src.core.shared.infrastructure.exceptions.exception_classes import PhoneNormalizerServiceError
-from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormalizer
-from src.core.shared.infrastructure.services.password_hasher import BcryptPasswordHasher
 
 
 TValueObject = TypeVar("TValueObject")
@@ -116,7 +114,8 @@ class Email(ValueObject[str]):
                 code="invalid_email_format",
                 context={
                     "field": "email",
-                    "verbose_name": "Email"
+                    "verbose_name": "Email",
+                    "value": self.value
                 }
             )
 
@@ -127,22 +126,19 @@ class Phone(ValueObject[str]):
     def from_raw(cls, raw_phone: str | None) -> "Phone":
         if not raw_phone:
             return cls(value=None)
+        return cls(value=raw_phone)
 
-        try:
-            normalize = PhoneNormalizer.normalize(raw_phone)
-            return cls(value=normalize)
-
-        except PhoneNormalizerServiceError as exc:
+    def _validate(self):
+        pattern = r"^\+77[0-9]\d{8}$"
+        if not re.match(pattern, self.value):
             raise InvalidInputError(
                 code="invalid_phone_format",
                 context={
                     "field": "phone",
-                    "verbose_name": "Номер телефона"
+                    "verbose_name": "Номер телефона",
+                    "value": self.value
                 }
-            ) from exc
-
-    def _validate(self):
-        pass
+            )
 
 
 @dataclass(frozen=True)
@@ -162,92 +158,48 @@ class OrganizationFullname(ValueObject[str]):
         return cls(value=normalize)
 
     def _validate(self):
-        pass
+        pattern = (
+            r"^[A-Za-zА-Яа-яӘәІіҢңҒғҮүҰұҚқӨөҺһ0-9№]"
+            r"[A-Za-zА-Яа-яӘәІіҢңҒғҮүҰұҚқӨөҺһ0-9\s.&'\"(),/#\-№]*$"
+        )
+        if not re.match(pattern, self.value):
+            raise InvalidInputError(
+                code="invalid_org_name_format",
+                context={
+                    "field": "organization_fullname",
+                    "verbose_name": "Наименование организации"
+                }
+            )
 
 
-@dataclass(frozen=True)
-class IIN(ValueObject[str]):
+class DocumentValue(ValueObject[str]):
     @classmethod
-    def from_raw(cls, raw_iin: str | None) -> "IIN":
-        if not raw_iin:
-            return cls(value=None)
-
-        normalize = raw_iin.strip()
-        return cls(value=normalize)
-
-    def _validate(self):
-        if not self.value.isdigit():
-            raise InvalidInputError(
-                code="invalid_identification_number_format.type",
-                context={
-                    "field": "iin",
-                    "verbose_name": "ИИН"
-                }
-            )
-
-        if len(self.value) != 12:
-            raise InvalidInputError(
-                code="invalid_identification_number_format.length",
-                context={
-                    "field": "iin",
-                    "verbose_name": "ИИН"
-                }
-            )
-
-
-@dataclass(frozen=True)
-class BIN(ValueObject[str]):
-    @classmethod
-    def from_raw(cls, raw_bin: str | None) -> "BIN":
-        if not raw_bin:
-            return cls(value=None)
-
-        normalize = raw_bin.strip()
-        return cls(value=normalize)
-
-    def _validate(self):
-        if not self.value.isdigit():
-            raise InvalidInputError(
-                code="invalid_identification_number_format.type",
-                context={
-                    "field": "bin",
-                    "verbose_name": "БИН"
-                }
-            )
-
-        if len(self.value) != 12:
-            raise InvalidInputError(
-                code="invalid_identification_number_format.length",
-                context={
-                    "field": "bin",
-                    "verbose_name": "БИН"
-                }
-            )
-
-
-@dataclass(frozen=True)
-class HashedPassword:
-    hashed_password: str
-
-    @classmethod
-    def from_raw(cls, raw_password: str) -> "HashedPassword":
-        if not raw_password:
+    def from_raw(cls, raw_value: str) -> "DocumentValue":
+        if not raw_value:
             raise MissingRequiredFieldError(
                 code="missing_required_field",
                 context={
-                    "field": "password",
-                    "verbose_name": "Пароль"
+                    "field": "document_value",
+                    "verbose_name": "Уникальный номер документа"
+                }
+            )
+        return cls(value=raw_value)
+
+    def _validate(self):
+        if not self.value.isdigit():
+            raise InvalidInputError(
+                code="invalid_document_format",
+                context={
+                    "field": "document_value",
+                    "verbose_name": "Уникальный номер документа"
                 }
             )
 
-        hashed = BcryptPasswordHasher.hash_password(raw_password)
-        return cls(hashed_password=hashed)
-
-    @classmethod
-    def from_hash(cls, hashed_password: str) -> "HashedPassword":
-        if not hashed_password:
-            raise ValueError("Хэшированный пароль не может быть пустым!")
-        return cls(hashed_password=hashed_password)
-
-    def matches(self, raw_password: str):
-        return BcryptPasswordHasher.verify_password(raw_password, self.hashed_password)
+        if len(self.value) != 12:
+            raise InvalidInputError(
+                code="invalid_document_format",
+                context={
+                    "field": "document_value",
+                    "verbose_name": "Уникальный номер документа"
+                }
+            )

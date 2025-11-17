@@ -9,7 +9,8 @@ from src.core.auth.domain.entities import (
     UserTokenIdentity as DomainUserTokenIdentity
 )
 
-from src.core.users.domain.value_objects import HashedPassword
+from src.core.auth.domain.value_objects import HashedPassword
+from src.core.shared.infrastructure.services.password_hasher import BcryptPasswordHasher
 
 
 class UserIdentityFactory:
@@ -38,7 +39,12 @@ class _UserCredentialsIdentityFactory:
         return DomainUserCredentialsIdentity(
             id=uuid.uuid4(),
             auth_id=auth_id,
-            hashed_password=HashedPassword.from_raw(dto.raw_password),
+            hashed_password=HashedPassword.from_raw(
+                BcryptPasswordHasher()
+                .hash_password(
+                    dto.raw_password
+                )
+            ),
             password_changed_at=datetime.utcnow()
         )
 

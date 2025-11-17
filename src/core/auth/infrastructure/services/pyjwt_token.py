@@ -47,7 +47,7 @@ class PyJWTTokenService(AbstractTokenService):
     def create_auth_token(self, user_id: uuid.UUID, token_type: TokenTypeEnum) -> AuthTokenDTO:
         lifetime = self._lifetimes.get(token_type)
         expires_at = datetime.now(timezone.utc) + lifetime
-        payload = {"sub": str(user_id), "exp": expires_at, "token_type": token_type.value}
+        payload = {"jti": str(uuid.uuid4()), "sub": str(user_id), "exp": expires_at, "token_type": token_type.value}
         token_str = jwt.encode(payload=payload, key=self._secret_key, algorithm=self._algorithm)
 
         return AuthTokenDTO(
@@ -73,3 +73,8 @@ class PyJWTTokenService(AbstractTokenService):
                 details=str(exc),
             ) from exc
 
+        except jwt.DecodeError as exc:
+            raise InvalidTokenError(
+                code="invalid_token_error",
+                details=str(exc)
+            ) from exc

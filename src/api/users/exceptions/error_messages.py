@@ -28,6 +28,9 @@ USER_ERROR_MESSAGES = {
     "invalid_identification_number_format.type": "{verbose_name} должен состоять из целых чисел",
     "invalid_identification_number_format.length": "{verbose_name} должен состоять из 12 целых цисел",
 
+    "invalid_document_type_for_individual": "{verbose_name} не может иметь БИН",
+    "invalid_document_type_for_too": "{verbose_name} не может иметь ИИН",
+
     # APPLICATION
     "service_unavailable_error": "Сервис временно недоступен. Пожалуйста, попробуйте позднее",
     "internal_server_error": "Технические неполадки. Пожалуйста, попробуйте позднее",
