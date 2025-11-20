@@ -1,4 +1,4 @@
-from src.api.users.user_dto import EmailConfirmationDTO
+from src.api.auth.auth_dto import EmailConfirmationDTO
 from src.core.shared.application.abstract_uow import AbstractUserIdentityUnitOfWork
 from src.core.users.domain.exceptions.exception_classes import InvalidEmailConfirmationCodeError
 

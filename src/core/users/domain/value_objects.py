@@ -203,3 +203,49 @@ class DocumentValue(ValueObject[str]):
                     "verbose_name": "Уникальный номер документа"
                 }
             )
+
+
+@dataclass(frozen=True)
+class IIN:
+    value: str
+
+    def __post_init__(self):
+        self._validate()
+
+    @classmethod
+    def from_raw(cls, raw_iin: str):
+        if not raw_iin:
+            raise MissingRequiredFieldError(
+                code="missing_required_field",
+                context={
+                    "field": "document_value",
+                    "verbose_name": "ИИН"
+                }
+            )
+        return cls(value=raw_iin)
+
+    def _validate(self):
+        pass
+
+
+@dataclass(frozen=True)
+class BIN:
+    value: str
+
+    def __post_init__(self):
+        self._validate()
+
+    @classmethod
+    def from_raw(cls, raw_bin: str):
+        if not raw_bin:
+            raise MissingRequiredFieldError(
+                code="missing_required_field",
+                context={
+                    "field": "document_value",
+                    "verbose_name": "БИН"
+                }
+            )
+        return cls(value=raw_bin)
+
+    def _validate(self):
+        pass

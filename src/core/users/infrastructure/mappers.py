@@ -28,7 +28,7 @@ class UserMapper:
             id=orm_model.id,
             role=orm_model.role,
             email=Email.from_raw(orm_model.email),
-            phone=Phone.from_raw(PhoneNormalizer.normalize(orm_model.phone)),
+            phone=Phone.from_raw(PhoneNormalizer().normalize(orm_model.phone)),
             is_active=orm_model.is_active,
             profile=profile,
             business_details=business_details

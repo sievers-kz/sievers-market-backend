@@ -1,7 +1,7 @@
 import pytest
 
 from src.api.auth.auth_dto import LoginUserDTO, RefreshTokenDTO
-from src.api.users.user_dto import EmailConfirmationDTO
+from src.api.auth.auth_dto import EmailConfirmationDTO
 from src.core.auth.domain.exceptions.exception_classes import TokenStateError, TokenCryptographyError
 
 
@@ -21,14 +21,14 @@ class TestLogoutUserUseCase:
         await self.create_user_usecase.execute(dto)
 
         async with self.uow:
-            user = await self.uow.user.get_by_user_email(dto.email)
+            user = await self.uow.user.get_by_user_email(dto.user.email)
             identity = await self.uow.identity.get_user_identity(user.id)
             email_token = identity.tokens[0].token_value
 
         confirmation_data = EmailConfirmationDTO(confirmation_code=email_token)
         await self.email_confirmation_usecase.execute(confirmation_data)
 
-        login_data = LoginUserDTO(email=dto.email, raw_password="supersecret")
+        login_data = LoginUserDTO(email=dto.user.email, raw_password="supersecret")
         response = await self.login_user_usecase.execute(login_data)
 
         logout_data = RefreshTokenDTO(refresh_token=response.refresh_token)
@@ -48,14 +48,14 @@ class TestLogoutUserUseCase:
         await self.create_user_usecase.execute(dto)
 
         async with self.uow:
-            user = await self.uow.user.get_by_user_email(dto.email)
+            user = await self.uow.user.get_by_user_email(dto.user.email)
             identity = await self.uow.identity.get_user_identity(user.id)
             email_token = identity.tokens[0].token_value
 
         confirmation_data = EmailConfirmationDTO(confirmation_code=email_token)
         await self.email_confirmation_usecase.execute(confirmation_data)
 
-        login_data = LoginUserDTO(email=dto.email, raw_password="supersecret")
+        login_data = LoginUserDTO(email=dto.user.email, raw_password="supersecret")
         response = await self.login_user_usecase.execute(login_data)
 
         logout_data = RefreshTokenDTO(refresh_token=response.refresh_token)
@@ -71,14 +71,14 @@ class TestLogoutUserUseCase:
         await self.create_user_usecase.execute(dto)
 
         async with self.uow:
-            user = await self.uow.user.get_by_user_email(dto.email)
+            user = await self.uow.user.get_by_user_email(dto.user.email)
             identity = await self.uow.identity.get_user_identity(user.id)
             email_token = identity.tokens[0].token_value
 
         confirmation_data = EmailConfirmationDTO(confirmation_code=email_token)
         await self.email_confirmation_usecase.execute(confirmation_data)
 
-        login_data = LoginUserDTO(email=dto.email, raw_password="supersecret")
+        login_data = LoginUserDTO(email=dto.user.email, raw_password="supersecret")
         await self.login_user_usecase.execute(login_data)
 
         logout_data = RefreshTokenDTO(refresh_token="nonexiststoken")

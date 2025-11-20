@@ -15,7 +15,8 @@ from src.api.auth.auth_dto import UserCredentialsDTO, AuthTokenDTO, UserIdentity
 from src.configuration.database.connection import Base
 from src.configuration.dependencies.depends import DependencyContainer
 
-from src.api.users.user_dto import CreateUserDTO, UserProfileDTO, BusinessDetailsDTO
+from src.api.auth.auth_dto import CreateUserDTO
+from src.api.users.user_dto import UserProfileDTO, BusinessDetailsDTO, UserDTO
 from src.core.auth.domain.enums import TokenTypeEnum
 from src.core.auth.infrastructure.factories import UserIdentityFactory
 from src.core.users.domain.entities import BusinessDetails, UserProfile
@@ -128,6 +129,12 @@ def create_user_dto():
         defailt_phone = f"8747{random.randint(1000000, 9999999)}"
         default_doc_value = f"123456{random.randint(100000, 999999)}"
 
+        user = UserDTO(
+            role=role,
+            email=email or default_email,
+            phone=phone or defailt_phone
+        )
+
         business_details = None
         if role == UserRoleEnum.BUSINESS:
             business_details = BusinessDetailsDTO(
@@ -147,9 +154,7 @@ def create_user_dto():
         default_credentials = UserCredentialsDTO(raw_password="supersecret")
 
         return CreateUserDTO(
-            role=role,
-            email=email or default_email,
-            phone=phone or defailt_phone,
+            user=user,
             profile=profile,
             credentials=credentials or default_credentials,
             business_details=business_details

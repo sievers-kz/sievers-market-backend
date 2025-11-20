@@ -1,6 +1,6 @@
 import pytest
 
-from src.api.users.user_dto import EmailConfirmationDTO
+from src.api.auth.auth_dto import EmailConfirmationDTO
 from src.core.users.domain.exceptions.exception_classes import InvalidEmailConfirmationCodeError
 
 
@@ -18,7 +18,7 @@ class TestEmailConfirmationUseCase:
         await self.create_user_usecase.execute(dto)
 
         async with self.uow:
-            user = await self.uow.user.get_by_user_email(dto.email)
+            user = await self.uow.user.get_by_user_email(dto.user.email)
             identity = await self.uow.identity.get_user_identity(user.id)
             email_token = identity.tokens[0].token_value
 
@@ -26,7 +26,7 @@ class TestEmailConfirmationUseCase:
         await self.email_confirmation_usecase.execute(confirmation_data)
 
         async with self.uow:
-            user = await self.uow.user.get_by_user_email(dto.email)
+            user = await self.uow.user.get_by_user_email(dto.user.email)
             assert user.is_active is True
 
             identity = await self.uow.identity.get_user_identity(user.id)

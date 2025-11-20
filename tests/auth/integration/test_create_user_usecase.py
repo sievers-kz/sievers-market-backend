@@ -17,7 +17,7 @@ class TestCreateUserUseCase:
         await self.usecase.execute(dto)
 
         async with self.uow:
-            user = await self.uow.user.get_by_user_email(dto.email)
+            user = await self.uow.user.get_by_user_email(dto.user.email)
 
         assert user.id is not None
         assert user.role == UserRoleEnum.INDIVIDUAL
@@ -30,7 +30,7 @@ class TestCreateUserUseCase:
         await self.usecase.execute(dto)
 
         async with self.uow:
-            user = await self.uow.user.get_by_user_email(dto.email)
+            user = await self.uow.user.get_by_user_email(dto.user.email)
 
         assert user.id is not None
         assert user.role == UserRoleEnum.BUSINESS
@@ -43,7 +43,7 @@ class TestCreateUserUseCase:
         await self.usecase.execute(dto)
 
         async with self.uow:
-            user = await self.uow.user.get_by_user_email(dto.email)
+            user = await self.uow.user.get_by_user_email(dto.user.email)
             identity = await self.uow.identity.get_user_identity(user.id)
 
         assert identity.id is not None

@@ -1,4 +1,4 @@
-from src.api.users.user_dto import CreateUserDTO
+from src.api.auth.auth_dto import CreateUserDTO
 from src.core.auth.domain.enums import TokenTypeEnum
 from src.core.auth.infrastructure.factories import UserIdentityFactory
 from src.core.auth.infrastructure.services.pyjwt_token import PyJWTTokenService

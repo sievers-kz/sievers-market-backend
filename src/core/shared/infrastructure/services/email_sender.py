@@ -4,8 +4,11 @@ from abc import ABC, abstractmethod
 from python_http_client import UnauthorizedError, ForbiddenError, BadRequestsError
 from sendgrid import SendGridAPIClient, Mail
 
-from src.core.shared.infrastructure.exceptions.exception_classes import EmailSenderError, EmailSenderConfigurationError, \
+from src.core.shared.infrastructure.exceptions.exception_classes import (
+    EmailSenderError,
+    EmailSenderConfigurationError,
     EmailSenderRequestsError
+)
 
 
 class AbstractEmailSender(ABC):

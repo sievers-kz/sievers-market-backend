@@ -1,12 +1,11 @@
 import uuid
 
-from src.api.users.user_dto import ResetPasswordDTO
+from src.api.auth.auth_dto import ResetPasswordDTO
 from src.core.auth.domain.enums import TokenTypeEnum
 from src.core.auth.domain.exceptions.exception_classes import TokenStateError
 from src.core.auth.infrastructure.services.pyjwt_token import AbstractTokenService
 from src.core.shared.application.abstract_uow import AbstractUserIdentityUnitOfWork
-from src.core.shared.infrastructure.services.password_hasher import BcryptPasswordHasher, AbstractPasswordHasher
-from src.core.users.application.exceptions.exception_classes import InternalServerError
+from src.core.shared.infrastructure.services.password_hasher import AbstractPasswordHasher
 
 
 class ResetPasswordUseCase:

@@ -1,10 +1,9 @@
 from src.api.auth.auth_dto import LoginUserDTO, LoginResponseDTO
 from src.core.auth.domain.enums import TokenTypeEnum
 from src.core.auth.domain.exceptions.exception_classes import InvalidCredentialsError
-from src.core.auth.infrastructure.factories import UserIdentityFactory
 from src.core.auth.infrastructure.services.pyjwt_token import AbstractTokenService
 from src.core.shared.application.abstract_uow import AbstractUserIdentityUnitOfWork
-from src.core.shared.infrastructure.services.password_hasher import BcryptPasswordHasher, AbstractPasswordHasher
+from src.core.shared.infrastructure.services.password_hasher import AbstractPasswordHasher
 
 
 class LoginUserUseCase:

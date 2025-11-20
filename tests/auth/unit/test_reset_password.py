@@ -5,7 +5,7 @@ import pytest
 
 from src.core.auth.domain.enums import TokenTypeEnum
 from src.core.auth.domain.exceptions.exception_classes import TokenStateError
-from src.core.users.application.usecases import ResetPasswordUseCase
+from src.core.auth.application.usecases import ResetPasswordUseCase
 
 
 class TestResetPasswordUseCase:
