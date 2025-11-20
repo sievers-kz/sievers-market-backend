@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from src.core.users.application.usecases import EmailConfirmationUseCase
+from src.core.auth.application.usecases import EmailConfirmationUseCase
 from src.core.users.domain.exceptions.exception_classes import InvalidEmailConfirmationCodeError
 
 

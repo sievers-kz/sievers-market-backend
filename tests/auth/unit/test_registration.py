@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from src.core.auth.domain.enums import TokenTypeEnum
-from src.core.users.application.usecases import CreateUserUseCase
+from src.core.auth.application.usecases import CreateUserUseCase
 
 
 class TestCreateUserUseCase:
@@ -25,8 +25,8 @@ class TestCreateUserUseCase:
 
     @pytest.mark.asyncio
     @pytest.mark.unit
-    @patch(target="src.core.users.application.usecases.registration.UserFactory")
-    @patch(target="src.core.users.application.usecases.registration.UserIdentityFactory")
+    @patch(target="src.core.auth.application.usecases.registration.UserFactory")
+    @patch(target="src.core.auth.application.usecases.registration.UserIdentityFactory")
     async def test_create_user_success(self, user_identity_factory_mock: MagicMock, user_factory_mock: MagicMock):
         mock_email = MagicMock(value="test@example.com")
         mock_user = MagicMock(id=uuid.uuid4(), email=mock_email)

@@ -1,6 +1,7 @@
 import uuid
 
-from src.api.users.user_dto import UserProfileDTO, BusinessDetailsDTO, CreateUserDTO
+from src.api.auth.auth_dto import CreateUserDTO
+from src.api.users.user_dto import UserProfileDTO, BusinessDetailsDTO
 from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormalizer
 
 from src.core.users.domain.entities import (
@@ -20,14 +21,14 @@ class UserFactory:
         profile = _UserProfileFactory.create(dto.profile, user_id)
 
         business_details = None
-        if dto.role == UserRoleEnum.BUSINESS and dto.business_details:
+        if dto.user.role == UserRoleEnum.BUSINESS and dto.business_details:
             business_details = _BusinessDetailsFactory.create(dto.business_details, user_id)
 
         return DomainUser(
             id=user_id,
-            role=dto.role,
-            email=Email.from_raw(dto.email),
-            phone=Phone.from_raw(PhoneNormalizer.normalize(dto.phone)),
+            role=dto.user.role,
+            email=Email.from_raw(dto.user.email),
+            phone=Phone.from_raw(PhoneNormalizer().normalize(dto.user.phone)),
             is_active=False,
             profile=profile,
             business_details=business_details

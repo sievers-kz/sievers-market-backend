@@ -1,12 +1,12 @@
 import uuid
 from abc import ABC, abstractmethod
 
-from src.core.users.domain.entities import UserAggregate
+from src.core.users.domain.entities import User
 
 
 class AbstractRepository(ABC):
     @abstractmethod
-    async def get_by_id(self, user_id: uuid.UUID) -> UserAggregate:
+    async def get_by_id(self, user_id: uuid.UUID) -> User:
         pass
 
     @abstractmethod
@@ -14,5 +14,5 @@ class AbstractRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_by_email(self, email: str) -> UserAggregate:
+    async def get_by_email(self, email: str) -> User:
         pass

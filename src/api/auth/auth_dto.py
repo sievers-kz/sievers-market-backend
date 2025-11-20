@@ -1,8 +1,17 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, EmailStr
 
+from src.api.users.user_dto import BusinessDetailsDTO, UserProfileDTO, UserDTO
 from src.core.auth.domain.enums import TokenTypeEnum
+
+
+class CreateUserDTO(BaseModel):
+    user: UserDTO
+    profile: UserProfileDTO
+    credentials: "UserCredentialsDTO"
+    business_details: Optional[BusinessDetailsDTO] = None
 
 
 class UserIdentityDTO(BaseModel):
@@ -39,3 +48,14 @@ class LoginResponseDTO(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "Bearer"
+
+
+class EmailConfirmationDTO(BaseModel):
+    confirmation_code: str
+
+
+class ResetPasswordDTO(BaseModel):
+    reset_password_token: str
+    new_password: str
+
+

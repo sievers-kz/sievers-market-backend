@@ -63,8 +63,8 @@ class UserIdentity(AggregateRoot):
                     return token
         return None
 
-    def token_is_expired(self):
-        pass
+    def change_password(self, raw_password: str):
+        self.credentials.change_password(raw_password=raw_password)
 
 
 @dataclass(frozen=False)
