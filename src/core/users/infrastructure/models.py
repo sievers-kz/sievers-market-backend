@@ -1,10 +1,14 @@
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import String, Boolean, ForeignKey, Text, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.shared.infrastructure.base_model import BaseModel
 from src.core.users.domain.enums import UserRoleEnum, DocumentTypeEnum, BusinessTypeEnum
+
+if TYPE_CHECKING:
+    from src.core.listings.infrastructure.models.listing import Listing
 
 
 class User(BaseModel):
@@ -37,6 +41,12 @@ class User(BaseModel):
 
     profile: Mapped["UserProfile"] = relationship(back_populates="user")
     business_details: Mapped["BusinessDetails"] = relationship(back_populates="user")
+
+    listings: Mapped[list["Listing"]] = relationship(
+        back_populates="author",
+        cascade="all, delete-orphan",
+        lazy="selectin"
+    )
 
 
 class UserProfile(BaseModel):

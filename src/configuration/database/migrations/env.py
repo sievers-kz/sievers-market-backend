@@ -8,9 +8,25 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from src.configuration.conf.settings import DatabaseConnectionSettings
 from src.configuration.database.connection import Base
+
 from src.core.shared.infrastructure.base_model import BaseModel
+from src.core.shared.infrastructure.shared_models import Region, Color
+
 from src.core.auth.infrastructure.models import UserIdentity, UserCredentialsIdentity, UserTokenIdentity
 from src.core.users.infrastructure.models import User, UserProfile
+
+from src.core.listings.infrastructure.models.listing import Listing, ListingMedia
+from src.core.listings.infrastructure.models.machinery import Machinery, MachinerySpecification
+
+from src.core.listings.infrastructure.models.references import (
+    Roubric,
+    MachineryManufacturer,
+    MachineryCategory,
+    MachinerySubcategory,
+    MachineryManufacturerCountry,
+    UnitOfMeasure,
+    MachinerySpecificationGroup
+)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
