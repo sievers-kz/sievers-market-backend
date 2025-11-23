@@ -20,12 +20,13 @@ class UserIdentity(BaseModel):
     credentials: Mapped["UserCredentialsIdentity"] = relationship(
         back_populates="user_identity",
         cascade="all, delete-orphan",
-        uselist=False
+        uselist=False,
     )
 
     tokens: Mapped[List["UserTokenIdentity"]] = relationship(
         back_populates="user_identity",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
+        lazy="selectin"
     )
 
 
