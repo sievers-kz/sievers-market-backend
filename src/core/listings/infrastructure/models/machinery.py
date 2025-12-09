@@ -8,15 +8,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.listings.domain.enums import (
     MachineryConditionEnum,
-    MachinerySpecsValueTypeEnum,
 )
 
 from src.core.shared.infrastructure.base_model import BaseModel
 
 if TYPE_CHECKING:
     from src.core.listings.infrastructure.models.listing import Listing
-    from src.core.shared.infrastructure.shared_models import Color
-    from src.core.listings.infrastructure.models.references import (
+    from src.core.references.infrastructure.models import Color
+    from src.core.references.infrastructure.models import (
         MachinerySubcategory,
         MachineryManufacturer,
         MachineryManufacturerCountry,
@@ -112,85 +111,3 @@ class Machinery(BaseModel):
     )
 
 
-class MachinerySpecification(BaseModel):
-    __tablename__ = "machinery_specifications"
-
-    subcategory_id: Mapped[UUID] = mapped_column(
-        ForeignKey(
-            "machinery_subcategories.id",
-            ondelete="CASCADE"
-        )
-    )
-
-    key: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False
-    )
-
-    label: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False
-    )
-
-    value_type: Mapped[MachinerySpecsValueTypeEnum] = mapped_column(
-        Enum(MachinerySpecsValueTypeEnum),
-        nullable=False
-    )
-
-    unit_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey(
-            "unit_of_measure.id",
-            ondelete="SET NULL"
-        ),
-        nullable=True
-    )
-
-    is_required: Mapped[bool] = mapped_column(
-        Boolean,
-        server_default="false",
-        default=False
-    )
-
-    group_id: Mapped[UUID | None] = mapped_column(  # ← ИЗМЕНЕНО!
-        ForeignKey(
-            "machinery_specification_groups.id",
-            ondelete="SET NULL"
-        ),
-        nullable=True
-    )
-
-    position: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-        default=0
-    )
-
-    options: Mapped[dict | None] = mapped_column(
-        JSONB,
-        nullable=True,
-        default=None
-    )
-
-    subcategory: Mapped["MachinerySubcategory"] = relationship(
-        back_populates="specifications"
-    )
-
-    unit: Mapped["UnitOfMeasure | None"] = relationship(
-        back_populates="specifications"
-    )
-
-    group: Mapped["MachinerySpecificationGroup | None"] = relationship(
-        back_populates="specifications"
-    )
-
-    __table_args__ = (
-        UniqueConstraint(
-            "subcategory_id", "key", name="uq_subcategory_key"
-        ),
-        Index(
-            "ix_machinery_spec_subcategory", "subcategory_id"
-        ),
-        Index(
-            "ix_machinery_spec_group", "group_id"
-        )
-    )

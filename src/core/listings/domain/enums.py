@@ -26,10 +26,4 @@ class MachineryConditionEnum(Enum):
     NEW = "new"
 
 
-class MachinerySpecsValueTypeEnum(Enum):
-    STRING = "string"
-    INTEGER = "integer"
-    BOOLEAN = "boolean"
-    FLOAT = "float"
-    ENUM = "enum"
 

@@ -10,22 +10,24 @@ from src.configuration.conf.settings import DatabaseConnectionSettings
 from src.configuration.database.connection import Base
 
 from src.core.shared.infrastructure.base_model import BaseModel
-from src.core.shared.infrastructure.shared_models import Region, Color
+from src.core.references.infrastructure.models import Region, Color
 
 from src.core.auth.infrastructure.models import UserIdentity, UserCredentialsIdentity, UserTokenIdentity
 from src.core.users.infrastructure.models import User, UserProfile
 
 from src.core.listings.infrastructure.models.listing import Listing, ListingMedia
-from src.core.listings.infrastructure.models.machinery import Machinery, MachinerySpecification
+from src.core.listings.infrastructure.models.machinery import Machinery
 
-from src.core.listings.infrastructure.models.references import (
+from src.core.references.infrastructure.models import (
     Roubric,
     MachineryManufacturer,
     MachineryCategory,
     MachinerySubcategory,
     MachineryManufacturerCountry,
     UnitOfMeasure,
-    MachinerySpecificationGroup
+    MachinerySpecificationGroup,
+    MachinerySpecification,
+    MachinerySubcategorySpecification
 )
 
 # this is the Alembic Config object, which provides

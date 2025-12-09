@@ -41,3 +41,15 @@ class AbstractUserIdentityUnitOfWork(AbstractUnitOfWork):
     @abstractmethod
     def identity(self):
         raise NotImplementedError
+
+
+class AbstractListingReferenceUnitOfWork(AbstractUnitOfWork):
+    @property
+    @abstractmethod
+    def listing(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def reference(self):
+        raise NotImplementedError
