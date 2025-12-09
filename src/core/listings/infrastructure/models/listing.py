@@ -11,8 +11,8 @@ from src.core.shared.infrastructure.base_model import BaseModel
 
 if TYPE_CHECKING:
     from src.core.users.infrastructure.models import User
-    from src.core.listings.infrastructure.models.references import Roubric
-    from src.core.shared.infrastructure.shared_models import Region
+    from src.core.references.infrastructure.models import Roubric
+    from src.core.references.infrastructure.models import Region
     from src.core.listings.infrastructure.models.machinery import Machinery
 
 

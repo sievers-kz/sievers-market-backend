@@ -59,3 +59,5 @@ class ResetPasswordDTO(BaseModel):
     new_password: str
 
 
+class AccessTokenDTO(BaseModel):
+    access_token: str

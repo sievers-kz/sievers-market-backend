@@ -13,6 +13,10 @@ from src.core.auth.application.usecases import (
     ForgotPasswordUseCase,
     ResetPasswordUseCase
 )
+from src.core.listings.application.usecases import GetListingCreationSchemaUseCase, CreateListingUseCase
+from src.core.listings.infrastructure.form_builder import ListingFormBuilderService
+from src.core.references.application.usecases.categories_tree import GetCategoriesTreeUseCase
+from src.core.references.infrastructure.reference_unit_of_work import ReferenceUnitOfWork
 
 from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormalizer
 
@@ -31,7 +35,7 @@ from src.core.auth.infrastructure.auth_unit_of_work import AuthUnitOfWork
 from src.core.shared.infrastructure.services.email_sender import ConsoleEmailSender, SendGridEmailSender
 from src.core.shared.infrastructure.services.password_hasher import BcryptPasswordHasher
 from src.core.auth.infrastructure.services.pyjwt_token import PyJWTTokenService
-from src.core.shared.infrastructure.composite_uow import UserIdentityUnitOfWork
+from src.core.shared.infrastructure.composite_uow import UserIdentityUnitOfWork, CompositeListingReferenceUnitOfWork
 from src.core.users.infrastructure.user_unit_of_work import UserUnitOfWork
 
 
@@ -39,7 +43,10 @@ class DependencyContainer(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
         modules=[
             "src.api.users.user_routers",
-            "src.api.auth.auth_routers"
+            "src.api.auth.auth_routers",
+            "src.api.references.routers",
+            "src.api.shared.security",
+            "src.api.listings.routers"
         ]
     )
 
@@ -73,9 +80,20 @@ class DependencyContainer(containers.DeclarativeContainer):
         session_factory=async_session_maker
     )
 
+    reference_unit_of_work = providers.Factory(
+        ReferenceUnitOfWork,
+        session_factory=async_session_maker
+    )
+
+    composite_listing_reference_unit_of_work = providers.Factory(
+        CompositeListingReferenceUnitOfWork,
+        session_factory=async_session_maker
+    )
+
     password_hasher = providers.Singleton(BcryptPasswordHasher)
     phone_normalizer = providers.Singleton(PhoneNormalizer)
     console_email_sender = providers.Singleton(ConsoleEmailSender)
+    form_builder = providers.Factory(ListingFormBuilderService)
 
     sendgrid_email_sender = providers.Singleton(
         SendGridEmailSender,
@@ -195,4 +213,22 @@ class DependencyContainer(containers.DeclarativeContainer):
         unit_of_work=identity_unit_of_work,
         token_service=token_service,
         password_hasher=password_hasher
+    )
+
+    get_categories_tree_usecase = providers.Factory(
+        GetCategoriesTreeUseCase,
+        unit_of_work=reference_unit_of_work
+    )
+
+    listing_creation_schema_usecase = providers.Factory(
+        GetListingCreationSchemaUseCase,
+        unit_of_work=composite_listing_reference_unit_of_work,
+        token_service=token_service,
+        form_builder=form_builder
+    )
+
+    create_listing_usecase = providers.Factory(
+        CreateListingUseCase,
+        unit_of_work=composite_listing_reference_unit_of_work,
+
     )
