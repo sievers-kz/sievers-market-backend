@@ -56,7 +56,6 @@ class ListingMediaMapper:
             listing_id=orm_model.listing_id,
             media_url=orm_model.media_url,
             mime_type=orm_model.mime_type,
-            is_main=orm_model.is_main,
             file_size=orm_model.file_size,
             position=orm_model.position,
             uploaded_at=orm_model.uploaded_at
@@ -69,7 +68,6 @@ class ListingMediaMapper:
             listing_id=domain_model.listing_id,
             media_url=domain_model.media_url,
             mime_type=domain_model.mime_type,
-            is_main=domain_model.is_main,
             file_size=domain_model.file_size,
             position=domain_model.position,
             uploaded_at=domain_model.uploaded_at

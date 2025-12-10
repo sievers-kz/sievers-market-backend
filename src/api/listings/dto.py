@@ -62,7 +62,6 @@ class CreateListingDTO(BaseModel):
 class CreateListingMediaDTO(BaseModel):
     media_url: str
     mime_type: MimeTypeEnum
-    is_main: bool
     file_size: int
     position: int
 
@@ -82,3 +81,80 @@ class CreateExtraSpecsDTO(BaseModel):
     key: str
     value: Any
     unit: str | None
+
+
+class InitialListingMediaDTO(BaseModel):
+    id: UUID
+    media_url: str
+    mime_type: MimeTypeEnum
+    file_size: int
+    position: int
+
+
+class InitialExtraSpecsDTO(BaseModel):
+    key: str
+    value: Any
+    unit: str | None
+
+
+class InitialMachineryDTO(BaseModel):
+    subcategory_id: UUID
+    manufacturer_id: UUID
+    manufacturer_country_id: UUID
+    color_id: Optional[UUID] = None
+    model: str
+    year_of_issue: int
+    condition: MachineryConditionEnum
+    extra_specs: List[InitialExtraSpecsDTO]
+
+
+class InitialListingDataDTO(BaseModel):
+    roubric_id: UUID
+    region_id: UUID
+    title: str
+    price: int
+    currency: ListingCurrencyEnum
+    description: Optional[str]
+    media: List[InitialListingMediaDTO]
+    machinery: "InitialMachineryDTO"
+
+
+class UpdateListingFormSchemaDTO(BaseModel):
+    listing_id: UUID
+    form_schema: List[FieldFormGroupDTO]
+    initial_listing_data: InitialListingDataDTO
+    references: AllReferencesDTO
+
+
+class UpdateListingMediaDTO(BaseModel):
+    media_url: str
+    mime_type: MimeTypeEnum
+    file_size: int
+
+
+class UpdateExtraSpecsDTO(BaseModel):
+    key: str
+    value: Any
+    unit: str | None
+
+
+class UpdateMachineryDTO(BaseModel):
+    subcategory_id: UUID
+    manufacturer_id: UUID
+    manufacturer_country_id: UUID
+    color_id: UUID
+    model: str
+    year_of_issue: int
+    condition: MachineryConditionEnum
+    extra_specs: List["UpdateExtraSpecsDTO"]
+
+
+class UpdateListingDTO(BaseModel):
+    roubric_id: UUID
+    region_id: UUID
+    title: str
+    price: int
+    currency: str
+    description: str
+    media: List[UpdateListingMediaDTO]
+    machinery: UpdateMachineryDTO
