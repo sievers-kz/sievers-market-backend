@@ -37,7 +37,6 @@ class _ListingMediaFactory:
                 listing_id=listing_id,
                 media_url=media.media_url,
                 mime_type=media.mime_type,
-                is_main=media.is_main,
                 file_size=media.file_size,
                 position=media.position,
                 uploaded_at=datetime.utcnow()

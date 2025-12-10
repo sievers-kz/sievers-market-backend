@@ -118,12 +118,6 @@ class ListingMedia(BaseModel):
         nullable=False,
     )
 
-    is_main: Mapped[bool] = mapped_column(
-        Boolean,
-        server_default="false",
-        default=False
-    )
-
     file_size: Mapped[int] = mapped_column(
         Integer,
         nullable=False
@@ -146,12 +140,6 @@ class ListingMedia(BaseModel):
     )
 
     __table_args__ = (
-        Index(
-            "uq_listing_media_one_main",
-            "listing_id",
-            unique=True,
-            postgresql_where=text("is_main = true")  # ← Оберни в text()
-        ),
+        UniqueConstraint("listing_id", "position", name="uq_listing_media_position"),
         Index("ix_listing_media_listing_id", "listing_id"),
-        Index("ix_listing_media_listing_position", "listing_id", "position")
     )

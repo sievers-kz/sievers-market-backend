@@ -4,10 +4,11 @@ from uuid import UUID
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Security
 
-from src.api.listings.dto import CreateListingDTO
+from src.api.listings.dto import CreateListingDTO, UpdateListingDTO
 from src.api.shared.security import get_current_user
 from src.configuration.dependencies.depends import DependencyContainer
-from src.core.listings.application.usecases import GetListingCreationSchemaUseCase, CreateListingUseCase
+from src.core.listings.application.usecases import GetListingCreationSchemaUseCase, CreateListingUseCase, \
+    UpdateListingSchemaUseCase, UpdateListingUseCase
 from src.core.users.domain.entities import User
 
 listings = APIRouter(prefix="/api/v1/listings", tags=["Listings"])
@@ -46,3 +47,39 @@ async def create_new_listing(
 ):
     await create_listing_usecase.execute(listing_dto, current_user.id)
     return {"message": "Ваше объявление создано"}
+
+
+@listings.get("/update/schema/{listing_id}")
+@inject
+async def get_listing_update_schema(
+    listing_id: UUID,
+    update_listing_schema_usecase: Annotated[
+        UpdateListingSchemaUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.update_listing_schema_usecase
+            ]
+        )
+    ],
+    current_user: User = Security(get_current_user)
+):
+    return await update_listing_schema_usecase.execute(listing_id)
+
+
+@listings.patch("/update/listing/{listing_id}")
+@inject
+async def update_current_listing(
+    update_listing_dto: UpdateListingDTO,
+    listing_id: UUID,
+    update_listing_usecase: Annotated[
+        UpdateListingUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.update_listing_usecase
+            ]
+        )
+    ],
+    current_user: User = Security(get_current_user)
+):
+    await update_listing_usecase.execute(update_listing_dto, listing_id)
+    return {"message": "Объявление успешно изменено"}
