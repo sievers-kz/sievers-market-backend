@@ -53,6 +53,11 @@ class Listing(AggregateRoot):
     def draft(self):
         self.status = ListingStatusEnum.DRAFT
 
+    def archive(self):
+        if self.status == ListingStatusEnum.ARCHIVED:
+            raise ValueError("Объявление уже добавлено в архив")
+        self.status = ListingStatusEnum.ARCHIVED
+
     def update(self, raw_update_data: dict):
         self.region_id = raw_update_data["region_id"]
         self.title = raw_update_data["title"]

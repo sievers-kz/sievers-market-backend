@@ -9,7 +9,7 @@ from src.api.shared.security import get_current_user
 from src.configuration.dependencies.depends import DependencyContainer
 from src.core.listings.application.usecases import GetListingCreationSchemaUseCase, CreateListingUseCase, \
     UpdateListingSchemaUseCase, UpdateListingUseCase, GetUserListingsUseCase, CreateDraftListingUseCase, \
-    ActivateListingUseCase, DeactivateListingUseCase
+    ActivateListingUseCase, DeactivateListingUseCase, ArchiveListingUseCase
 from src.core.listings.domain.enums import ListingStatusEnum
 from src.core.users.domain.entities import User
 
@@ -156,3 +156,21 @@ async def deactivate_listing(
 ):
     await deactivate_listing_usecase.execute(listing_id)
     return {"message": "Ваше объявление деактивировано"}
+
+
+@listings.patch("/archive/{listing_id}")
+@inject
+async def archive_listing(
+    listing_id: UUID,
+    archive_listing_usecase: Annotated[
+        ArchiveListingUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.archive_listing_usecase
+            ]
+        )
+    ],
+    current_user: User = Security(get_current_user)
+):
+    await archive_listing_usecase.execute(listing_id)
+    return {"message": "Ваше объявление добавлено в архив"}
