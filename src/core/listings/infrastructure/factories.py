@@ -1,17 +1,23 @@
 from datetime import datetime
 import uuid
 
-from src.api.listings.dto import CreateListingDTO, CreateListingMediaDTO, CreateMachineryDTO
+from src.api.listings.dto import (
+    CreateActiveListingDTO,
+    CreateListingMediaDTO,
+    CreateMachineryDTO,
+    CreateDraftListingDTO,
+    CreateDraftListingMediaDTO,
+    CreateDraftMachineryDTO
+)
 from src.core.listings.domain.entities import Listing, ListingMedia, Machinery
-from src.core.listings.domain.enums import ListingStatusEnum
 
 
 class ListingFactory:
     @staticmethod
-    def create(listing: CreateListingDTO, user_id: uuid.UUID) -> Listing:
+    def create(listing: CreateActiveListingDTO | CreateDraftListingDTO, user_id: uuid.UUID) -> Listing:
         listing_id = uuid.uuid4()
-        media = _ListingMediaFactory.create(listing.media, listing_id)
-        machinery = _MachineryFactory.create(listing.machinery, listing_id)
+        media = (_ListingMediaFactory.create(listing.media, listing_id) if listing.media else [])
+        machinery = (_MachineryFactory.create(listing.machinery, listing_id) if listing.machinery else None)
 
         return Listing(
             id=listing_id,
@@ -22,7 +28,7 @@ class ListingFactory:
             price=listing.price,
             currency=listing.currency,
             description=listing.description,
-            status=ListingStatusEnum.ACTIVE,
+            status=None,
             media=media,
             machinery=machinery,
             updated_at=datetime.utcnow()
@@ -31,7 +37,10 @@ class ListingFactory:
 
 class _ListingMediaFactory:
     @staticmethod
-    def create(listing_media: list[CreateListingMediaDTO], listing_id: uuid.UUID) -> ListingMedia:
+    def create(
+        listing_media: list[CreateListingMediaDTO | CreateDraftListingMediaDTO],
+        listing_id: uuid.UUID
+    ) -> ListingMedia:
         return [
             ListingMedia(
                 id=uuid.uuid4(),
@@ -47,8 +56,8 @@ class _ListingMediaFactory:
 
 class _MachineryFactory:
     @staticmethod
-    def create(machinery: CreateMachineryDTO, listing_id: uuid.UUID) -> Machinery:
-        extra_specs_json = [spec.dict() for spec in machinery.extra_specs]
+    def create(machinery: CreateMachineryDTO | CreateDraftMachineryDTO, listing_id: uuid.UUID) -> Machinery:
+        extra_specs_json = [spec.dict() for spec in machinery.extra_specs] if machinery.extra_specs else []
         return Machinery(
             id=uuid.uuid4(),
             listing_id=listing_id,

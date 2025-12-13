@@ -38,21 +38,24 @@ class Machinery(BaseModel):
         ForeignKey(
             "machinery_subcategories.id",
             ondelete="CASCADE"
-        )
+        ),
+        nullable=False
     )
 
     manufacturer_id: Mapped[UUID] = mapped_column(
         ForeignKey(
             "machinery_manufacturers.id",
             ondelete="CASCADE"
-        )
+        ),
+        nullable=True
     )
 
     manufacturer_country_id: Mapped[UUID] = mapped_column(
         ForeignKey(
             "machinery_manufacturer_countries.id",
             ondelete="CASCADE"
-        )
+        ),
+        nullable=True
     )
 
     color_id: Mapped[UUID | None] = mapped_column(
@@ -65,23 +68,23 @@ class Machinery(BaseModel):
 
     model: Mapped[str] = mapped_column(
         String(100),
-        nullable=False
+        nullable=True
     )
 
     year_of_issue: Mapped[int] = mapped_column(
         Integer,
-        nullable=False
+        nullable=True
     )
 
     condition: Mapped[MachineryConditionEnum] = mapped_column(
         Enum(MachineryConditionEnum),
-        nullable=False
+        nullable=True
     )
 
     extra_specs: Mapped[dict] = mapped_column(
         JSONB,
-        nullable=False,
-        default={}
+        nullable=True,
+        default=dict
     )
 
     listing: Mapped["Listing"] = relationship(

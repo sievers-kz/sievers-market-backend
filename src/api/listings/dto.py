@@ -49,7 +49,7 @@ class FormSchemaResponse(BaseModel):
     references: AllReferencesDTO
 
 
-class CreateListingDTO(BaseModel):
+class CreateActiveListingDTO(BaseModel):
     roubric_id: UUID
     region_id: UUID
     title: str
@@ -169,3 +169,37 @@ class UserListingsQueryDTO(BaseModel):
     condition: MachineryConditionEnum | None
     subcategory: str
     updated_at: datetime
+
+
+class CreateDraftListingDTO(BaseModel):
+    roubric_id: UUID
+    region_id: UUID | None
+    title: str | None
+    price: int | None
+    currency: ListingCurrencyEnum | None
+    description: Optional[str] | None
+    media: list["CreateDraftListingMediaDTO"] | None
+    machinery: Optional["CreateDraftMachineryDTO"]
+
+
+class CreateDraftListingMediaDTO(BaseModel):
+    media_url: str | None
+    mime_type: MimeTypeEnum | None
+    file_size: int | None
+
+
+class CreateDraftMachineryDTO(BaseModel):
+    subcategory_id: UUID | None
+    manufacturer_id: UUID | None
+    manufacturer_country_id: UUID | None
+    color_id: Optional[UUID] = None
+    model: str | None
+    year_of_issue: int | None
+    condition: MachineryConditionEnum | None
+    extra_specs: list["CreateDraftExtraSpecsDTO"] | None
+
+
+class CreateDraftExtraSpecsDTO(BaseModel):
+    key: str | None
+    value: Any | None
+    unit: str | None

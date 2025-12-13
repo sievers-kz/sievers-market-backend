@@ -23,36 +23,39 @@ class Listing(BaseModel):
         ForeignKey(
             "users.id",
             ondelete="CASCADE"
-        )
+        ),
+        nullable=False
     )
 
     roubric_id: Mapped[UUID] = mapped_column(
         ForeignKey(
             "roubrics.id",
             ondelete="CASCADE"
-        )
+        ),
+        nullable=False
     )
 
     region_id: Mapped[UUID] = mapped_column(
         ForeignKey(
             "regions.id",
             ondelete="CASCADE"
-        )
+        ),
+        nullable=True
     )
 
     title: Mapped[str] = mapped_column(
         String(100),
-        nullable=False
+        nullable=True
     )
 
     price: Mapped[int] = mapped_column(
         Integer,
-        nullable=False
+        nullable=True
     )
 
     currency: Mapped[ListingCurrencyEnum] = mapped_column(
         Enum(ListingCurrencyEnum),
-        nullable=False,
+        nullable=True,
         default=ListingCurrencyEnum.KZT.value
     )
 
@@ -110,17 +113,17 @@ class ListingMedia(BaseModel):
 
     media_url: Mapped[str] = mapped_column(
         Text,
-        nullable=False
+        nullable=True
     )
 
     mime_type: Mapped[MimeTypeEnum] = mapped_column(
         Enum(MimeTypeEnum),
-        nullable=False,
+        nullable=True,
     )
 
     file_size: Mapped[int] = mapped_column(
         Integer,
-        nullable=False
+        nullable=True
     )
 
     position: Mapped[int] = mapped_column(

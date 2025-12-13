@@ -92,7 +92,6 @@ class MachineryMapper:
             year_of_issue=orm_model.year_of_issue,
             condition=orm_model.condition,
             extra_specs=orm_model.extra_specs,
-            subcategory=orm_model.subcategory
         )
 
     @staticmethod
