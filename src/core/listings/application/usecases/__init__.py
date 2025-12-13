@@ -4,6 +4,8 @@ from .update_listing_schema import UpdateListingSchemaUseCase
 from .update_listing import UpdateListingUseCase
 from .get_user_listings import GetUserListingsUseCase
 from .create_draft_listing import CreateDraftListingUseCase
+from .activate_listing import ActivateListingUseCase
+from .deactivate_listing import DeactivateListingUseCase
 
 
 __all__ = [
@@ -12,5 +14,7 @@ __all__ = [
     "UpdateListingSchemaUseCase",
     "UpdateListingUseCase",
     "GetUserListingsUseCase",
-    "CreateDraftListingUseCase"
+    "CreateDraftListingUseCase",
+    "ActivateListingUseCase",
+    "DeactivateListingUseCase"
 ]
