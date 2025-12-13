@@ -25,7 +25,7 @@ class Listing(AggregateRoot):
     machinery: Machinery | None
     updated_at: datetime
 
-    def publish(self):
+    def can_be_published(self):
         if not self.title:
             raise ValueError("Заголовок обязателен")
         if not self.region_id:
@@ -34,13 +34,21 @@ class Listing(AggregateRoot):
             raise ValueError("Цена должна быть указана")
         if not self.media:
             raise ValueError("Добавьте минимум одну фотографию")
-
         self.machinery.validate_required()
 
-        self.activate()
+    def publish(self):
+        if self.status == ListingStatusEnum.ACTIVE:
+            raise ValueError("Объявление уже активировано")
 
-    def activate(self):
+        self.can_be_published()
         self.status = ListingStatusEnum.ACTIVE
+
+    def deactivate(self):
+        if self.status != ListingStatusEnum.ACTIVE:
+            if self.status == ListingStatusEnum.INACTIVE:
+                raise ValueError("Объявление уже деактивировано")
+            raise ValueError("Деактивировать можно только активные объявления")
+        self.status = ListingStatusEnum.INACTIVE
 
     def draft(self):
         self.status = ListingStatusEnum.DRAFT

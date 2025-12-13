@@ -8,7 +8,8 @@ from src.api.listings.dto import CreateActiveListingDTO, UpdateListingDTO, Creat
 from src.api.shared.security import get_current_user
 from src.configuration.dependencies.depends import DependencyContainer
 from src.core.listings.application.usecases import GetListingCreationSchemaUseCase, CreateListingUseCase, \
-    UpdateListingSchemaUseCase, UpdateListingUseCase, GetUserListingsUseCase, CreateDraftListingUseCase
+    UpdateListingSchemaUseCase, UpdateListingUseCase, GetUserListingsUseCase, CreateDraftListingUseCase, \
+    ActivateListingUseCase, DeactivateListingUseCase
 from src.core.listings.domain.enums import ListingStatusEnum
 from src.core.users.domain.entities import User
 
@@ -119,3 +120,39 @@ async def create_draft_listing(
 ):
     await create_draft_listing_usecase.execute(draft_dto, current_user.id)
     return {"message": "Объявление сохранено в черновик"}
+
+
+@listings.patch("/activate/{listing_id}")
+@inject
+async def activate_listing(
+    listing_id: UUID,
+    activate_listing_usecase: Annotated[
+        ActivateListingUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.activate_listing_usecase
+            ]
+        )
+    ],
+    current_user: User = Security(get_current_user)
+):
+    await activate_listing_usecase.execute(listing_id)
+    return {"message": "Ваше объявление активировано"}
+
+
+@listings.patch("/deactivate/{listing_id}")
+@inject
+async def deactivate_listing(
+    listing_id: UUID,
+    deactivate_listing_usecase: Annotated[
+        DeactivateListingUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.deactivate_listing_usecase
+            ]
+        )
+    ],
+    current_user: User = Security(get_current_user)
+):
+    await deactivate_listing_usecase.execute(listing_id)
+    return {"message": "Ваше объявление деактивировано"}
