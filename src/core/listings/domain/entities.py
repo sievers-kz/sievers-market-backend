@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
+from src.core.listings.domain.enums import ListingStatusEnum
 from src.core.shared.domain.entities import AggregateRoot, Entity
 
 
@@ -14,15 +15,35 @@ class Listing(AggregateRoot):
     id: UUID
     author_id: UUID
     roubric_id: UUID
-    region_id: UUID
-    title: str
-    price: int
-    currency: str
-    description: str
+    region_id: UUID | None
+    title: str | None
+    price: int | None
+    currency: str | None
+    description: str | None
     status: str
-    media: List[ListingMedia]
-    machinery: Machinery
+    media: List[ListingMedia] | None
+    machinery: Machinery | None
     updated_at: datetime
+
+    def publish(self):
+        if not self.title:
+            raise ValueError("Заголовок обязателен")
+        if not self.region_id:
+            raise ValueError("Укажите местоположение")
+        if not self.price or self.price == 0:
+            raise ValueError("Цена должна быть указана")
+        if not self.media:
+            raise ValueError("Добавьте минимум одну фотографию")
+
+        self.machinery.validate_required()
+
+        self.activate()
+
+    def activate(self):
+        self.status = ListingStatusEnum.ACTIVE
+
+    def draft(self):
+        self.status = ListingStatusEnum.DRAFT
 
     def update(self, raw_update_data: dict):
         self.region_id = raw_update_data["region_id"]
@@ -56,9 +77,9 @@ class Listing(AggregateRoot):
 class ListingMedia(Entity):
     id: UUID
     listing_id: UUID
-    media_url: str
-    mime_type: str
-    file_size: int
+    media_url: str | None
+    mime_type: str | None
+    file_size: int | None
     position: int
     uploaded_at: datetime
 
@@ -74,14 +95,13 @@ class Machinery(Entity):
     id: UUID
     listing_id: UUID
     subcategory_id: UUID
-    manufacturer_id: UUID
-    manufacturer_country_id: UUID
-    color_id: UUID
-    model: str
-    year_of_issue: int
-    condition: str
-    extra_specs: dict
-    subcategory: dict | None = None
+    manufacturer_id: UUID | None
+    manufacturer_country_id: UUID | None
+    color_id: UUID | None
+    model: str | None
+    year_of_issue: int | None
+    condition: str | None
+    extra_specs: dict | None
 
     def update(self, raw_machinery: dict):
         self.subcategory_id = raw_machinery["subcategory_id"]
@@ -104,3 +124,16 @@ class Machinery(Entity):
             result.append(item)
         return result
 
+    def validate_required(self):
+        if not self.subcategory_id:
+            raise ValueError("Подкатегория обязательна")
+        if not self.manufacturer_id:
+            raise ValueError("Нужно указать производителя")
+        if not self.manufacturer_country_id:
+            raise ValueError("Укажите страну-производителя")
+        if not self.model:
+            raise ValueError("Укажите модель")
+        if not self.year_of_issue:
+            raise ValueError("Укажите год выпуска")
+        if not self.condition:
+            raise ValueError("Укажите состояние техники")

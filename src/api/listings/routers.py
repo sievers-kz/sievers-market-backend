@@ -4,11 +4,11 @@ from uuid import UUID
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Security
 
-from src.api.listings.dto import CreateListingDTO, UpdateListingDTO
+from src.api.listings.dto import CreateActiveListingDTO, UpdateListingDTO, CreateDraftListingDTO
 from src.api.shared.security import get_current_user
 from src.configuration.dependencies.depends import DependencyContainer
 from src.core.listings.application.usecases import GetListingCreationSchemaUseCase, CreateListingUseCase, \
-    UpdateListingSchemaUseCase, UpdateListingUseCase, GetUserListingsUseCase
+    UpdateListingSchemaUseCase, UpdateListingUseCase, GetUserListingsUseCase, CreateDraftListingUseCase
 from src.core.listings.domain.enums import ListingStatusEnum
 from src.core.users.domain.entities import User
 
@@ -35,7 +35,7 @@ async def get_listing_creation_schema(
 @listings.post("/create/new")
 @inject
 async def create_new_listing(
-    listing_dto: CreateListingDTO,
+    listing_dto: CreateActiveListingDTO,
     create_listing_usecase: Annotated[
         CreateListingUseCase,
         Depends(
@@ -101,3 +101,21 @@ async def get_user_listings(
     current_user: User = Security(get_current_user)
 ):
     return await get_user_listings_usecase.execute(status, current_user.id)
+
+
+@listings.post("/create/draft")
+@inject
+async def create_draft_listing(
+    draft_dto: CreateDraftListingDTO,
+    create_draft_listing_usecase: Annotated[
+        CreateDraftListingUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.create_draft_listing_usecase
+            ]
+        )
+    ],
+    current_user: User = Security(get_current_user)
+):
+    await create_draft_listing_usecase.execute(draft_dto, current_user.id)
+    return {"message": "Объявление сохранено в черновик"}
