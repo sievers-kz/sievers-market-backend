@@ -8,7 +8,8 @@ from src.api.listings.dto import CreateListingDTO, UpdateListingDTO
 from src.api.shared.security import get_current_user
 from src.configuration.dependencies.depends import DependencyContainer
 from src.core.listings.application.usecases import GetListingCreationSchemaUseCase, CreateListingUseCase, \
-    UpdateListingSchemaUseCase, UpdateListingUseCase
+    UpdateListingSchemaUseCase, UpdateListingUseCase, GetUserListingsUseCase
+from src.core.listings.domain.enums import ListingStatusEnum
 from src.core.users.domain.entities import User
 
 listings = APIRouter(prefix="/api/v1/listings", tags=["Listings"])
@@ -83,3 +84,20 @@ async def update_current_listing(
 ):
     await update_listing_usecase.execute(update_listing_dto, listing_id)
     return {"message": "Объявление успешно изменено"}
+
+
+@listings.get("/me/listings/{status}")
+@inject
+async def get_user_listings(
+    status: ListingStatusEnum,
+    get_user_listings_usecase: Annotated[
+        GetUserListingsUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.get_user_listings_usecase
+            ]
+        )
+    ],
+    current_user: User = Security(get_current_user)
+):
+    return await get_user_listings_usecase.execute(status, current_user.id)

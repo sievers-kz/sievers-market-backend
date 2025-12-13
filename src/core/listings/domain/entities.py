@@ -22,6 +22,7 @@ class Listing(AggregateRoot):
     status: str
     media: List[ListingMedia]
     machinery: Machinery
+    updated_at: datetime
 
     def update(self, raw_update_data: dict):
         self.region_id = raw_update_data["region_id"]
@@ -80,6 +81,7 @@ class Machinery(Entity):
     year_of_issue: int
     condition: str
     extra_specs: dict
+    subcategory: dict | None = None
 
     def update(self, raw_machinery: dict):
         self.subcategory_id = raw_machinery["subcategory_id"]

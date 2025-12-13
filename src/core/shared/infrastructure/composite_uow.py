@@ -3,7 +3,7 @@ from typing import Callable
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.auth.infrastructure.auth_repository import UserIdentityRepository
-from src.core.listings.infrastructure.repository import ListingRepository
+from src.core.listings.infrastructure.repository import ListingRepository, ListingQueryService
 from src.core.references.infrastructure.repository import ReferenceRepository
 from src.core.shared.infrastructure.sql_alchemy_uow import SQLAlchemyUnitOfWork
 from src.core.users.infrastructure.user_repository import UserRepository
@@ -29,6 +29,10 @@ class CompositeListingReferenceUnitOfWork(SQLAlchemyUnitOfWork):
     @property
     def listing(self):
         return ListingRepository(self._session)
+
+    @property
+    def listing_query(self):
+        return ListingQueryService(self._session)
 
     @property
     def reference(self):
