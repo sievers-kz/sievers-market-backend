@@ -13,6 +13,7 @@ class ListingStatusEnum(Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
     ARCHIVED = "archived"
+    DELETED = "deleted"
 
 
 class MimeTypeEnum(Enum):
