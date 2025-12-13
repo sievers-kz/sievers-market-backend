@@ -51,5 +51,10 @@ class AbstractListingReferenceUnitOfWork(AbstractUnitOfWork):
 
     @property
     @abstractmethod
+    def listing_query(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
     def reference(self):
         raise NotImplementedError

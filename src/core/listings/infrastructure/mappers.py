@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from src.core.listings.domain.entities import (
     Listing as DomainListing,
     ListingMedia as DomainListingMedia,
@@ -25,7 +27,8 @@ class ListingMapper:
             description=orm_model.description,
             status=orm_model.status,
             media=media,
-            machinery=machinery
+            machinery=machinery,
+            updated_at=datetime.utcnow(),
         )
 
     @staticmethod
@@ -44,7 +47,8 @@ class ListingMapper:
             description=domain_model.description,
             status=domain_model.status,
             media=media,
-            machinery=machinery
+            machinery=machinery,
+            updated_at=domain_model.updated_at
         )
 
 
@@ -87,7 +91,8 @@ class MachineryMapper:
             model=orm_model.model,
             year_of_issue=orm_model.year_of_issue,
             condition=orm_model.condition,
-            extra_specs=orm_model.extra_specs
+            extra_specs=orm_model.extra_specs,
+            subcategory=orm_model.subcategory
         )
 
     @staticmethod

@@ -24,7 +24,8 @@ class ListingFactory:
             description=listing.description,
             status=ListingStatusEnum.ACTIVE,
             media=media,
-            machinery=machinery
+            machinery=machinery,
+            updated_at=datetime.utcnow()
         )
 
 
@@ -38,9 +39,9 @@ class _ListingMediaFactory:
                 media_url=media.media_url,
                 mime_type=media.mime_type,
                 file_size=media.file_size,
-                position=media.position,
+                position=position,
                 uploaded_at=datetime.utcnow()
-            ) for media in listing_media
+            ) for position, media in enumerate(listing_media)
         ]
 
 

@@ -1,11 +1,12 @@
 import enum
+from datetime import datetime
 from typing import Optional, Dict, List, Any
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 from src.api.references.dto import AllReferencesDTO
-from src.core.listings.domain.enums import ListingCurrencyEnum, MimeTypeEnum, MachineryConditionEnum
+from src.core.listings.domain.enums import ListingCurrencyEnum, MimeTypeEnum, MachineryConditionEnum, ListingStatusEnum
 
 
 class FieldTypeEnum(str, enum.Enum):
@@ -63,7 +64,6 @@ class CreateListingMediaDTO(BaseModel):
     media_url: str
     mime_type: MimeTypeEnum
     file_size: int
-    position: int
 
 
 class CreateMachineryDTO(BaseModel):
@@ -158,3 +158,14 @@ class UpdateListingDTO(BaseModel):
     description: str
     media: List[UpdateListingMediaDTO]
     machinery: UpdateMachineryDTO
+
+
+class UserListingsQueryDTO(BaseModel):
+    id: UUID
+    title: str | None
+    price: int | None
+    media: str | None
+    status: ListingStatusEnum
+    condition: MachineryConditionEnum | None
+    subcategory: str
+    updated_at: datetime

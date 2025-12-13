@@ -14,7 +14,7 @@ from src.core.auth.application.usecases import (
     ResetPasswordUseCase
 )
 from src.core.listings.application.usecases import GetListingCreationSchemaUseCase, CreateListingUseCase, \
-    UpdateListingSchemaUseCase, UpdateListingUseCase
+    UpdateListingSchemaUseCase, UpdateListingUseCase, GetUserListingsUseCase
 from src.core.listings.infrastructure.form_builder import ListingFormBuilderService
 from src.core.references.application.usecases.categories_tree import GetCategoriesTreeUseCase
 from src.core.references.infrastructure.reference_unit_of_work import ReferenceUnitOfWork
@@ -241,5 +241,10 @@ class DependencyContainer(containers.DeclarativeContainer):
 
     update_listing_usecase = providers.Factory(
         UpdateListingUseCase,
+        unit_of_work=composite_listing_reference_unit_of_work
+    )
+
+    get_user_listings_usecase = providers.Factory(
+        GetUserListingsUseCase,
         unit_of_work=composite_listing_reference_unit_of_work
     )
