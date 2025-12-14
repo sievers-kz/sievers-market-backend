@@ -7,6 +7,7 @@ from .create_draft_listing import CreateDraftListingUseCase
 from .activate_listing import ActivateListingUseCase
 from .deactivate_listing import DeactivateListingUseCase
 from .archive_listing import ArchiveListingUseCase
+from .delete_listing import DeleteListingUseCase
 
 
 __all__ = [
@@ -18,5 +19,6 @@ __all__ = [
     "CreateDraftListingUseCase",
     "ActivateListingUseCase",
     "DeactivateListingUseCase",
-    "ArchiveListingUseCase"
+    "ArchiveListingUseCase",
+    "DeleteListingUseCase"
 ]

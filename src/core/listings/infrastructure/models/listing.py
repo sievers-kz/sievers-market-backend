@@ -65,9 +65,11 @@ class Listing(BaseModel):
     )
 
     status: Mapped[ListingStatusEnum] = mapped_column(
-        Enum(ListingStatusEnum),
+        Enum(
+            ListingStatusEnum,
+            values_callable=lambda x: [e.value for e in x]
+        ),
         nullable=False,
-        default=ListingStatusEnum.DRAFT.value
     )
 
     author: Mapped["User"] = relationship(

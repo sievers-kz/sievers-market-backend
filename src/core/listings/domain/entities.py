@@ -58,6 +58,11 @@ class Listing(AggregateRoot):
             raise ValueError("Объявление уже добавлено в архив")
         self.status = ListingStatusEnum.ARCHIVED
 
+    def delete(self):
+        if self.status == ListingStatusEnum.DELETED:
+            raise ValueError("Объявление уже удалено")
+        self.status = ListingStatusEnum.DELETED
+
     def update(self, raw_update_data: dict):
         self.region_id = raw_update_data["region_id"]
         self.title = raw_update_data["title"]

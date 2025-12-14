@@ -7,11 +7,21 @@ from fastapi import APIRouter, Depends, Security
 from src.api.listings.dto import CreateActiveListingDTO, UpdateListingDTO, CreateDraftListingDTO
 from src.api.shared.security import get_current_user
 from src.configuration.dependencies.depends import DependencyContainer
-from src.core.listings.application.usecases import GetListingCreationSchemaUseCase, CreateListingUseCase, \
-    UpdateListingSchemaUseCase, UpdateListingUseCase, GetUserListingsUseCase, CreateDraftListingUseCase, \
-    ActivateListingUseCase, DeactivateListingUseCase, ArchiveListingUseCase
+from src.core.listings.application.usecases import (
+    GetListingCreationSchemaUseCase,
+    CreateListingUseCase,
+    UpdateListingSchemaUseCase,
+    UpdateListingUseCase,
+    GetUserListingsUseCase,
+    CreateDraftListingUseCase,
+    ActivateListingUseCase,
+    DeactivateListingUseCase,
+    ArchiveListingUseCase,
+    DeleteListingUseCase
+)
 from src.core.listings.domain.enums import ListingStatusEnum
 from src.core.users.domain.entities import User
+
 
 listings = APIRouter(prefix="/api/v1/listings", tags=["Listings"])
 
@@ -174,3 +184,20 @@ async def archive_listing(
 ):
     await archive_listing_usecase.execute(listing_id)
     return {"message": "Ваше объявление добавлено в архив"}
+
+
+@listings.patch("/delete/{listing_id}")
+@inject
+async def delete_listing(
+    listing_id: UUID,
+    delete_listing_usecase: Annotated[
+        DeleteListingUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.delete_listing_usecase
+            ]
+        )
+    ]
+):
+    await delete_listing_usecase.execute(listing_id)
+    return {"message": "Ваше объявление удалено"}
