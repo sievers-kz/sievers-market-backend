@@ -203,3 +203,77 @@ class CreateDraftExtraSpecsDTO(BaseModel):
     key: str | None
     value: Any | None
     unit: str | None
+
+
+class BaseFilters(BaseModel):
+    subcategories: list[dict]
+    price_range: dict
+
+
+class DynamicFilters(BaseModel):
+    key: str
+    label: str
+    type: str
+    unit: Optional[dict] = None
+    options: List["FilterOptions"] | None = None
+
+
+class FilterTypes(str, enum.Enum):
+    RANGE = "range"
+    SELECT = "select"
+
+
+class FilterOptions(BaseModel):
+    value: str
+    label: str
+
+
+class FilterRanges(BaseModel):
+    min_label: str
+    max_label: str
+
+
+class FilterFields(BaseModel):
+    name: str
+    label: str
+    type: FilterTypes
+    unit: Optional[dict] = None
+    placeholder: str | None = None
+    options: List[FilterOptions] | None = None
+    ranges: FilterRanges | None = None
+
+
+class FilterBlocks(BaseModel):
+    id: str
+    title: str
+    order: int
+    filters: List[FilterFields]
+
+
+class SidebarFilters(BaseModel):
+    base_filters: List[FilterBlocks]
+    dynamic_filters: List[FilterBlocks] | None
+
+
+class ListingCards(BaseModel):
+    id: UUID
+    title: str | None
+    price: int | None
+    media: str | None
+    status: ListingStatusEnum
+    condition: MachineryConditionEnum | None
+    subcategory: str
+    updated_at: datetime
+
+
+class PaginationInfo(BaseModel):
+    page: int
+    page_size: int
+    total: int
+    total_pages: int
+
+
+class PublicListingsPageResponse(BaseModel):
+    filters: SidebarFilters
+    listings: List[ListingCards]
+    pagination: PaginationInfo

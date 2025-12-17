@@ -56,5 +56,10 @@ class AbstractListingReferenceUnitOfWork(AbstractUnitOfWork):
 
     @property
     @abstractmethod
+    def filter_query(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
     def reference(self):
         raise NotImplementedError

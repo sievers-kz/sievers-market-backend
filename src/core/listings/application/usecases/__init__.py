@@ -8,6 +8,7 @@ from .activate_listing import ActivateListingUseCase
 from .deactivate_listing import DeactivateListingUseCase
 from .archive_listing import ArchiveListingUseCase
 from .delete_listing import DeleteListingUseCase
+from .get_public_listings import GetPublicListingsUseCase
 
 
 __all__ = [
@@ -20,5 +21,6 @@ __all__ = [
     "ActivateListingUseCase",
     "DeactivateListingUseCase",
     "ArchiveListingUseCase",
-    "DeleteListingUseCase"
+    "DeleteListingUseCase",
+    "GetPublicListingsUseCase"
 ]
