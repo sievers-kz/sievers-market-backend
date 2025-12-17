@@ -2,7 +2,7 @@ from typing import Annotated
 from uuid import UUID
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, Security
+from fastapi import APIRouter, Depends, Security, Query, Request
 
 from src.api.listings.dto import CreateActiveListingDTO, UpdateListingDTO, CreateDraftListingDTO
 from src.api.shared.security import get_current_user
@@ -17,7 +17,7 @@ from src.core.listings.application.usecases import (
     ActivateListingUseCase,
     DeactivateListingUseCase,
     ArchiveListingUseCase,
-    DeleteListingUseCase
+    DeleteListingUseCase, GetPublicListingsUseCase
 )
 from src.core.listings.domain.enums import ListingStatusEnum
 from src.core.users.domain.entities import User
@@ -201,3 +201,35 @@ async def delete_listing(
 ):
     await delete_listing_usecase.execute(listing_id)
     return {"message": "Ваше объявление удалено"}
+
+
+@listings.get("/public/")
+@inject
+async def get_public_listings(
+    get_public_listings_usecase: Annotated[
+        GetPublicListingsUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.get_public_listings_usecase
+            ]
+        )
+    ],
+
+    request: Request,
+    category_id: UUID = Query(description="ID категории"),
+    subcategory_id: UUID | None = Query(None, description="ID подкатегории"),
+    min_price: int | None = Query(None, description="Минимальная цена"),
+    max_price: int | None = Query(None, description="Максимальная цена"),
+    page: int = Query(1, ge=1, description="Номер страницы"),
+    page_size: int = Query(20, ge=1, description="Размер страницы")
+):
+    applied_dynamic_filters = dict(request.query_params)
+    return await get_public_listings_usecase.execute(
+        category_id=category_id,
+        subcategory_id=subcategory_id,
+        min_price=min_price,
+        max_price=max_price,
+        page=page,
+        page_size=page_size,
+        applied_dynamic_filters=applied_dynamic_filters
+    )

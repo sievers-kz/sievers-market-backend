@@ -264,6 +264,12 @@ class MachinerySubcategorySpecification(BaseModel):
         default=False
     )
 
+    is_filterable: Mapped[bool] = mapped_column(
+        Boolean,
+        server_default="false",
+        default=False
+    )
+
     subcategory: Mapped["MachinerySubcategory"] = relationship(
         back_populates="specifications"
     )
