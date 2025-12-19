@@ -17,7 +17,7 @@ from src.core.listings.application.usecases import (
     ActivateListingUseCase,
     DeactivateListingUseCase,
     ArchiveListingUseCase,
-    DeleteListingUseCase, GetPublicListingsUseCase
+    DeleteListingUseCase, GetPublicListingsUseCase, GetDetailPublicListingUseCase
 )
 from src.core.listings.domain.enums import ListingStatusEnum
 from src.core.users.domain.entities import User
@@ -233,3 +233,19 @@ async def get_public_listings(
         page_size=page_size,
         applied_dynamic_filters=applied_dynamic_filters
     )
+
+
+@listings.get("/detail/{listing_id}")
+@inject
+async def get_detail_public_listing(
+    listing_id: UUID,
+    get_detail_public_listing_usecase: Annotated[
+        GetDetailPublicListingUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.get_detail_public_listing_usecase
+            ]
+        )
+    ]
+):
+    return await get_detail_public_listing_usecase.execute(listing_id)

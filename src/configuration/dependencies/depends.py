@@ -16,7 +16,7 @@ from src.core.auth.application.usecases import (
 from src.core.listings.application.usecases import GetListingCreationSchemaUseCase, CreateListingUseCase, \
     UpdateListingSchemaUseCase, UpdateListingUseCase, GetUserListingsUseCase, CreateDraftListingUseCase, \
     ActivateListingUseCase, DeactivateListingUseCase, ArchiveListingUseCase, DeleteListingUseCase, \
-    GetPublicListingsUseCase
+    GetPublicListingsUseCase, GetDetailPublicListingUseCase
 from src.core.listings.infrastructure.filter_builder import FilterBuilderService
 from src.core.listings.infrastructure.form_builder import ListingFormBuilderService
 from src.core.references.application.usecases.categories_tree import GetCategoriesTreeUseCase
@@ -281,5 +281,10 @@ class DependencyContainer(containers.DeclarativeContainer):
     get_public_listings_usecase = providers.Factory(
         GetPublicListingsUseCase,
         filter_builder=filter_builder,
+        unit_of_work=composite_listing_reference_unit_of_work
+    )
+
+    get_detail_public_listing_usecase = providers.Factory(
+        GetDetailPublicListingUseCase,
         unit_of_work=composite_listing_reference_unit_of_work
     )
