@@ -6,7 +6,7 @@ from sqlalchemy import select, delete, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
-from src.api.listings.dto import UserListingsQueryDTO, BaseFilters, DynamicFilters, ListingCards
+from src.api.listings.dto import UserListingsQueryDTO, BaseFilters, DynamicFilters, ListingCards, DetailListingResponse
 from src.api.references.dto import SpecificationDTO
 from src.core.listings.domain.enums import ListingStatusEnum
 from src.core.listings.infrastructure.mappers import ListingMapper
@@ -70,6 +70,31 @@ class ListingQueryService:
         self.listing_media = ORMListingMedia
         self.machinery = ORMMachinery
         self.subcategory = ORMSubcategory
+
+    async def get_detail_listing_by_id(self, listing_id: UUID):
+        statement = (
+            select(self.listing)
+            .options(
+                joinedload(self.listing.author),
+                joinedload(self.listing.region),
+                selectinload(self.listing.media),
+                joinedload(self.listing.machinery)
+                .options(
+                    joinedload(self.machinery.subcategory),
+                    joinedload(self.machinery.manufacturer),
+                    joinedload(self.machinery.manufacturer_country),
+                    joinedload(self.machinery.color)
+                ),
+            ).where(
+                self.listing.id == listing_id,
+                self.listing.status == ListingStatusEnum.ACTIVE
+            )
+        )
+
+        result = await self._session.execute(statement)
+        listing = result.unique().scalar_one_or_none()
+
+        return DetailListingResponse.model_validate(listing, from_attributes=True)
 
     async def get_filtered_listings(
         self,

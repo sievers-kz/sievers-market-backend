@@ -137,7 +137,8 @@ class Machinery(Entity):
             item = {
                 "key": spec["key"],
                 "value": spec["value"],
-                "unit": spec.get("unit")
+                "unit": spec.get("unit"),
+                "label": spec.get("label")
             }
             result.append(item)
         return result

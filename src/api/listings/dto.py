@@ -5,7 +5,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from src.api.references.dto import AllReferencesDTO
+from src.api.references.dto import AllReferencesDTO, SubcategoryResponse, RegionDTO, ManufacturerDTO, \
+    ManufactureCountryDTO, ColorDTO
 from src.core.listings.domain.enums import ListingCurrencyEnum, MimeTypeEnum, MachineryConditionEnum, ListingStatusEnum
 
 
@@ -81,6 +82,7 @@ class CreateExtraSpecsDTO(BaseModel):
     key: str
     value: Any
     unit: str | None
+    label: str
 
 
 class InitialListingMediaDTO(BaseModel):
@@ -95,6 +97,7 @@ class InitialExtraSpecsDTO(BaseModel):
     key: str
     value: Any
     unit: str | None
+    label: str
 
 
 class InitialMachineryDTO(BaseModel):
@@ -136,6 +139,7 @@ class UpdateExtraSpecsDTO(BaseModel):
     key: str
     value: Any
     unit: str | None
+    label: str
 
 
 class UpdateMachineryDTO(BaseModel):
@@ -203,6 +207,7 @@ class CreateDraftExtraSpecsDTO(BaseModel):
     key: str | None
     value: Any | None
     unit: str | None
+    label: str | None
 
 
 class BaseFilters(BaseModel):
@@ -277,3 +282,40 @@ class PublicListingsPageResponse(BaseModel):
     filters: SidebarFilters
     listings: List[ListingCards]
     pagination: PaginationInfo
+
+
+class ListingAuthorDTO(BaseModel):
+    id: UUID
+    role: str
+    email: str
+    phone: str
+
+
+class ListingMediaDTO(BaseModel):
+    id: UUID
+    media_url: str
+
+
+class ListingMachineryDTO(BaseModel):
+    id: UUID
+    model: str
+    year_of_issue: int
+    condition: MachineryConditionEnum
+    extra_specs: List[InitialExtraSpecsDTO]
+    subcategory: SubcategoryResponse
+    manufacturer: ManufacturerDTO
+    manufacturer_country: ManufactureCountryDTO
+    color: Optional[ColorDTO] = None
+
+
+class DetailListingResponse(BaseModel):
+    id: UUID
+    title: str
+    price: int
+    currency: ListingCurrencyEnum
+    description: str
+    status: ListingStatusEnum
+    author: ListingAuthorDTO
+    region: RegionDTO
+    media: List[ListingMediaDTO]
+    machinery: ListingMachineryDTO
