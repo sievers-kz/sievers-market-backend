@@ -10,6 +10,7 @@ from .archive_listing import ArchiveListingUseCase
 from .delete_listing import DeleteListingUseCase
 from .get_public_listings import GetPublicListingsUseCase
 from .get_detail_public_listing import GetDetailPublicListingUseCase
+from .search_listings import SearchListingsUseCase
 
 
 __all__ = [
@@ -24,5 +25,6 @@ __all__ = [
     "ArchiveListingUseCase",
     "DeleteListingUseCase",
     "GetPublicListingsUseCase",
-    "GetDetailPublicListingUseCase"
+    "GetDetailPublicListingUseCase",
+    "SearchListingsUseCase"
 ]
