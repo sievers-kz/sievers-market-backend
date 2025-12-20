@@ -17,7 +17,7 @@ from src.core.listings.application.usecases import (
     ActivateListingUseCase,
     DeactivateListingUseCase,
     ArchiveListingUseCase,
-    DeleteListingUseCase, GetPublicListingsUseCase, GetDetailPublicListingUseCase
+    DeleteListingUseCase, GetPublicListingsUseCase, GetDetailPublicListingUseCase, SearchListingsUseCase
 )
 from src.core.listings.domain.enums import ListingStatusEnum
 from src.core.users.domain.entities import User
@@ -249,3 +249,19 @@ async def get_detail_public_listing(
     ]
 ):
     return await get_detail_public_listing_usecase.execute(listing_id)
+
+
+@listings.get("/search")
+@inject
+async def search_listings(
+    search_listings_usecase: Annotated[
+        SearchListingsUseCase,
+        Depends(
+            Provide[
+                DependencyContainer.search_listings_usecase
+            ]
+        )
+    ],
+    query_string: str = Query(None, description="Поиск объявлений"),
+):
+    return await search_listings_usecase.execute(query_string)

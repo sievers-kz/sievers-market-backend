@@ -10,6 +10,7 @@ from src.api.users.user_routers import users_router
 from src.core.shared.application.exceptions.base_exception import BaseApplicationError
 from src.configuration.conf.settings import DatabaseConnectionSettings
 from src.configuration.dependencies.depends import DependencyContainer
+from src.core.listings.infrastructure.models.events import update_listing_search_index
 
 
 def create_fastapi_app() -> FastAPI:

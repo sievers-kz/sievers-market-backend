@@ -2,7 +2,7 @@ import asyncio
 from typing import List
 from uuid import UUID
 
-from sqlalchemy import select, delete, func, text
+from sqlalchemy import select, delete, func, text, or_, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -95,6 +95,47 @@ class ListingQueryService:
         listing = result.unique().scalar_one_or_none()
 
         return DetailListingResponse.model_validate(listing, from_attributes=True)
+
+    async def search_listings(self, query_string: str):
+        q_lower = query_string.strip().lower()
+        words = q_lower.split()
+
+        search_query = " & ".join([f"{word}:*" for word in words])
+        ts_query = func.to_tsquery("russian", search_query)
+
+        statement = (
+            select(self.listing)
+            .options(
+                selectinload(self.listing.media),
+                selectinload(self.listing.machinery).selectinload(self.machinery.subcategory)
+            )
+            .where(
+                or_(
+                    self.listing.search_vector.op("@@")(ts_query),
+                    self.listing.search_content.op("%")(q_lower),
+                )
+            )
+            .order_by(
+                desc(func.ts_rank(self.listing.search_vector, ts_query)),
+                desc(func.similarity(self.listing.search_content, q_lower))
+            )
+        )
+
+        result = await self._session.execute(statement)
+        listings = result.scalars().all()
+
+        return [
+            ListingCards(
+                id=str(listing.id),
+                title=listing.title or "Без названия",
+                price=listing.price,
+                media=listing.media[0].media_url if listing.media else None,
+                status=listing.status,
+                condition=listing.machinery.condition,
+                subcategory=listing.machinery.subcategory.name,
+                updated_at=listing.updated_at
+            ) for listing in listings
+        ]
 
     async def get_filtered_listings(
         self,

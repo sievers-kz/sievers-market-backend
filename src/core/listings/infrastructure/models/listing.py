@@ -2,11 +2,14 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, String, Integer, Enum, Text, Boolean, DateTime, Index, UniqueConstraint, text
+from sqlalchemy import ForeignKey, String, Integer, Enum, Text, Boolean, DateTime, Index, UniqueConstraint, text, \
+    Computed
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from src.core.listings.domain.enums import ListingCurrencyEnum, ListingStatusEnum, MimeTypeEnum
+from src.core.listings.infrastructure.models.mixins import SearchMixin
 from src.core.shared.infrastructure.base_model import BaseModel
 
 if TYPE_CHECKING:
@@ -16,7 +19,7 @@ if TYPE_CHECKING:
     from src.core.listings.infrastructure.models.machinery import Machinery
 
 
-class Listing(BaseModel):
+class Listing(BaseModel, SearchMixin):
     __tablename__ = "listings"
 
     author_id: Mapped[UUID] = mapped_column(
