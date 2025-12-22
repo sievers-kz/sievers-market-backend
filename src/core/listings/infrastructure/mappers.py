@@ -5,6 +5,7 @@ from src.core.listings.domain.entities import (
     ListingMedia as DomainListingMedia,
     Machinery as DomainMachinery
 )
+from src.core.listings.domain.value_objects import Title, Price, Model, YearOfIssue
 
 from src.core.listings.infrastructure.models.listing import Listing as ORMListing, ListingMedia as ORMListingMedia
 from src.core.listings.infrastructure.models.machinery import Machinery as ORMMachinery
@@ -21,8 +22,8 @@ class ListingMapper:
             author_id=orm_model.author_id,
             roubric_id=orm_model.roubric_id,
             region_id=orm_model.region_id,
-            title=orm_model.title,
-            price=orm_model.price,
+            title=Title.from_raw(orm_model.title),
+            price=Price.from_raw(orm_model.price),
             currency=orm_model.currency,
             description=orm_model.description,
             status=orm_model.status,
@@ -88,8 +89,8 @@ class MachineryMapper:
             manufacturer_id=orm_model.manufacturer_id,
             manufacturer_country_id=orm_model.manufacturer_country_id,
             color_id=orm_model.color_id,
-            model=orm_model.model,
-            year_of_issue=orm_model.year_of_issue,
+            model=Model.from_raw(orm_model.model),
+            year_of_issue=YearOfIssue.from_raw(orm_model.year_of_issue),
             condition=orm_model.condition,
             extra_specs=orm_model.extra_specs,
         )

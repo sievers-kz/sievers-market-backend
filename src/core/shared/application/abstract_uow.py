@@ -43,23 +43,3 @@ class AbstractUserIdentityUnitOfWork(AbstractUnitOfWork):
         raise NotImplementedError
 
 
-class AbstractListingReferenceUnitOfWork(AbstractUnitOfWork):
-    @property
-    @abstractmethod
-    def listing(self):
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def listing_query(self):
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def filter_query(self):
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def reference(self):
-        raise NotImplementedError

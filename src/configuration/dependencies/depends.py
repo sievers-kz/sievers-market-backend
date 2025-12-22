@@ -19,8 +19,10 @@ from src.core.listings.application.usecases import GetListingCreationSchemaUseCa
     GetPublicListingsUseCase, GetDetailPublicListingUseCase, SearchListingsUseCase
 from src.core.listings.infrastructure.filter_builder import FilterBuilderService
 from src.core.listings.infrastructure.form_builder import ListingFormBuilderService
+from src.core.listings.infrastructure.listing_unit_of_work import ListingUnitOfWork
+from src.core.listings.infrastructure.query_services.listing_query_context import ListingQueryContext
 from src.core.references.application.usecases.categories_tree import GetCategoriesTreeUseCase
-from src.core.references.infrastructure.reference_unit_of_work import ReferenceUnitOfWork
+from src.core.references.infrastructure.queries.reference_query_context import ReferenceQueryContext
 
 from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormalizer
 
@@ -39,7 +41,7 @@ from src.core.auth.infrastructure.auth_unit_of_work import AuthUnitOfWork
 from src.core.shared.infrastructure.services.email_sender import ConsoleEmailSender, SendGridEmailSender
 from src.core.shared.infrastructure.services.password_hasher import BcryptPasswordHasher
 from src.core.auth.infrastructure.services.pyjwt_token import PyJWTTokenService
-from src.core.shared.infrastructure.composite_uow import UserIdentityUnitOfWork, CompositeListingReferenceUnitOfWork
+from src.core.shared.infrastructure.composite_uow import UserIdentityUnitOfWork
 from src.core.users.infrastructure.user_unit_of_work import UserUnitOfWork
 
 
@@ -79,18 +81,23 @@ class DependencyContainer(containers.DeclarativeContainer):
         session_factory=async_session_maker
     )
 
+    listing_unit_of_work = providers.Factory(
+        ListingUnitOfWork,
+        session_factory=async_session_maker
+    )
+
     user_identity_unit_of_work = providers.Factory(
         UserIdentityUnitOfWork,
         session_factory=async_session_maker
     )
 
-    reference_unit_of_work = providers.Factory(
-        ReferenceUnitOfWork,
+    reference_query_context = providers.Factory(
+        ReferenceQueryContext,
         session_factory=async_session_maker
     )
 
-    composite_listing_reference_unit_of_work = providers.Factory(
-        CompositeListingReferenceUnitOfWork,
+    listing_query_context = providers.Factory(
+        ListingQueryContext,
         session_factory=async_session_maker
     )
 
@@ -222,74 +229,75 @@ class DependencyContainer(containers.DeclarativeContainer):
 
     get_categories_tree_usecase = providers.Factory(
         GetCategoriesTreeUseCase,
-        unit_of_work=reference_unit_of_work
+        query_service=reference_query_context
     )
 
     listing_creation_schema_usecase = providers.Factory(
         GetListingCreationSchemaUseCase,
-        unit_of_work=composite_listing_reference_unit_of_work,
-        token_service=token_service,
+        query_service=reference_query_context,
         form_builder=form_builder
     )
 
     create_listing_usecase = providers.Factory(
         CreateListingUseCase,
-        unit_of_work=composite_listing_reference_unit_of_work,
+        unit_of_work=listing_unit_of_work,
+        query_service=reference_query_context
     )
 
     update_listing_schema_usecase = providers.Factory(
         UpdateListingSchemaUseCase,
-        unit_of_work=composite_listing_reference_unit_of_work,
+        listing_query_service=listing_query_context,
+        reference_query_service=reference_query_context,
         form_builder=form_builder
     )
 
     update_listing_usecase = providers.Factory(
         UpdateListingUseCase,
-        unit_of_work=composite_listing_reference_unit_of_work
+        unit_of_work=listing_unit_of_work,
     )
 
     get_user_listings_usecase = providers.Factory(
         GetUserListingsUseCase,
-        unit_of_work=composite_listing_reference_unit_of_work
+        query_service=listing_query_context
     )
 
     create_draft_listing_usecase = providers.Factory(
         CreateDraftListingUseCase,
-        unit_of_work=composite_listing_reference_unit_of_work
+        unit_of_work=listing_unit_of_work
     )
 
     activate_listing_usecase = providers.Factory(
         ActivateListingUseCase,
-        unit_of_work=composite_listing_reference_unit_of_work
+        unit_of_work=listing_unit_of_work
     )
 
     deactivate_listing_usecase = providers.Factory(
         DeactivateListingUseCase,
-        unit_of_work=composite_listing_reference_unit_of_work
+        unit_of_work=listing_unit_of_work
     )
 
     archive_listing_usecase = providers.Factory(
         ArchiveListingUseCase,
-        unit_of_work=composite_listing_reference_unit_of_work
+        unit_of_work=listing_unit_of_work
     )
 
     delete_listing_usecase = providers.Factory(
         DeleteListingUseCase,
-        unit_of_work=composite_listing_reference_unit_of_work
+        unit_of_work=listing_unit_of_work
     )
 
     get_public_listings_usecase = providers.Factory(
         GetPublicListingsUseCase,
         filter_builder=filter_builder,
-        unit_of_work=composite_listing_reference_unit_of_work
+        query_service=listing_query_context
     )
 
     get_detail_public_listing_usecase = providers.Factory(
         GetDetailPublicListingUseCase,
-        unit_of_work=composite_listing_reference_unit_of_work
+        query_service=listing_query_context
     )
 
     search_listings_usecase = providers.Factory(
         SearchListingsUseCase,
-        unit_of_work=composite_listing_reference_unit_of_work
+        query_service=listing_query_context
     )

@@ -10,6 +10,7 @@ from src.api.listings.dto import (
     CreateDraftMachineryDTO
 )
 from src.core.listings.domain.entities import Listing, ListingMedia, Machinery
+from src.core.listings.domain.value_objects import Title, Price, Model, YearOfIssue
 
 
 class ListingFactory:
@@ -24,8 +25,8 @@ class ListingFactory:
             author_id=user_id,
             roubric_id=listing.roubric_id,
             region_id=listing.region_id,
-            title=listing.title,
-            price=listing.price,
+            title=Title.from_raw(listing.title),
+            price=Price.from_raw(listing.price),
             currency=listing.currency,
             description=listing.description,
             status=None,
@@ -65,8 +66,8 @@ class _MachineryFactory:
             manufacturer_id=machinery.manufacturer_id,
             manufacturer_country_id=machinery.manufacturer_country_id,
             color_id=machinery.color_id,
-            model=machinery.model,
-            year_of_issue=machinery.year_of_issue,
+            model=Model.from_raw(machinery.model),
+            year_of_issue=YearOfIssue.from_raw(machinery.year_of_issue),
             condition=machinery.condition,
             extra_specs=extra_specs_json,
         )

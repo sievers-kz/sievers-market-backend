@@ -1,11 +1,11 @@
-from src.core.shared.application.abstract_uow import AbstractListingReferenceUnitOfWork
+from src.core.listings.application.abstract_listing_query_context import AbstractListingQueryContext
 
 
 class SearchListingsUseCase:
-    def __init__(self, unit_of_work: AbstractListingReferenceUnitOfWork):
-        self.unit_of_work = unit_of_work
+    def __init__(self, query_service: AbstractListingQueryContext):
+        self.query_service = query_service
 
     async def execute(self, query_string: str):
-        async with self.unit_of_work as uow:
-            listings = await uow.listing_query.search_listings(query_string)
+        async with self.query_service as query:
+            listings = await query.listing.search_listings(query_string)
             return listings
