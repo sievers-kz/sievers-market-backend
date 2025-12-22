@@ -1,10 +1,10 @@
 from uuid import UUID
 
-from src.core.shared.application.abstract_uow import AbstractListingReferenceUnitOfWork
+from src.core.listings.application.abstract_listing_unit_of_work import AbstractListingUnitOfWork
 
 
 class ArchiveListingUseCase:
-    def __init__(self, unit_of_work: AbstractListingReferenceUnitOfWork):
+    def __init__(self, unit_of_work: AbstractListingUnitOfWork):
         self.unit_of_work = unit_of_work
 
     async def execute(self, listing_id: UUID):

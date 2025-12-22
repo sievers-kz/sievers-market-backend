@@ -7,6 +7,7 @@ from typing import List
 from uuid import UUID
 
 from src.core.listings.domain.enums import ListingStatusEnum
+from src.core.listings.domain.value_objects import Title, Price, Model, YearOfIssue
 from src.core.shared.domain.entities import AggregateRoot, Entity
 
 
@@ -16,8 +17,8 @@ class Listing(AggregateRoot):
     author_id: UUID
     roubric_id: UUID
     region_id: UUID | None
-    title: str | None
-    price: int | None
+    title: Title | None
+    price: Price | None
     currency: str | None
     description: str | None
     status: str
@@ -65,8 +66,8 @@ class Listing(AggregateRoot):
 
     def update(self, raw_update_data: dict):
         self.region_id = raw_update_data["region_id"]
-        self.title = raw_update_data["title"]
-        self.price = raw_update_data["price"]
+        self.title = Title.from_raw(raw_update_data["title"])
+        self.price = Price.from_raw(raw_update_data["price"])
         self.currency = raw_update_data["currency"]
         self.description = raw_update_data["description"]
         self.update_media(raw_update_data["media"])
@@ -116,8 +117,8 @@ class Machinery(Entity):
     manufacturer_id: UUID | None
     manufacturer_country_id: UUID | None
     color_id: UUID | None
-    model: str | None
-    year_of_issue: int | None
+    model: Model | None
+    year_of_issue: YearOfIssue | None
     condition: str | None
     extra_specs: dict | None
 
@@ -126,8 +127,8 @@ class Machinery(Entity):
         self.manufacturer_id = raw_machinery["manufacturer_id"]
         self.manufacturer_country_id = raw_machinery["manufacturer_country_id"]
         self.color_id = raw_machinery["color_id"]
-        self.model = raw_machinery["model"]
-        self.year_of_issue = raw_machinery["year_of_issue"]
+        self.model = Model.from_raw(raw_machinery["model"])
+        self.year_of_issue = YearOfIssue.from_raw(raw_machinery["year_of_issue"])
         self.condition = raw_machinery["condition"]
         self.extra_specs = self.update_extra_specs(raw_machinery["extra_specs"])
 

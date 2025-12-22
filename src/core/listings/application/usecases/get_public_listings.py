@@ -1,13 +1,13 @@
 from uuid import UUID
 
 from src.api.listings.dto import PublicListingsPageResponse
+from src.core.listings.application.abstract_listing_query_context import AbstractListingQueryContext
 from src.core.listings.infrastructure.filter_builder import FilterBuilderService
-from src.core.shared.application.abstract_uow import AbstractListingReferenceUnitOfWork
 
 
 class GetPublicListingsUseCase:
-    def __init__(self, filter_builder: FilterBuilderService, unit_of_work: AbstractListingReferenceUnitOfWork):
-        self.unit_of_work = unit_of_work
+    def __init__(self, filter_builder: FilterBuilderService, query_service: AbstractListingQueryContext):
+        self.query_service = query_service
         self.filter_builder = filter_builder
 
     async def execute(
@@ -20,14 +20,14 @@ class GetPublicListingsUseCase:
         page_size: int,
         applied_dynamic_filters: dict | None
     ):
-        async with self.unit_of_work as uow:
-            base_filters = await uow.filter_query.get_base_filters(category_id)
+        async with self.query_service as query:
+            base_filters = await query.filter.get_base_filters(category_id)
             dynamic_filters = []
             if subcategory_id:
-                dynamic_filters = await uow.filter_query.get_dynamic_filters(subcategory_id)
+                dynamic_filters = await query.filter.get_dynamic_filters(subcategory_id)
             filters = self.filter_builder.build_filters(base_filters, dynamic_filters)
 
-            listings, total = await uow.listing_query.get_filtered_listings(
+            listings, total = await query.listing.get_filtered_listings(
                 category_id=category_id,
                 subcategory_id=subcategory_id,
                 min_price=min_price,

@@ -5,14 +5,14 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
-from src.api.references.dto import RoubricResponse, ManufacturerDTO, AllReferencesDTO, RegionDTO, ColorDTO, \
-    ManufactureCountryDTO, SpecificationDTO
-from src.core.references.infrastructure.models import Roubric, MachineryCategory, MachinerySubcategory, \
-    MachineryManufacturer, MachineryManufacturerCountry, Region, Color, MachinerySpecification, \
+from src.api.references.dto import RoubricResponse, ManufacturerDTO, ManufactureCountryDTO, RegionDTO, ColorDTO, \
+    AllReferencesDTO, SpecificationDTO
+from src.core.references.infrastructure.models import Roubric, MachinerySubcategory, MachineryManufacturer, \
+    MachineryCategory, MachineryManufacturerCountry, Region, Color, MachinerySpecification, \
     MachinerySubcategorySpecification
 
 
-class ReferenceRepository:
+class ReferenceQueryService:
     def __init__(self, session: AsyncSession):
         self._session = session
         self.roubric = Roubric
@@ -22,28 +22,6 @@ class ReferenceRepository:
         self.manufacture_country = MachineryManufacturerCountry
         self.region = Region
         self.color = Color
-        self.specification = MachinerySpecification
-        self.subcategory_specification = MachinerySubcategorySpecification
-
-    async def get_categories_tree(self):
-        statement = (
-            select(self.roubric)
-            .options(
-                selectinload(
-                    self.roubric.categories
-                ).selectinload(
-                    self.category.subcategories
-                )
-            )
-        )
-
-        result = await self._session.execute(statement)
-        tree = result.unique().scalars().first()
-
-        if not tree:
-            return None
-
-        return RoubricResponse.model_validate(tree, from_attributes=True)
 
     async def get_common_lookups(self):
         manufacturers_statement = select(self.manufacturer)
@@ -82,12 +60,46 @@ class ReferenceRepository:
             colors=colors
         )
 
+
+class CategoryQueryService:
+    def __init__(self, session: AsyncSession):
+        self._session = session
+        self.roubric = Roubric
+        self.category = MachineryCategory
+        self.subcategory = MachinerySubcategory
+
+    async def get_category_tree(self):
+        statement = (
+            select(self.roubric)
+            .options(
+                selectinload(
+                    self.roubric.categories
+                ).selectinload(
+                    self.category.subcategories
+                )
+            )
+        )
+
+        result = await self._session.execute(statement)
+        tree = result.unique().scalars().first()
+
+        if not tree:
+            return None
+
+        return RoubricResponse.model_validate(tree, from_attributes=True)
+
+
+class SpecificationQueryService:
+    def __init__(self, session: AsyncSession):
+        self._session = session
+        self.subcategory_specification = MachinerySubcategorySpecification
+
     async def get_subcategory_specifications(self, subcategory_id: UUID):
         statement = (
             select(self.subcategory_specification)
             .where(self.subcategory_specification.subcategory_id == subcategory_id)
             .options(
-                joinedload(self.subcategory_specification.specification, ),
+                joinedload(self.subcategory_specification.specification),
                 joinedload(self.subcategory_specification.unit)
             )
         )
@@ -95,9 +107,8 @@ class ReferenceRepository:
         result = await self._session.execute(statement)
         rows = result.scalars().all()
 
-        final_dto = []
-        for row in rows:
-            dto = SpecificationDTO(
+        return [
+            SpecificationDTO(
                 id=row.specification.id,
                 key=row.specification.key,
                 label=row.specification.label,
@@ -106,7 +117,5 @@ class ReferenceRepository:
                 position=row.specification.position,
                 is_required=row.is_required,
                 options=row.specification.options
-            )
-
-            final_dto.append(dto)
-        return final_dto
+            ) for row in rows
+        ]

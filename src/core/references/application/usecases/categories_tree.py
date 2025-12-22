@@ -1,13 +1,13 @@
 from src.api.references.dto import RoubricResponse
-from src.core.references.application.abstract_reference_uow import AbstractReferenceUnitOfWork
+from src.core.references.application.abstract_reference_query_context import AbstractReferenceQueryContext
 
 
 class GetCategoriesTreeUseCase:
-    def __init__(self, unit_of_work: AbstractReferenceUnitOfWork):
-        self.unit_of_work = unit_of_work
+    def __init__(self, query_service: AbstractReferenceQueryContext):
+        self.query_service = query_service
 
     async def execute(self):
-        async with self.unit_of_work as uow:
-            tree = await uow.reference.get_categories_tree()
+        async with self.query_service as query:
+            tree = await query.category.get_category_tree()
             return tree
 
