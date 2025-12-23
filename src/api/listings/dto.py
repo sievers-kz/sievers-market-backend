@@ -46,7 +46,7 @@ class FieldFormGroupDTO(BaseModel):
 class FormSchemaResponse(BaseModel):
     """Финальный ответ"""
     subcategory_id: UUID
-    schema: List[FieldFormGroupDTO]
+    form_schema: List[FieldFormGroupDTO]
     references: AllReferencesDTO
 
 

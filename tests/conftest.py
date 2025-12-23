@@ -13,7 +13,7 @@ from sqlalchemy.orm import sessionmaker
 
 from src.api.auth.auth_dto import UserCredentialsDTO, AuthTokenDTO, UserIdentityDTO
 from src.configuration.database.connection import Base
-from src.configuration.dependencies.depends import DependencyContainer
+from src.configuration.dependencies.container import ApplicationContainer
 
 from src.api.auth.auth_dto import CreateUserDTO
 from src.api.users.user_dto import UserProfileDTO, BusinessDetailsDTO, UserDTO
@@ -101,8 +101,8 @@ async def database_session(session_factory):
 
 @pytest_asyncio.fixture(scope="function")
 async def container(engine, session_factory, test_settings):
-    container = DependencyContainer()
-    container.config.from_pydantic(test_settings)
+    container = ApplicationContainer()
+    container.wire(modules=[__name__])
 
     container.async_engine.override(engine)
     container.async_session_maker.override(session_factory)

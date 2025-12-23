@@ -5,7 +5,6 @@ from fastapi import Header, HTTPException, status, Depends
 from dependency_injector.wiring import Provide, inject
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from src.configuration.dependencies.depends import DependencyContainer
 from src.core.auth.domain.enums import TokenTypeEnum
 from src.core.auth.infrastructure.exceptions.exception_classes import InvalidTokenError
 from src.core.auth.infrastructure.services.pyjwt_token import AbstractTokenService
@@ -25,9 +24,7 @@ async def get_current_user_id(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     token_service: AbstractTokenService
     = Depends(
-        Provide[
-            DependencyContainer.token_service
-        ]
+        Provide["iam.token_service"]
     ),
 ) -> UUID:
     token = credentials.credentials
@@ -57,9 +54,7 @@ async def get_current_user_id(
 async def get_current_user(
     unit_of_work: AbstractUserUnitOfWork
     = Depends(
-        Provide[
-            DependencyContainer.user_unit_of_work
-        ]
+        Provide["iam.user_unit_of_work"]
     ),
     user_id: UUID = Depends(get_current_user_id)
 ):

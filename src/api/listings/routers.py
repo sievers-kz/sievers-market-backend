@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Security, Query, Request
 
 from src.api.listings.dto import CreateActiveListingDTO, UpdateListingDTO, CreateDraftListingDTO
 from src.api.shared.security import get_current_user
-from src.configuration.dependencies.depends import DependencyContainer
+
 from src.core.listings.application.usecases import (
     GetListingCreationSchemaUseCase,
     CreateListingUseCase,
@@ -19,6 +19,7 @@ from src.core.listings.application.usecases import (
     ArchiveListingUseCase,
     DeleteListingUseCase, GetPublicListingsUseCase, GetDetailPublicListingUseCase, SearchListingsUseCase
 )
+
 from src.core.listings.domain.enums import ListingStatusEnum
 from src.core.users.domain.entities import User
 
@@ -33,9 +34,7 @@ async def get_listing_creation_schema(
     listing_creation_schema_usecase: Annotated[
         GetListingCreationSchemaUseCase,
         Depends(
-            Provide[
-                DependencyContainer.listing_creation_schema_usecase
-            ]
+            Provide["listing.listing_creation_schema_usecase"]
         )
     ],
     current_user: User = Security(get_current_user)
@@ -50,9 +49,7 @@ async def create_new_listing(
     create_listing_usecase: Annotated[
         CreateListingUseCase,
         Depends(
-            Provide[
-                DependencyContainer.create_listing_usecase
-            ]
+            Provide["listing.create_listing_usecase"]
         )
     ],
     current_user: User = Security(get_current_user)
@@ -68,9 +65,7 @@ async def get_listing_update_schema(
     update_listing_schema_usecase: Annotated[
         UpdateListingSchemaUseCase,
         Depends(
-            Provide[
-                DependencyContainer.update_listing_schema_usecase
-            ]
+            Provide["listing.update_listing_schema_usecase"]
         )
     ],
     current_user: User = Security(get_current_user)
@@ -86,9 +81,7 @@ async def update_current_listing(
     update_listing_usecase: Annotated[
         UpdateListingUseCase,
         Depends(
-            Provide[
-                DependencyContainer.update_listing_usecase
-            ]
+            Provide["listing.update_listing_usecase"]
         )
     ],
     current_user: User = Security(get_current_user)
@@ -104,9 +97,7 @@ async def get_user_listings(
     get_user_listings_usecase: Annotated[
         GetUserListingsUseCase,
         Depends(
-            Provide[
-                DependencyContainer.get_user_listings_usecase
-            ]
+            Provide["listing.get_user_listings_usecase"]
         )
     ],
     current_user: User = Security(get_current_user)
@@ -121,9 +112,7 @@ async def create_draft_listing(
     create_draft_listing_usecase: Annotated[
         CreateDraftListingUseCase,
         Depends(
-            Provide[
-                DependencyContainer.create_draft_listing_usecase
-            ]
+            Provide["listing.create_draft_listing_usecase"]
         )
     ],
     current_user: User = Security(get_current_user)
@@ -139,9 +128,7 @@ async def activate_listing(
     activate_listing_usecase: Annotated[
         ActivateListingUseCase,
         Depends(
-            Provide[
-                DependencyContainer.activate_listing_usecase
-            ]
+            Provide["listing.activate_listing_usecase"]
         )
     ],
     current_user: User = Security(get_current_user)
@@ -157,9 +144,7 @@ async def deactivate_listing(
     deactivate_listing_usecase: Annotated[
         DeactivateListingUseCase,
         Depends(
-            Provide[
-                DependencyContainer.deactivate_listing_usecase
-            ]
+            Provide["listing.deactivate_listing_usecase"]
         )
     ],
     current_user: User = Security(get_current_user)
@@ -175,9 +160,7 @@ async def archive_listing(
     archive_listing_usecase: Annotated[
         ArchiveListingUseCase,
         Depends(
-            Provide[
-                DependencyContainer.archive_listing_usecase
-            ]
+            Provide["listing.archive_listing_usecase"]
         )
     ],
     current_user: User = Security(get_current_user)
@@ -193,9 +176,7 @@ async def delete_listing(
     delete_listing_usecase: Annotated[
         DeleteListingUseCase,
         Depends(
-            Provide[
-                DependencyContainer.delete_listing_usecase
-            ]
+            Provide["listing.delete_listing_usecase"]
         )
     ]
 ):
@@ -209,9 +190,7 @@ async def get_public_listings(
     get_public_listings_usecase: Annotated[
         GetPublicListingsUseCase,
         Depends(
-            Provide[
-                DependencyContainer.get_public_listings_usecase
-            ]
+            Provide["listing.get_public_listings_usecase"]
         )
     ],
 
@@ -242,9 +221,7 @@ async def get_detail_public_listing(
     get_detail_public_listing_usecase: Annotated[
         GetDetailPublicListingUseCase,
         Depends(
-            Provide[
-                DependencyContainer.get_detail_public_listing_usecase
-            ]
+            Provide["listing.get_detail_public_listing_usecase"]
         )
     ]
 ):
@@ -257,9 +234,7 @@ async def search_listings(
     search_listings_usecase: Annotated[
         SearchListingsUseCase,
         Depends(
-            Provide[
-                DependencyContainer.search_listings_usecase
-            ]
+            Provide["listing.search_listings_usecase"]
         )
     ],
     query_string: str = Query(None, description="Поиск объявлений"),

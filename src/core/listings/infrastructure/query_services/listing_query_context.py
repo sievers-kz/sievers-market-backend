@@ -24,9 +24,9 @@ class ListingQueryContext:
         await self._session.close()
 
     @property
-    def listings(self):
+    def listing(self):
         return ListingQueryService(self._session)
 
     @property
-    def filters(self):
+    def filter(self):
         return FilterQueryService(self._session)

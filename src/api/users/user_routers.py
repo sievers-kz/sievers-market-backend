@@ -13,8 +13,6 @@ from src.api.users.user_dto import (
     ChangePasswordDTO
 )
 
-from src.configuration.dependencies.depends import DependencyContainer
-
 from src.core.users.application.usecases import (
     ChangeFullnameUseCase,
     ChangeEmailUseCase,
@@ -36,9 +34,7 @@ async def change_fullname(
     change_fullname_usecase: Annotated[
         ChangeFullnameUseCase,
         Depends(
-            Provide[
-                DependencyContainer.change_fullname_usecase
-            ]
+            Provide["iam.change_fullname_usecase"]
         )
     ]
 ):
@@ -53,9 +49,7 @@ async def change_email(
     change_email_usecase: Annotated[
         ChangeEmailUseCase,
         Depends(
-            Provide[
-                DependencyContainer.change_email_usecase
-            ]
+            Provide["iam.change_email_usecase"]
         )
     ]
 ):
@@ -70,9 +64,7 @@ async def change_phone(
     change_phone_usecase: Annotated[
         ChangePhoneUseCase,
         Depends(
-            Provide[
-                DependencyContainer.change_phone_usecase
-            ]
+            Provide["iam.change_phone_usecase"]
         )
     ]
 ):
@@ -87,9 +79,7 @@ async def change_organization_fullname(
     change_organization_fullname_usecase: Annotated[
         ChangeOrganizationFullnameUseCase,
         Depends(
-            Provide[
-                DependencyContainer.change_organization_fullname_usecase
-            ]
+            Provide["iam.change_organization_fullname_usecase"]
         )
     ]
 ):
@@ -104,9 +94,7 @@ async def change_document_value(
     change_document_value_usecase: Annotated[
         ChangeDocumentValueUseCase,
         Depends(
-            Provide[
-                DependencyContainer.change_document_value_usecase
-            ]
+            Provide["iam.change_document_value_usecase"]
         )
     ]
 ):
@@ -121,9 +109,7 @@ async def change_avatar_url(
     change_avatar_url_usecase: Annotated[
         ChangeAvatarURLUsecase,
         Depends(
-            Provide[
-                DependencyContainer.change_avatar_url_usecase
-            ]
+            Provide["iam.change_avatar_url_usecase"]
         )
     ]
 ):
@@ -138,9 +124,7 @@ async def change_password(
     change_password_usecase: Annotated[
         ChangePasswordUseCase,
         Depends(
-            Provide[
-                DependencyContainer.change_password_usecase
-            ]
+            Provide["iam.change_password_usecase"]
         )
     ]
 ):

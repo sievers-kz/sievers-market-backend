@@ -11,8 +11,8 @@ from src.api.auth.auth_dto import (
     RefreshTokenDTO,
     ForgotPasswordDTO, ResetPasswordDTO,
 )
+from src.configuration.dependencies.container import ApplicationContainer
 
-from src.configuration.dependencies.depends import DependencyContainer
 from src.core.auth.application.usecases import (
     CreateUserUseCase,
     EmailConfirmationUseCase,
@@ -34,7 +34,7 @@ async def create_user(
         CreateUserUseCase,
         Depends(
             Provide[
-                DependencyContainer.create_user_usecase
+                ApplicationContainer.iam.create_user_usecase
             ]
         )
     ]
@@ -51,7 +51,7 @@ async def confirm_email(
         EmailConfirmationUseCase,
         Depends(
             Provide[
-                DependencyContainer.email_confirmation_usecase
+                ApplicationContainer.iam.email_confirmation_usecase
             ]
         )
     ]
@@ -68,7 +68,7 @@ async def login_user(
         LoginUserUseCase,
         Depends(
             Provide[
-                DependencyContainer.login_user_usecase
+                ApplicationContainer.iam.login_user_usecase
             ]
         )
     ]
@@ -84,7 +84,7 @@ async def refresh_token(
         RefreshTokenUseCase,
         Depends(
             Provide[
-                DependencyContainer.refresh_token_usecase
+                ApplicationContainer.iam.refresh_token_usecase
             ]
         )
     ]
@@ -100,7 +100,7 @@ async def logout_user(
         LogoutUserUseCase,
         Depends(
             Provide[
-                DependencyContainer.logout_user_usecase
+                ApplicationContainer.iam.logout_user_usecase
             ]
         )
     ]
@@ -117,7 +117,7 @@ async def request_forgot_password(
         ForgotPasswordUseCase,
         Depends(
             Provide[
-                DependencyContainer.forgot_password_usecase
+                ApplicationContainer.iam.forgot_password_usecase
             ]
         )
     ]
@@ -134,7 +134,7 @@ async def reset_user_password(
         ResetPasswordUseCase,
         Depends(
             Provide[
-                DependencyContainer.reset_password_usecase
+                ApplicationContainer.iam.reset_password_usecase
             ]
         )
     ]
