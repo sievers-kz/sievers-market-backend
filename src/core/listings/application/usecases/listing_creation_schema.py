@@ -19,4 +19,4 @@ class GetListingCreationSchemaUseCase:
             references = await query.reference.get_common_lookups()
             specifications = await query.specification.get_subcategory_specifications(subcategory_id)
             schema = self.form_builder.build_form_schema(specifications)
-            return FormSchemaResponse(subcategory_id=subcategory_id, schema=schema, references=references)
+            return FormSchemaResponse(subcategory_id=subcategory_id, form_schema=schema, references=references)

@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from src.configuration.conf.settings import DatabaseConnectionSettings
+from src.configuration.settings.settings import PostgresSettings
 from src.configuration.database.connection import Base
 
 from src.core.shared.infrastructure.base_model import BaseModel
@@ -32,7 +32,7 @@ from src.core.references.infrastructure.models import (
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
-database_settings = DatabaseConnectionSettings()
+database_settings = PostgresSettings()
 
 config = context.config
 config.set_main_option("sqlalchemy.url", database_settings.database_url)
