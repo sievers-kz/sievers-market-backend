@@ -1,35 +1,35 @@
 from fastapi import FastAPI
-from fastapi.exceptions import RequestValidationError
 
-from src.api.auth.auth_routers import auth_router
-from src.api.listings.routers import listings
-from src.api.references.routers import reference
-from src.api.shared.exceptions.exception_handlers import application_exception_handler, pydantic_exception_handler
-from src.api.shared.security import bearer_scheme
-from src.api.users.user_routers import users_router
+from src.api.buyer.routers import buyer
+from src.api.iam.routers import iam
+from src.api.machinery.routers import machinery
+from src.api.reference.routers import reference
+from src.api.seller.routers import seller
 from src.configuration.dependencies.container import ApplicationContainer
-from src.core.shared.application.exceptions.base_exception import BaseApplicationError
-from src.core.listings.infrastructure.models.events import update_listing_search_index
 
 
 def create_fastapi_app() -> FastAPI:
+    app = FastAPI(title="AGROW Marketplace", version="1.0.0")
     container = ApplicationContainer()
-    container.wire()
-
-    app = FastAPI(title="AGROW Marketplace", version="1.0.0",)
+    container.wire(
+        modules=[
+            "src.api.iam.routers",
+            "src.api.buyer.routers",
+            "src.api.seller.routers",
+            "src.api.machinery.routers",
+            "src.api.reference.routers",
+            "src.api.shared.security"
+        ]
+    )
     app.container = container
 
-    app.add_exception_handler(BaseApplicationError, application_exception_handler)
-    app.add_exception_handler(RequestValidationError, pydantic_exception_handler)
-
-    app.include_router(users_router)
-    app.include_router(auth_router)
+    app.include_router(iam)
+    app.include_router(buyer)
+    app.include_router(seller)
     app.include_router(reference)
-    app.include_router(listings)
+    app.include_router(machinery)
 
     return app
 
 
 fastapi_app = create_fastapi_app()
-
-

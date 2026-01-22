@@ -1,0 +1,42 @@
+from src.api.iam.dto import RefreshData, LoginResponse
+from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
+from src.core.iam.domain.enums import TokenType
+from src.core.iam.infrastructure.services.pyjwt_token import AbstractTokenService
+
+
+class RefreshTokenUseCase:
+    def __init__(
+        self,
+        unit_of_work: AbstractIAMUnitOfWork,
+        token_service: AbstractTokenService
+    ):
+        self.unit_of_work = unit_of_work
+        self.token_service = token_service
+
+    async def execute(self, refresh_data: RefreshData):
+        try:
+            self.token_service.verify_token(refresh_data.refresh_token, TokenType.REFRESH)
+        except Exception:
+            raise ValueError("Invalid refresh token")
+
+        async with self.unit_of_work as uow:
+            account = await uow.account.find_by_token_value(refresh_data.refresh_token)
+            if not account:
+                raise ValueError("Token not found")
+
+            new_access_token = self.token_service.create_token(account.id, TokenType.ACCESS, account.role)
+            new_refresh_token = self.token_service.create_token(account.id, TokenType.REFRESH, account.role)
+
+            account.rotate_refresh_token(
+                refresh_data.refresh_token,
+                new_refresh_token.value,
+                new_refresh_token.expires_at
+            )
+
+            await uow.account.save(account)
+            await uow.commit()
+
+            return LoginResponse(
+                access_token=new_access_token.value,
+                refresh_token=new_refresh_token.value
+            )

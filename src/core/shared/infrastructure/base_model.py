@@ -1,10 +1,11 @@
+import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import UUID, String, DateTime, func, ForeignKey, Enum, Boolean
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import UUID, DateTime, func, Text, Boolean, Integer
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column
 
-from src.core.users.domain.enums import UserRoleEnum, BusinessTypeEnum
 from src.configuration.database.connection import Base
 
 
@@ -28,6 +29,7 @@ class BaseModel(Base):
         nullable=False,
     )
 
-
-
+    @staticmethod
+    def get_enum_values(enum_class: enum.Enum):
+        return [item.value for item in enum_class]
 

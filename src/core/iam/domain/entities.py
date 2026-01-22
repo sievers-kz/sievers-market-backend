@@ -1,0 +1,111 @@
+import uuid
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from uuid import UUID
+
+from src.core.iam.domain.enums import UserRole, TokenType
+from src.core.iam.domain.value_objects import Email, Phone, Password
+
+from src.core.shared.domain.entities import AggregateRoot, Entity
+from src.core.shared.infrastructure.services.password_hasher import AbstractPasswordHasher
+
+
+@dataclass(frozen=False)
+class Account(AggregateRoot):
+    id: UUID
+    role: UserRole
+    email: Email
+    phone: Phone | None
+    password: Password
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime | None
+    tokens: list["Token"]
+
+    def confirm_account(self):
+        if self.is_active:
+            raise ValueError("Account is already confirmed")
+        self.is_active = True
+
+    def resend_confirmation_code(self, token_value: str, expires_at: datetime):
+        self.revoke_all_tokens_by_type(TokenType.EMAIL)
+        self.add_new_token(TokenType.EMAIL, token_value, expires_at)
+
+    def login(self, raw_password: str, password_hasher: AbstractPasswordHasher):
+        if not self.is_active:
+            raise ValueError("Account is not confirmed")
+
+        if not self.password.verify(raw_password, password_hasher):
+            raise ValueError("Invalid email or password")
+
+    def logout(self, token_value: str):
+        self.revoke_token(token_value)
+
+    def revoke_token(self, token_value: str):
+        token = next((token for token in self.tokens if token.value == token_value), None)
+        if token and not token.is_revoked:
+            token.revoke_token()
+
+    def add_new_token(self, type: TokenType, value: str, expires_at: datetime):
+        new_token = Token.create(self.id, type, value, expires_at)
+        self.tokens.append(new_token)
+        return new_token
+
+    def rotate_refresh_token(self, old_token: str, new_token: str, expires_at):
+        self.revoke_token(old_token)
+        self.add_new_token(type=TokenType.REFRESH, value=new_token, expires_at=expires_at)
+
+    def request_reset_password(self, token_value: str, expires_at: datetime):
+        self.add_new_token(TokenType.PASSWORD, token_value, expires_at)
+
+    def reset_password(self, token_value: str, new_hashed_password: str):
+        self.revoke_token(token_value)
+
+        self.password = Password(new_hashed_password)
+        self.updated_at = datetime.now(timezone.utc)
+
+        self.revoke_all_tokens_by_type(TokenType.REFRESH)
+
+    def revoke_all_tokens_by_type(self, token_type: TokenType):
+        for token in self.tokens:
+            if token.type == token_type and not token.is_revoked:
+                token.revoke_token()
+
+    def change_password(
+        self,
+        raw_old_password: str,
+        new_hashed_password: str,
+        password_hasher: AbstractPasswordHasher
+    ):
+        if not self.password.verify(raw_old_password, password_hasher):
+            raise ValueError("Invalid password")
+
+        self.password = Password(new_hashed_password)
+        self.updated_at = datetime.now(timezone.utc)
+
+
+@dataclass(frozen=False)
+class Token(Entity):
+    id: UUID
+    account_id: UUID
+    type: TokenType
+    value: str
+    is_revoked: bool
+    expires_at: datetime
+
+    @classmethod
+    def create(cls, account_id: UUID, type: TokenType, value: str, expires_at: datetime):
+        return cls(
+            id=uuid.uuid4(),
+            account_id=account_id,
+            type=type,
+            value=value,
+            is_revoked=False,
+            expires_at=expires_at
+        )
+
+    def revoke_token(self):
+        if self.is_revoked:
+            raise ValueError("Token is already revoked")
+        self.is_revoked = True
+

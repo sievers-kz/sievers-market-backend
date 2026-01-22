@@ -2,173 +2,144 @@ from datetime import timedelta
 
 from dependency_injector import containers, providers
 
-from src.core.auth.application.usecases import (
+from src.core.iam.application.usecases import (
     CreateUserUseCase,
-    EmailConfirmationUseCase,
+    AccountConfirmationUseCase,
     LoginUserUseCase,
     RefreshTokenUseCase,
     LogoutUserUseCase,
     ForgotPasswordUseCase,
-    ResetPasswordUseCase
+    ResetPasswordUseCase,
+    ChangePasswordUseCase, ResendConfirmationCodeUseCase
 )
+from src.core.iam.infrastructure.adapters.account_confirmation import EmailNotifierAdapter
+from src.core.iam.infrastructure.adapters.profile_creator import ProfileCreatorAdapter
 
-from src.core.auth.infrastructure.auth_unit_of_work import AuthUnitOfWork
-from src.core.users.infrastructure.user_unit_of_work import UserUnitOfWork
-from src.core.shared.infrastructure.composite_uow import UserIdentityUnitOfWork
+from src.core.iam.infrastructure.iam_unit_of_work import IAMUnitOfWork
+from src.core.iam.infrastructure.factory import AccountFactory
 
-from src.core.auth.infrastructure.services.pyjwt_token import PyJWTTokenService
-from src.core.shared.infrastructure.services.email_sender import ConsoleEmailSender
+from src.core.iam.infrastructure.services.pyjwt_token import PyJWTTokenService
 from src.core.shared.infrastructure.services.password_hasher import BcryptPasswordHasher
 from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormalizer
 
-from src.core.users.application.usecases import (
-    ChangeFullnameUseCase,
-    ChangeEmailUseCase,
-    ChangePhoneUseCase,
-    ChangeOrganizationFullnameUseCase,
-    ChangeDocumentValueUseCase,
-    ChangeAvatarURLUsecase,
-    ChangePasswordUseCase
-)
-
 
 class IAMContainer(containers.DeclarativeContainer):
-    wiring_config = containers.WiringConfiguration(
-        modules=[
-            "src.api.users.user_routers",
-            "src.api.auth.auth_routers"
-        ]
-    )
+    auth_config = providers.Configuration()
+    database_session = providers.Dependency()
 
-    auth_config = providers.Dependency()
-    session_factory = providers.Dependency()
-    sendgrid_sender = providers.Dependency()
+    buyer_service = providers.Dependency()
+    seller_service = providers.Dependency()
 
-    user_unit_of_work = providers.Factory(
-        UserUnitOfWork,
-        session_factory=session_factory
-    )                                    # TODO: Restructure UserUoW & IdentityUoW & UserIdentityUoW to IAMUnitOfWork
-    identity_unit_of_work = providers.Factory(
-        AuthUnitOfWork,
-        session_factory=session_factory
-    )
-    user_identity_unit_of_work = providers.Factory(
-        UserIdentityUnitOfWork,
-        session_factory=session_factory
+    console_email_sender = providers.Dependency()
+    email_confirmation_template = providers.Dependency()
+    password_recovery_template = providers.Dependency()
+
+    iam_unit_of_work = providers.Factory(
+        IAMUnitOfWork,
+        session=database_session
     )
 
     bcrypt_password_hasher = providers.Singleton(BcryptPasswordHasher)
-    console_email_sender = providers.Singleton(ConsoleEmailSender)
     phonenumber_normalizer = providers.Singleton(PhoneNormalizer)
+
+    account_factory = providers.Factory(
+        AccountFactory,
+        phone_normalizer=phonenumber_normalizer,
+        password_hasher=bcrypt_password_hasher
+    )
 
     pyjwt_token_service = providers.Singleton(
         PyJWTTokenService,
-        secret_key=auth_config.provided["secret_key"],
-        algorithm=auth_config.provided["algorithm"],
+        secret_key=auth_config.secret_key,
+        algorithm=auth_config.algorithm,
 
         access_token_lifetime=providers.Factory(
             timedelta,
-            minutes=auth_config.provided["access_token_lifetime"]
+            minutes=auth_config.access_token_lifetime.as_int()
         ),
         refresh_token_lifetime=providers.Factory(
             timedelta,
-            days=auth_config.provided["refresh_token_lifetime"]
+            days=auth_config.refresh_token_lifetime.as_int()
         ),
         email_token_lifetime=providers.Factory(
             timedelta,
-            hours=auth_config.provided["email_token_lifetime"]
+            hours=auth_config.email_token_lifetime.as_int()
         ),
         password_reset_token_lifetime=providers.Factory(
             timedelta,
-            hours=auth_config.provided["password_reset_token_lifetime"]
+            hours=auth_config.password_reset_token_lifetime.as_int()
         )
+    )
+
+    profile_creator_adapter = providers.Factory(
+        ProfileCreatorAdapter,
+        buyer_service=buyer_service,
+        seller_service=seller_service
+    )
+
+    email_notifier_adapter = providers.Factory(
+        EmailNotifierAdapter,
+        sender=console_email_sender,
+        email_confirmation_template=email_confirmation_template,
+        password_recovery_template=password_recovery_template
     )
 
     create_user_usecase = providers.Factory(
         CreateUserUseCase,
-        unit_of_work=user_identity_unit_of_work,
-        email_sender=console_email_sender,
-        token_service=pyjwt_token_service
+        unit_of_work=iam_unit_of_work,
+        token_service=pyjwt_token_service,
+        factory=account_factory,
+        profile_creator=profile_creator_adapter,
+        notifier=email_notifier_adapter
     )
 
-    email_confirmation_usecase = providers.Factory(
-        EmailConfirmationUseCase,
-        unit_of_work=user_identity_unit_of_work
+    account_confirmation_usecase = providers.Factory(
+        AccountConfirmationUseCase,
+        unit_of_work=iam_unit_of_work
+    )
+
+    resend_confirmation_code_usecase = providers.Factory(
+        ResendConfirmationCodeUseCase,
+        unit_of_work=iam_unit_of_work,
+        token_service=pyjwt_token_service,
+        notifier=email_notifier_adapter
     )
 
     login_user_usecase = providers.Factory(
         LoginUserUseCase,
-        unit_of_work=user_identity_unit_of_work,
+        unit_of_work=iam_unit_of_work,
         token_service=pyjwt_token_service,
         password_hasher=bcrypt_password_hasher
     )
 
     refresh_token_usecase = providers.Factory(
         RefreshTokenUseCase,
-        unit_of_work=identity_unit_of_work,
+        unit_of_work=iam_unit_of_work,
         token_service=pyjwt_token_service
     )
 
     logout_user_usecase = providers.Factory(
         LogoutUserUseCase,
-        unit_of_work=identity_unit_of_work,
-        token_service=pyjwt_token_service
+        unit_of_work=iam_unit_of_work,
     )
 
     forgot_password_usecase = providers.Factory(
         ForgotPasswordUseCase,
-        unit_of_work=user_identity_unit_of_work,
+        unit_of_work=iam_unit_of_work,
         token_service=pyjwt_token_service,
-        email_sender=console_email_sender
+        notifier=email_notifier_adapter
     )
 
     reset_password_usecase = providers.Factory(
         ResetPasswordUseCase,
-        unit_of_work=user_identity_unit_of_work,
+        unit_of_work=iam_unit_of_work,
         token_service=pyjwt_token_service,
         password_hasher=bcrypt_password_hasher
     )
 
-    change_fullname_usecase = providers.Factory(
-        ChangeFullnameUseCase,
-        unit_of_work=user_unit_of_work,
-        token_service=pyjwt_token_service
-    )
-
-    change_email_usecase = providers.Factory(
-        ChangeEmailUseCase,
-        unit_of_work=user_unit_of_work,
-        token_service=pyjwt_token_service
-    )
-
-    change_phone_usecase = providers.Factory(
-        ChangePhoneUseCase,
-        unit_of_work=user_unit_of_work,
-        token_service=pyjwt_token_service,
-        phone_normalizer=phonenumber_normalizer
-    )
-
-    change_organization_fullname_usecase = providers.Factory(
-        ChangeOrganizationFullnameUseCase,
-        unit_of_work=user_unit_of_work,
-        token_service=pyjwt_token_service,
-    )
-
-    change_document_value_usecase = providers.Factory(
-        ChangeDocumentValueUseCase,
-        unit_of_work=user_unit_of_work,
-        token_service=pyjwt_token_service,
-    )
-
-    change_avatar_url_usecase = providers.Factory(
-        ChangeAvatarURLUsecase,
-        unit_of_work=user_unit_of_work,
-        token_service=pyjwt_token_service
-    )
-
     change_password_usecase = providers.Factory(
         ChangePasswordUseCase,
-        unit_of_work=identity_unit_of_work,
+        unit_of_work=iam_unit_of_work,
         token_service=pyjwt_token_service,
         password_hasher=bcrypt_password_hasher
     )
