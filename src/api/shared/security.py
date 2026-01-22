@@ -1,16 +1,16 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import Header, HTTPException, status, Depends
+from fastapi import HTTPException, status, Depends
 from dependency_injector.wiring import Provide, inject
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from src.core.auth.domain.enums import TokenTypeEnum
-from src.core.auth.infrastructure.exceptions.exception_classes import InvalidTokenError
-from src.core.auth.infrastructure.services.pyjwt_token import AbstractTokenService
-
-from src.core.users.application.abstract_user_uow import AbstractUserUnitOfWork
-
+from src.api.shared.dto import CurrentUser, CurrentSeller
+from src.configuration.dependencies.container import ApplicationContainer
+from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
+from src.core.iam.domain.enums import TokenType, UserRole
+from src.core.iam.infrastructure.services.pyjwt_token import AbstractTokenService
+from src.core.seller.application.interfaces.abstract_seller_uow import AbstractSellerUnitOfWork
 
 bearer_scheme = HTTPBearer(
     scheme_name="BearerAuth",
@@ -24,25 +24,27 @@ async def get_current_user_id(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     token_service: AbstractTokenService
     = Depends(
-        Provide["iam.token_service"]
+        Provide[
+            ApplicationContainer.iam.pyjwt_token_service
+        ]
     ),
 ) -> UUID:
     token = credentials.credentials
 
     try:
-        payload = token_service.verify_token(token, TokenTypeEnum.ACCESS_TOKEN)
-        user_id_from_jwt = payload.get("sub")
+        payload = token_service.verify_token(token, TokenType.ACCESS)
+        account_id_from_jwt = payload.get("sub")
 
-        if not user_id_from_jwt:
+        if not account_id_from_jwt:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=f"Невалидный или просроченный токен",
                 headers={"WWW-Authenticate": "Bearer"}
             )
 
-        return UUID(user_id_from_jwt)
+        return UUID(account_id_from_jwt)
 
-    except InvalidTokenError as exc:
+    except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Невалидный или просроченный токен",
@@ -52,20 +54,53 @@ async def get_current_user_id(
 
 @inject
 async def get_current_user(
-    unit_of_work: AbstractUserUnitOfWork
+    unit_of_work: AbstractIAMUnitOfWork
     = Depends(
-        Provide["iam.user_unit_of_work"]
+        Provide[
+            ApplicationContainer.iam.iam_unit_of_work
+        ]
     ),
-    user_id: UUID = Depends(get_current_user_id)
+    account_id: UUID = Depends(get_current_user_id)
 ):
     async with unit_of_work as uow:
-        user = await uow.user.get_user_by_id(user_id)
+        account = await uow.account.get_account_by_id(account_id)
 
-        if not user:
+        if not account:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="User not found",
                 headers={"WWW-Authenticate": "Bearer"}
             )
 
-        return user
+        return CurrentUser(id=account.id, role=account.role)
+
+
+@inject
+async def get_current_seller(
+    unit_of_work: Annotated[
+        AbstractSellerUnitOfWork,
+        Depends(
+            Provide[
+                ApplicationContainer.seller.seller_unit_of_work
+            ]
+        )
+    ],
+    account: CurrentUser = Depends(get_current_user)
+):
+    if account.role != UserRole.SELLER:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    async with unit_of_work as uow:
+        seller = await uow.seller.get_by_account_id(account.id)
+        if not seller:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Seller not found"
+            )
+
+    return CurrentSeller(id=seller.id)
+

@@ -10,26 +10,29 @@ from src.configuration.settings.settings import PostgresSettings
 from src.configuration.database.connection import Base
 
 from src.core.shared.infrastructure.base_model import BaseModel
-from src.core.references.infrastructure.models import Region, Color
 
-from src.core.auth.infrastructure.models import UserIdentity, UserCredentialsIdentity, UserTokenIdentity
-from src.core.users.infrastructure.models import User, UserProfile
+from src.core.iam.infrastructure.models import Account, Token
 
-from src.core.listings.infrastructure.models.listing import Listing, ListingMedia
-from src.core.listings.infrastructure.models.machinery import Machinery
+from src.core.buyer.infrastructure.models import Buyer
+from src.core.seller.infrastructure.models import Seller
+
+from src.core.machinery.infrastructure.models import Machinery
 
 from src.core.references.infrastructure.models import (
-    Roubric,
-    MachineryManufacturer,
-    MachineryCategory,
-    MachinerySubcategory,
-    MachineryManufacturerCountry,
+    Rubric,
+    Category,
+    Subcategory,
+    SubcategoryAttribute,
+    Attribute,
+    AttributeOption,
     UnitOfMeasure,
-    MachinerySpecificationGroup,
-    MachinerySpecification,
-    MachinerySubcategorySpecification
+    Region,
+    City,
+    Color,
+    Country,
+    Brand,
+    AttrGroup
 )
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 database_settings = PostgresSettings()
