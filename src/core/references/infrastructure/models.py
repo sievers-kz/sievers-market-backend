@@ -48,6 +48,9 @@ class Subcategory(BaseModel):
         cascade="all, delete-orphan"
     )
 
+    def __str__(self):
+        return self.name
+
 
 class AttrGroup(BaseModel):
     __tablename__ = "attr_groups"
@@ -182,6 +185,9 @@ class City(BaseModel):
     name: Mapped[str] = mapped_column(String(50), nullable=False)
     region_id: Mapped[UUID] = mapped_column(ForeignKey("regions.id", ondelete="CASCADE"), nullable=False)
     region: Mapped["Region"] = relationship(back_populates="cities")
+
+    def __str__(self):
+        return self.name
 
 
 class Color(BaseModel):

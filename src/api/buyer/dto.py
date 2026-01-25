@@ -16,6 +16,6 @@ class ChangeBuyerRegion(BaseModel):
 class BuyerResponse(BaseModel):
     last_name: str
     first_name: str
-    patronymic: str
-    avatar_url: str
+    patronymic: str | None = None
+    avatar_url: str | None = None
 

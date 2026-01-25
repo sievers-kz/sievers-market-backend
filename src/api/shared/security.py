@@ -5,8 +5,9 @@ from fastapi import HTTPException, status, Depends
 from dependency_injector.wiring import Provide, inject
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from src.api.shared.dto import CurrentUser, CurrentSeller
+from src.api.shared.dto import CurrentUser, CurrentSeller, CurrentBuyer
 from src.configuration.dependencies.container import ApplicationContainer
+from src.core.buyer.application.interfaces.abstract_buyer_uow import AbstractBuyerUnitOfWork
 from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
 from src.core.iam.domain.enums import TokenType, UserRole
 from src.core.iam.infrastructure.services.pyjwt_token import AbstractTokenService
@@ -76,6 +77,36 @@ async def get_current_user(
 
 
 @inject
+async def get_current_buyer(
+    unit_of_work: Annotated[
+        AbstractBuyerUnitOfWork,
+        Depends(
+            Provide[
+                ApplicationContainer.buyer.buyer_unit_of_work
+            ]
+        )
+    ],
+    account: CurrentUser = Depends(get_current_user)
+):
+    if account.role != UserRole.BUYER:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    async with unit_of_work as uow:
+        buyer = await uow.buyer.get_by_account_id(account.id)
+        if not buyer:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Buyer not found"
+            )
+
+        return CurrentBuyer(id=buyer.id)
+
+
+@inject
 async def get_current_seller(
     unit_of_work: Annotated[
         AbstractSellerUnitOfWork,
@@ -102,5 +133,5 @@ async def get_current_seller(
                 detail="Seller not found"
             )
 
-    return CurrentSeller(id=seller.id)
+        return CurrentSeller(id=seller.id)
 
