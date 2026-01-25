@@ -8,6 +8,7 @@ from src.configuration.dependencies.machinery import MachineryContainer
 from src.configuration.dependencies.reference import ReferenceContainer
 from src.configuration.dependencies.seller import SellerContainer
 from src.configuration.dependencies.shared import SharedContainer
+from src.configuration.dependencies.wishlist import WishlistContainer
 
 
 class ApplicationContainer(containers.DeclarativeContainer):
@@ -48,6 +49,11 @@ class ApplicationContainer(containers.DeclarativeContainer):
         MachineryContainer,
         database_session=gateways.database_session,
         attribute_service=reference.attribute_service
+    )
+
+    wishlist = providers.Container(
+        WishlistContainer,
+        database_session=gateways.database_session
     )
 
     iam = providers.Container(

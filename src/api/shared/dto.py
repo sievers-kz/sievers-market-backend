@@ -10,5 +10,9 @@ class CurrentUser(BaseModel):
     role: UserRole
 
 
+class CurrentBuyer(BaseModel):
+    id: UUID
+
+
 class CurrentSeller(BaseModel):
     id: UUID
