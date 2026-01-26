@@ -5,6 +5,7 @@ from src.configuration.dependencies.configuration import ConfigurationContainer
 from src.configuration.dependencies.gateways import GatewaysContainer
 from src.configuration.dependencies.iam import IAMContainer
 from src.configuration.dependencies.machinery import MachineryContainer
+from src.configuration.dependencies.media import MediaContainer
 from src.configuration.dependencies.reference import ReferenceContainer
 from src.configuration.dependencies.seller import SellerContainer
 from src.configuration.dependencies.shared import SharedContainer
@@ -53,6 +54,12 @@ class ApplicationContainer(containers.DeclarativeContainer):
 
     wishlist = providers.Container(
         WishlistContainer,
+        database_session=gateways.database_session
+    )
+
+    media = providers.Container(
+        MediaContainer,
+        object_storage_config=configurations.object_storage,
         database_session=gateways.database_session
     )
 

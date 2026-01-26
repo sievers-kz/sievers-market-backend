@@ -41,10 +41,21 @@ class SendGridSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
+class ObjectStorageSettings(BaseSettings):
+    object_storage_endpoint: str = Field(alias="OBJECT_STORAGE_ENDPOINT")
+    object_storage_access_key: str = Field(alias="OBJECT_STORAGE_ACCESS_KEY")
+    object_storage_secret_key: str = Field(alias="OBJECT_STORAGE_SECRET_KEY")
+    object_storage_bucket_name: str = Field(alias="OBJECT_STORAGE_BUCKET_NAME")
+    object_storage_secure_config: bool = Field(alias="OBJECT_STORAGE_SECURE_CONFIG")
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+
 class ApplicationSettings(BaseSettings):
     database: PostgresSettings = Field(default_factory=PostgresSettings)
     authentication: AuthenticationSettings = Field(default_factory=AuthenticationSettings)
     sendgrid: SendGridSettings = Field(default_factory=SendGridSettings)
+    object_storage: ObjectStorageSettings = Field(default_factory=ObjectStorageSettings)
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", env_file_encoding="utf-8")
 
