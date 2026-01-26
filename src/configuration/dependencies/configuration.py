@@ -8,3 +8,4 @@ class ConfigurationContainer(containers.DeclarativeContainer):
     database = configuration.database
     authentication = configuration.authentication
     sendgrid = configuration.sendgrid
+    object_storage = configuration.object_storage

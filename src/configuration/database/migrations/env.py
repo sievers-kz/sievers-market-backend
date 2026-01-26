@@ -19,6 +19,7 @@ from src.core.seller.infrastructure.models import Seller
 from src.core.machinery.infrastructure.models import Machinery
 
 from src.core.wishlist.infrastructure.models import Wishlist
+from src.core.media.infrastructure.models import Media
 
 from src.core.references.infrastructure.models import (
     Rubric,

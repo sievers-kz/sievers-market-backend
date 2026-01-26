@@ -6,6 +6,7 @@ from src.api.machinery.routers import machinery
 from src.api.reference.routers import reference
 from src.api.seller.routers import seller
 from src.api.wishlist.routers import wishlist
+from src.api.media.routers import media
 from src.configuration.dependencies.container import ApplicationContainer
 
 
@@ -20,7 +21,8 @@ def create_fastapi_app() -> FastAPI:
             "src.api.machinery.routers",
             "src.api.reference.routers",
             "src.api.shared.security",
-            "src.api.wishlist.routers"
+            "src.api.wishlist.routers",
+            "src.api.media.routers"
         ]
     )
     app.container = container
@@ -31,6 +33,7 @@ def create_fastapi_app() -> FastAPI:
     app.include_router(reference)
     app.include_router(machinery)
     app.include_router(wishlist)
+    app.include_router(media)
 
     return app
 
