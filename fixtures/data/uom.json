@@ -1,0 +1,13 @@
+[
+  {"name": "h.p", "label": "л.с"},
+  {"name": "h", "label": "ч"},
+  {"name": "t", "label": "т"},
+  {"name": "kg", "label": "кг"},
+  {"name": "m", "label": "м"},
+  {"name": "cm", "label": "см"},
+  {"name": "mm", "label": "мм"},
+  {"name": "Nm", "label": "Нм"},
+  {"name": "km/h", "label": "км/ч"},
+  {"name": "l", "label": "л"},
+  {"name": "unit", "label": "шт"}
+]

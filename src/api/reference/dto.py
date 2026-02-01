@@ -59,7 +59,7 @@ class MachineryConfig(BaseModel):
             "label": "Марка",
             "widget_type": "select",
             "required": True,
-            "data_url": "/api/v1/reference/brands"
+            "data_url": "/api/v1/reference/brands.json"
         },
 
         {
