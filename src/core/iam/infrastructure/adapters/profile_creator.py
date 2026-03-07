@@ -1,25 +1,12 @@
 from uuid import UUID
 
-from src.core.buyer.application.interfaces.abstract_buyer_service import AbstractBuyerService
+from src.core.customer.application.interfaces.abstract_customer_service import AbstractCustomerService
 from src.core.iam.application.interfaces.abstract_profile_creator import AbstractProfileCreator
-from src.core.seller.application.interfaces.abstract_seller_service import AbstractSellerService
 
 
 class ProfileCreatorAdapter(AbstractProfileCreator):
-    def __init__(
-        self,
-        buyer_service: AbstractBuyerService,
-        seller_service: AbstractSellerService
-    ):
-        self._strategies = {
-            "buyer": buyer_service,
-            "seller": seller_service
-        }
+    def __init__(self, customer_service: AbstractCustomerService):
+        self.customer_service = customer_service
 
-    async def create(self, account_id: UUID, profile_data):
-        role = profile_data.role
-        if role not in self._strategies:
-            raise ValueError("Invalid role")
-
-        strategy = self._strategies[role]
-        await strategy.create(account_id, profile_data)
+    async def create(self, account_id: UUID, last_name: str, first_name: str):
+        await self.customer_service.create(account_id, last_name, first_name)

@@ -11,15 +11,6 @@ from src.core.shared.infrastructure.base_model import BaseModel
 class Account(BaseModel):
     __tablename__ = "accounts"
 
-    role: Mapped[UserRole] = mapped_column(
-        Enum(
-            UserRole,
-            native_enum=False,
-            values_callable=BaseModel.get_enum_values
-        ),
-        nullable=False
-    )
-
     email: Mapped[str] = mapped_column(
         String(255),
         unique=True,

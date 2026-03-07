@@ -52,24 +52,8 @@ class Subcategory(BaseModel):
         return self.name
 
 
-class AttrGroup(BaseModel):
-    __tablename__ = "attr_groups"
-    name: Mapped[str] = mapped_column(String(50), nullable=False)
-    label: Mapped[str] = mapped_column(String(100), nullable=False)
-    position: Mapped[int] = mapped_column(Integer, default=0)
-
-    attributes: Mapped[list["Attribute"]] = relationship(back_populates="group")
-
-
 class Attribute(BaseModel):
     __tablename__ = "attributes"
-    group_id: Mapped[Optional[UUID]] = mapped_column(
-        ForeignKey(
-            "attr_groups.id",
-            ondelete="SET NULL"
-        ),
-        nullable=True
-    )
 
     key: Mapped[str] = mapped_column(String(100), nullable=False)
     label: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -85,7 +69,6 @@ class Attribute(BaseModel):
 
     position: Mapped[int] = mapped_column(Integer, default=0)
 
-    group: Mapped[Optional["AttrGroup"]] = relationship(back_populates="attributes")
     subcategory_attributes: Mapped[list["SubcategoryAttribute"]] = relationship(back_populates="attribute")
 
     options: Mapped[Optional[list["AttributeOption"]]] = relationship(

@@ -22,7 +22,7 @@ RUN poetry install --no-root --without dev
 COPY entrypoint.sh .
 RUN sed -i 's/\r$//g' /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
-COPY .. .
+COPY . .
 
 EXPOSE 8000
 ENTRYPOINT ["/app/entrypoint.sh"]

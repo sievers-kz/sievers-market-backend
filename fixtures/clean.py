@@ -2,7 +2,7 @@ import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from src.configuration.settings.settings import PostgresSettings
 from src.core.references.infrastructure.models import (
-    SubcategoryAttribute, AttributeOption, Attribute, AttrGroup,
+    SubcategoryAttribute, AttributeOption, Attribute,
     Subcategory, Category, Rubric, City, Region,
     Color, UnitOfMeasure, Brand, Country
 )
@@ -18,7 +18,6 @@ async def clean_all():
             SubcategoryAttribute,
             AttributeOption,
             Attribute,
-            AttrGroup,
             Subcategory,
             Category,
             Rubric,

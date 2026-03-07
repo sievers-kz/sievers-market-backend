@@ -2,13 +2,15 @@ import uuid
 from uuid import UUID
 
 from src.core.machinery.domain.entities import Machinery
-from src.core.machinery.domain.enums import PriceCurrency, MachineryCondition, ListingStatus
+from src.core.machinery.domain.value_objects import Title, Price, YearOfIssue
+from src.core.shared.domain.enums import ListingStatus, PriceCurrency
+from src.core.machinery.domain.enums import MachineryCondition
 
 
 class MachineryFactory:
     @staticmethod
     def create(
-        seller_id: UUID,
+        customer_id: UUID,
         subcategory_id: UUID,
         title: str,
         price: int,
@@ -26,21 +28,19 @@ class MachineryFactory:
     ) -> Machinery:
         return Machinery(
             id=uuid.uuid4(),
-            seller_id=seller_id,
+            customer_id=customer_id,
             subcategory_id=subcategory_id,
-            title=title,
-            price=price,
+            title=Title(title),
+            price=Price(price),
             currency=currency,
             city_id=city_id,
             description=description,
             brand_id=brand_id,
             model=model,
-            year_of_issue=year_of_issue,
+            year_of_issue=YearOfIssue(year_of_issue),
             condition=condition,
             color_id=color_id,
             attributes=attributes,
             country_id=country_id,
             status=ListingStatus.ACTIVE,
-            created_at=None,
-            updated_at=None,
         )

@@ -17,6 +17,7 @@ from src.core.iam.infrastructure.adapters.profile_creator import ProfileCreatorA
 
 from src.core.iam.infrastructure.iam_unit_of_work import IAMUnitOfWork
 from src.core.iam.infrastructure.factory import AccountFactory
+from src.core.iam.infrastructure.repository import AccountRepository
 
 from src.core.iam.infrastructure.services.pyjwt_token import PyJWTTokenService
 from src.core.shared.infrastructure.services.password_hasher import BcryptPasswordHasher
@@ -26,13 +27,16 @@ from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormal
 class IAMContainer(containers.DeclarativeContainer):
     auth_config = providers.Configuration()
     database_session = providers.Dependency()
-
-    buyer_service = providers.Dependency()
-    seller_service = providers.Dependency()
+    customer_service = providers.Dependency()
 
     console_email_sender = providers.Dependency()
     email_confirmation_template = providers.Dependency()
     password_recovery_template = providers.Dependency()
+
+    account_repository = providers.Factory(
+        AccountRepository,
+        session=database_session
+    )
 
     iam_unit_of_work = providers.Factory(
         IAMUnitOfWork,
@@ -73,8 +77,7 @@ class IAMContainer(containers.DeclarativeContainer):
 
     profile_creator_adapter = providers.Factory(
         ProfileCreatorAdapter,
-        buyer_service=buyer_service,
-        seller_service=seller_service
+        customer_service=customer_service,
     )
 
     email_notifier_adapter = providers.Factory(
@@ -140,6 +143,5 @@ class IAMContainer(containers.DeclarativeContainer):
     change_password_usecase = providers.Factory(
         ChangePasswordUseCase,
         unit_of_work=iam_unit_of_work,
-        token_service=pyjwt_token_service,
         password_hasher=bcrypt_password_hasher
     )

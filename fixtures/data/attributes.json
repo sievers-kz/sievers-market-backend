@@ -2,7 +2,7 @@
     {
         "key": "engine_power",
         "label": "Мощность двигателя",
-        "value_type": "float"
+        "value_type": "integer"
     },
 
     {

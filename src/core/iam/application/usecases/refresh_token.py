@@ -24,8 +24,8 @@ class RefreshTokenUseCase:
             if not account:
                 raise ValueError("Token not found")
 
-            new_access_token = self.token_service.create_token(account.id, TokenType.ACCESS, account.role)
-            new_refresh_token = self.token_service.create_token(account.id, TokenType.REFRESH, account.role)
+            new_access_token = self.token_service.create_token(account.id, TokenType.ACCESS)
+            new_refresh_token = self.token_service.create_token(account.id, TokenType.REFRESH)
 
             account.rotate_refresh_token(
                 refresh_data.refresh_token,

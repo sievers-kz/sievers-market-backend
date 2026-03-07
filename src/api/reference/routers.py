@@ -51,7 +51,7 @@ async def get_category_form(
     return await usecase.execute(id)
 
 
-@reference.get("/brands.json", response_model=list[BrandDTO])
+@reference.get("/brands", response_model=list[BrandDTO])
 @inject
 async def get_all_brands(
     usecase: Annotated[

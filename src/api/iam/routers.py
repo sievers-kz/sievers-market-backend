@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends
 from fastapi.params import Security
 
 from src.api.iam.dto import (
-    CreateUserRequest,
     AccountConfirmation,
     LoginResponse,
     RefreshData,
@@ -13,7 +12,7 @@ from src.api.iam.dto import (
     ResetPasswordData,
     ChangePasswordData,
     LoginAccount,
-    ResendCodeRequest,
+    ResendCodeRequest, CreateUserRequest,
 )
 from src.api.shared.dto import CurrentUser
 from src.api.shared.security import get_current_user
@@ -21,7 +20,6 @@ from src.api.shared.security import get_current_user
 from src.configuration.dependencies.container import ApplicationContainer
 
 from src.core.iam.application.usecases import (
-    CreateUserUseCase,
     AccountConfirmationUseCase,
     LoginUserUseCase,
     RefreshTokenUseCase,
@@ -29,7 +27,7 @@ from src.core.iam.application.usecases import (
     ForgotPasswordUseCase,
     ResetPasswordUseCase,
     ChangePasswordUseCase,
-    ResendConfirmationCodeUseCase
+    ResendConfirmationCodeUseCase, CreateUserUseCase
 )
 
 
@@ -38,7 +36,7 @@ iam = APIRouter(prefix="/api/v1/iam", tags=["IAM"])
 
 @iam.post("/registration")
 @inject
-async def create_user(
+async def create_new_user(
     dto: CreateUserRequest,
     usecase: Annotated[
         CreateUserUseCase,
@@ -49,8 +47,8 @@ async def create_user(
         )
     ]
 ):
-    await usecase.execute(user_data=dto)
-    return {"message": "Регистрация прошла успешно. Пожалуйста, подтвердите свою почту для завершения"}
+    await usecase.execute(dto)
+    return {"message": "Регистрация успешно пройдена. Пожалуйста, подтвердите свою почту для завершения"}
 
 
 @iam.post("/account_confirmation")

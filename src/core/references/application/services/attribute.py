@@ -1,7 +1,17 @@
 from typing import Any
 from uuid import UUID
 
+from pydantic import ConfigDict, create_model, ValidationError
+
 from src.core.references.application.interfaces.abstract_attribute_repository import AbstractAttributeRepository
+
+
+_TYPE_MAP: dict[str, type] = {
+    "integer": int,
+    "float": float,
+    "boolean": bool,
+    "string": str,
+}
 
 
 class AttributeService:
@@ -15,42 +25,21 @@ class AttributeService:
         if not rules:
             raise ValueError("Subcategory not found")
 
-        map_rules = {rule.attribute.key: rule for rule in rules}
+        fields = {
+            rule.attribute.key: (
+                _TYPE_MAP.get(rule.attribute.value_type.value, str),
+                ... if rule.is_required else None,
+            )
+            for rule in rules
+        }
 
-        allowed_keys = set(map_rules.keys())
-        received_keys = set(raw_attributes.keys())
+        model = create_model(
+            "DynamicAttributes",
+            __config__=ConfigDict(extra="forbid"),
+            **fields,
+        )
 
-        unknown_keys = received_keys - allowed_keys
-        if unknown_keys:
-            raise ValueError(f"Unknown attributes: {', '.join(unknown_keys)}")
-
-        clean_attributes = {}
-
-        for key, rule in map_rules.items():
-            value = raw_attributes.get(key)
-
-            if value in [None, ""]:
-                raise ValueError(f"Missing required attribute {key}")
-
-            try:
-                target_type = rule.attribute.value_type
-                casted_value = self._cast_value(key, value, target_type)
-                clean_attributes[key] = casted_value
-            except ValueError:
-                raise ValueError(f"Invalid value for attribute {key}")
-        return clean_attributes
-
-    def _cast_value(self, key: str, value: Any, target_type: str) -> Any:
         try:
-            if target_type == "integer":
-                return int(value)
-            elif target_type == "float":
-                if isinstance(value, str):
-                    value = value.replace(",", ".")
-                return float(value)
-            elif target_type == "boolean":
-                return bool(value)
-            return str(value)
-        except Exception:
-            raise ValueError(f"Invalid value for attribute {key}")
-
+            return model(**raw_attributes).model_dump(exclude_unset=True)
+        except ValidationError as e:
+            raise ValueError(e.errors())

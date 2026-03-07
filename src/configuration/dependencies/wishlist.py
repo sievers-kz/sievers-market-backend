@@ -1,5 +1,6 @@
 from dependency_injector import containers, providers
 
+from src.core.wishlist.application.services.wishlist import WishlistService
 from src.core.wishlist.application.usecases import AddToWishlistUseCase, DeleteFromWishlistUseCase, GetWishlistUseCase
 from src.core.wishlist.infrastructure.repository import WishlistRepository
 from src.core.wishlist.infrastructure.wishlist_unit_of_work import WishlistUnitOfWork
@@ -11,6 +12,11 @@ class WishlistContainer(containers.DeclarativeContainer):
     wishlist_repository = providers.Factory(
         WishlistRepository,
         session=database_session
+    )
+
+    wishlist_service = providers.Factory(
+        WishlistService,
+        repository=wishlist_repository
     )
 
     wishlist_unit_of_work = providers.Factory(

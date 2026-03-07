@@ -1,15 +1,15 @@
 from uuid import UUID
 
-from src.core.machinery.application.interfaces.abstract_machinery_uow import AbstractMachineryUnitOfWork
+from src.core.machinery.application.interfaces.uow import IMachineryUnitOfWork
 
 
 class DeactivateMachineryUseCase:
-    def __init__(self, unit_of_work: AbstractMachineryUnitOfWork):
-        self.unit_of_work = unit_of_work
+    def __init__(self, uow: IMachineryUnitOfWork):
+        self.uow = uow
 
-    async def execute(self, machinery_id: UUID):
-        async with self.unit_of_work as uow:
-            machinery = await uow.machinery.get_by_machinery_id(machinery_id)
+    async def execute(self, customer_id: UUID, machinery_id: UUID):
+        async with self.uow as uow:
+            machinery = await uow.machinery.get_machinery_by_id(machinery_id)
             machinery.deactivate()
 
             await uow.machinery.save(machinery)

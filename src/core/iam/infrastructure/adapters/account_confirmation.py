@@ -1,9 +1,8 @@
-from src.core.iam.application.interfaces.abstract_account_confirmation import AbstractAccountConfirmation
-from src.core.iam.application.interfaces.abstract_password_recovery import AbstractPasswordRecovery
+from src.core.iam.application.interfaces.abstract_account_notifier import AbstractAccountNotifier
 from src.core.shared.infrastructure.services.email_sender import AbstractEmailSender
 
 
-class EmailNotifierAdapter(AbstractAccountConfirmation, AbstractPasswordRecovery):
+class EmailNotifierAdapter(AbstractAccountNotifier):
     def __init__(
         self,
         sender: AbstractEmailSender,

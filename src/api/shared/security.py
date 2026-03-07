@@ -5,13 +5,13 @@ from fastapi import HTTPException, status, Depends
 from dependency_injector.wiring import Provide, inject
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from src.api.shared.dto import CurrentUser, CurrentSeller, CurrentBuyer
+from src.api.shared.dto import CurrentUser, CurrentCustomer
 from src.configuration.dependencies.container import ApplicationContainer
-from src.core.buyer.application.interfaces.abstract_buyer_uow import AbstractBuyerUnitOfWork
+from src.core.customer.application.interfaces.abstract_customer_uow import AbstractCustomerUnitOfWork
 from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
 from src.core.iam.domain.enums import TokenType, UserRole
 from src.core.iam.infrastructure.services.pyjwt_token import AbstractTokenService
-from src.core.seller.application.interfaces.abstract_seller_uow import AbstractSellerUnitOfWork
+
 
 bearer_scheme = HTTPBearer(
     scheme_name="BearerAuth",
@@ -73,65 +73,29 @@ async def get_current_user(
                 headers={"WWW-Authenticate": "Bearer"}
             )
 
-        return CurrentUser(id=account.id, role=account.role)
+        return CurrentUser(id=account.id)
 
 
 @inject
-async def get_current_buyer(
+async def get_current_customer(
     unit_of_work: Annotated[
-        AbstractBuyerUnitOfWork,
+        AbstractCustomerUnitOfWork,
         Depends(
             Provide[
-                ApplicationContainer.buyer.buyer_unit_of_work
+                ApplicationContainer.customer.customer_unit_of_work
             ]
         )
     ],
     account: CurrentUser = Depends(get_current_user)
 ):
-    if account.role != UserRole.BUYER:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
     async with unit_of_work as uow:
-        buyer = await uow.buyer.get_by_account_id(account.id)
-        if not buyer:
+        customer = await uow.customer.get_by_account_id(account.id)
+        if not customer:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Buyer not found"
+                detail="Customer not found"
             )
 
-        return CurrentBuyer(id=buyer.id)
+        return CurrentCustomer(id=customer.id)
 
-
-@inject
-async def get_current_seller(
-    unit_of_work: Annotated[
-        AbstractSellerUnitOfWork,
-        Depends(
-            Provide[
-                ApplicationContainer.seller.seller_unit_of_work
-            ]
-        )
-    ],
-    account: CurrentUser = Depends(get_current_user)
-):
-    if account.role != UserRole.SELLER:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
-    async with unit_of_work as uow:
-        seller = await uow.seller.get_by_account_id(account.id)
-        if not seller:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Seller not found"
-            )
-
-        return CurrentSeller(id=seller.id)
 
