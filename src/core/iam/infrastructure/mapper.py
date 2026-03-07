@@ -9,7 +9,6 @@ class AccountMapper:
         tokens = TokenMapper.to_orm(account.tokens)
         return ORMAccount(
             id=account.id,
-            role=account.role,
             phone=account.phone.value,
             email=account.email.value,
             password_hash=account.password.value,
@@ -24,7 +23,6 @@ class AccountMapper:
         tokens = TokenMapper.to_domain(account.tokens)
         return DomainAccount(
             id=account.id,
-            role=account.role,
             phone=Phone(account.phone),
             email=Email(account.email),
             password=Password(account.password_hash),

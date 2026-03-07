@@ -1,24 +1,29 @@
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, String, Integer, Enum, BigInteger, Text, Index, Computed
+from sqlalchemy import ForeignKey, String, BigInteger, Enum, Text, Integer, Computed, Index
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.core.machinery.domain.enums import MachineryCondition, PriceCurrency, ListingStatus
+from src.core.machinery.domain.enums import MachineryCondition
+from src.core.shared.domain.enums import PriceCurrency, ListingStatus
 from src.core.shared.infrastructure.base_model import BaseModel
 
 if TYPE_CHECKING:
-    from src.core.seller.infrastructure.models import Seller
-    from src.core.references.infrastructure.models import Subcategory, City, Brand, Color, Country
+    from src.core.customer.infrastructure.models import Customer
+    from src.core.references.infrastructure.models import Subcategory
+    from src.core.references.infrastructure.models import City
+    from src.core.references.infrastructure.models import Brand
+    from src.core.references.infrastructure.models import Color
+    from src.core.references.infrastructure.models import Country
 
 
 class Machinery(BaseModel):
     __tablename__ = "machinery"
 
-    seller_id: Mapped[UUID] = mapped_column(
+    customer_id: Mapped[UUID] = mapped_column(
         ForeignKey(
-            "sellers.id",
+            "customers.id",
             ondelete="CASCADE"
         ),
         nullable=False
@@ -33,7 +38,7 @@ class Machinery(BaseModel):
     )
 
     title: Mapped[str | None] = mapped_column(
-        String(100),
+        String,
         nullable=True
     )
 
@@ -73,7 +78,7 @@ class Machinery(BaseModel):
     )
 
     model: Mapped[str | None] = mapped_column(
-        String(100),
+        String,
         nullable=True
     )
 
@@ -99,17 +104,17 @@ class Machinery(BaseModel):
         nullable=True
     )
 
-    attributes: Mapped[dict | None] = mapped_column(
-        JSONB,
-        default={},
-        nullable=True
-    )
-
     country_id: Mapped[UUID | None] = mapped_column(
         ForeignKey(
             "countries.id",
             ondelete="SET NULL"
         ),
+        nullable=True
+    )
+
+    attributes: Mapped[dict | None] = mapped_column(
+        JSONB,
+        default={},
         nullable=True
     )
 
@@ -119,7 +124,6 @@ class Machinery(BaseModel):
             native_enum=False,
             values_callable=BaseModel.get_enum_values
         ),
-        default=ListingStatus.DRAFT,
         nullable=False
     )
 
@@ -135,13 +139,34 @@ class Machinery(BaseModel):
         nullable=True
     )
 
+    length: Mapped[int | None] = mapped_column(
+        Integer,
+        Computed("(attributes->>'length')::integer", persisted=True),
+        nullable=True
+    )
+
+    width: Mapped[int | None] = mapped_column(
+        Integer,
+        Computed("(attributes->>'width')::integer", persisted=True),
+        nullable=True
+    )
+
+    height: Mapped[int | None] = mapped_column(
+        Integer,
+        Computed("(attributes->>'height')::integer", persisted=True),
+        nullable=True
+    )
+
     __table_args__ = (
         Index("ix_machinery_attributes_gin", "attributes", postgresql_using="gin"),
         Index("ix_machinery_engine_power", "engine_power"),
-        Index("ix_machinery_weight", "weight")
+        Index("ix_machinery_weight", "weight"),
+        Index("ix_machinery_length", "length"),
+        Index("ix_machinery_width", "width"),
+        Index("ix_machinery_height", "height"),
     )
 
-    seller: Mapped["Seller"] = relationship()
+    customer: Mapped["Customer"] = relationship()
     subcategory: Mapped["Subcategory"] = relationship()
     city: Mapped["City | None"] = relationship()
     brand: Mapped["Brand | None"] = relationship()

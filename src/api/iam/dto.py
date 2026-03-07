@@ -5,7 +5,6 @@ from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field
 
 from src.core.iam.domain.enums import TokenType
-from src.core.seller.domain.enums import SellerType
 
 
 class ResendCodeRequest(BaseModel):
@@ -50,27 +49,12 @@ class AccountConfirmation(BaseModel):
     confirm_token: str
 
 
-class CreateAccountRequest(BaseModel):
+class CreateUserRequest(BaseModel):
     email: EmailStr
     raw_password: str
-
-
-class CreateBuyerRequest(CreateAccountRequest):
-    role: Literal["buyer"]
     last_name: str
     first_name: str
 
 
-class CreateSellerRequest(CreateAccountRequest):
-    role: Literal["seller"]
-    last_name: str
-    first_name: str
-    seller_type: SellerType
-    company_name: str
-    legal_address: str
-    tax_id: str
-    city_id: UUID
 
-
-CreateUserRequest = Annotated[Union[CreateBuyerRequest, CreateSellerRequest], Field(discriminator="role")]
 

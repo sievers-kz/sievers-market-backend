@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from src.api.iam.dto import CreateAccountRequest, TokenData
+from src.api.iam.dto import TokenData, CreateUserRequest
 from src.core.iam.domain.entities import Account, Token
 from src.core.iam.domain.value_objects import Password
 from src.core.shared.infrastructure.services.password_hasher import AbstractPasswordHasher
@@ -21,7 +21,7 @@ class AccountFactory:
     def create(
         self,
         account_id: UUID,
-        account_data: CreateAccountRequest,
+        account_data: CreateUserRequest,
         token_data: list[TokenData]
     ) -> Account:
 
@@ -30,7 +30,6 @@ class AccountFactory:
 
         return Account(
             id=account_id,
-            role=account_data.role,
             email=Email(account_data.email),
             phone=Phone(value=None),
             password=Password(hashed_password),

@@ -13,8 +13,7 @@ from src.core.shared.infrastructure.base_model import BaseModel
 
 from src.core.iam.infrastructure.models import Account, Token
 
-from src.core.buyer.infrastructure.models import Buyer
-from src.core.seller.infrastructure.models import Seller
+from src.core.customer.infrastructure.models import Customer
 
 from src.core.machinery.infrastructure.models import Machinery
 
@@ -34,7 +33,6 @@ from src.core.references.infrastructure.models import (
     Color,
     Country,
     Brand,
-    AttrGroup
 )
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

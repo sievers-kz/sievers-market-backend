@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+from dotenv import load_dotenv
+
 import json
 import logging
 from pathlib import Path
@@ -19,10 +23,17 @@ from src.core.references.infrastructure.models import (
     Subcategory,
     Attribute,
     AttributeOption,
-    AttrGroup,
     SubcategoryAttribute
 )
 from src.core.references.domain.enums import AttrValueType
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+ENV_PATH = BASE_DIR / ".env"
+
+if ENV_PATH.exists():
+    load_dotenv(dotenv_path=ENV_PATH)
+
+sys.path.append(str(BASE_DIR))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -37,10 +48,12 @@ class DataSeeder:
 
     def _load_json(self, filename: str) -> Any:
         """Загружает JSON файл из fixtures/data"""
-        filepath = self.fixtures_path / filename
-        logger.info(f"Loading {filepath}")
+        current_script_dir = Path(__file__).resolve().parent
+        file_path = current_script_dir / "data" / filename
 
-        with open(filepath, "r", encoding="utf-8") as f:
+        logging.info(f"📂 Opening file: {file_path}")
+
+        with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
     async def seed_countries(self):

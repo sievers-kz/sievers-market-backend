@@ -1,8 +1,8 @@
 import asyncio
 
 from src.api.iam.dto import ResendCodeRequest
-from src.core.iam.application.interfaces.abstract_account_confirmation import AbstractAccountConfirmation
 from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
+from src.core.iam.application.interfaces.abstract_account_notifier import AbstractAccountNotifier
 from src.core.iam.application.interfaces.abstract_token_service import AbstractTokenService
 from src.core.iam.domain.enums import TokenType
 
@@ -12,7 +12,7 @@ class ResendConfirmationCodeUseCase:
         self,
         unit_of_work: AbstractIAMUnitOfWork,
         token_service: AbstractTokenService,
-        notifier: AbstractAccountConfirmation
+        notifier: AbstractAccountNotifier
     ):
         self.unit_of_work = unit_of_work
         self.token_service = token_service
@@ -25,7 +25,7 @@ class ResendConfirmationCodeUseCase:
                 await asyncio.sleep(0.5)
                 return
 
-            email_token = self.token_service.create_token(account.id, TokenType.EMAIL, account.role)
+            email_token = self.token_service.create_token(account.id, TokenType.EMAIL)
             account.resend_confirmation_code(email_token.value, email_token.expires_at)
 
             await uow.account.save(account)

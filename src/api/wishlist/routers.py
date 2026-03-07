@@ -5,8 +5,8 @@ from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter
 from fastapi.params import Depends, Security
 
-from src.api.shared.dto import CurrentBuyer
-from src.api.shared.security import get_current_buyer
+from src.api.shared.dto import CurrentCustomer
+from src.api.shared.security import get_current_customer
 from src.api.wishlist.dto import WishlistCard
 from src.configuration.dependencies.container import ApplicationContainer
 from src.core.wishlist.application.usecases import AddToWishlistUseCase, DeleteFromWishlistUseCase, GetWishlistUseCase
@@ -26,9 +26,9 @@ async def add_to_wishlist(
             ]
         )
     ],
-    current_buyer: CurrentBuyer = Security(get_current_buyer)
+    current_customer: CurrentCustomer = Security(get_current_customer)
 ):
-    await usecase.execute(current_buyer.id, machinery_id)
+    await usecase.execute(current_customer.id, machinery_id)
     return {"message": "Added to wishlist successfully"}
 
 
@@ -44,9 +44,9 @@ async def delete_from_wishlist(
             ]
         )
     ],
-    current_buyer: CurrentBuyer = Security(get_current_buyer)
+    current_customer: CurrentCustomer = Security(get_current_customer)
 ):
-    await usecase.execute(current_buyer.id, machinery_id)
+    await usecase.execute(current_customer.id, machinery_id)
     return {"message": "Removed from wishlist successfully"}
 
 
@@ -61,6 +61,6 @@ async def get_wishlist(
             ]
         )
     ],
-    current_buyer: CurrentBuyer = Security(get_current_buyer)
+    current_customer: CurrentCustomer = Security(get_current_customer)
 ):
-    return await usecase.execute(current_buyer.id)
+    return await usecase.execute(current_customer.id)

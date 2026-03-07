@@ -2,7 +2,7 @@ import enum
 
 
 class UserRole(str, enum.Enum):
-    BUYER = "buyer"
+    BUYER = "customer"
     SELLER = "seller"
     ADMIN = "admin"
 

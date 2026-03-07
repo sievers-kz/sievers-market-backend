@@ -21,7 +21,7 @@ class ChangePasswordUseCase:
                 raise ValueError("Account not found")
 
             new_password_hash = self.password_hasher.hash_password(change_password_data.new_password)
-            account.change_password(change_password_data.old_password, new_password_hash, self.password_hasher)
+            account.change_password(change_password_data.raw_password, new_password_hash, self.password_hasher)
 
             await uow.account.save(account)
             await uow.commit()

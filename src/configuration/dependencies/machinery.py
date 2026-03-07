@@ -1,84 +1,114 @@
 from dependency_injector import containers, providers
 
-from src.core.machinery.application.usecases import (
-    CreateMachineryUseCase,
-    ActivateMachineryUseCase,
-    DeactivateMachineryUseCase, UpdateMachineryUseCase, DeleteMachineryUseCase, FilterMachineryUseCase,
-    GetSellerMachineryUseCase, GetDetailMachineryUseCase, GetOwnerDetailMachineryUseCase
-)
-
-from src.core.machinery.infrastructure.adapters import AttributeValidator
-from src.core.machinery.infrastructure.machinery_unit_of_work import MachineryUnitOfWork
-from src.core.machinery.infrastructure.repository import MachineryRepository, MachineryReader
+from src.core.machinery.application.usecases import CreateMachineryUseCase, GetMachineryListUseCase, \
+    GetMachineryDetailUseCase, GetCustomerMachineryUseCase, ActivateMachineryUseCase, DeactivateMachineryUseCase, \
+    ArchiveMachineryUseCase, DeleteMachineryUseCase, GetCustomerMachineryDetailUseCase, ChangeMachineryCategoryUseCase, \
+    ChangeMachineryGeneralUseCase, ChangeOperatingHistoryUseCase, ChangeMachineryPriceUseCase, \
+    ChangeMachinerySpecUseCase, ChangeMachineryDescriptionUseCase
+from src.core.machinery.infrastructure.adapters import AttributeValidatorAdapter, WishlistCounterAdapter
+from src.core.machinery.infrastructure.queries import MachineryQuery
+from src.core.machinery.infrastructure.uow import MachineryUnitOfWork
 
 
 class MachineryContainer(containers.DeclarativeContainer):
     database_session = providers.Dependency()
     attribute_service = providers.Dependency()
+    wishlist_service = providers.Dependency()
 
-    machinery_repository = providers.Factory(
-        MachineryRepository,
-        session=database_session
+    machinery_query = providers.Factory(
+        MachineryQuery,
+        session=database_session,
     )
 
-    machinery_reader = providers.Factory(
-        MachineryReader,
-        session=database_session
-    )
-
-    machinery_unit_of_work = providers.Factory(
+    machinery_uow = providers.Factory(
         MachineryUnitOfWork,
-        session=database_session
+        session=database_session,
     )
 
-    attribute_validator = providers.Factory(
-        AttributeValidator,
-        attribute_service=attribute_service
+    attribute_validator_adapter = providers.Factory(
+        AttributeValidatorAdapter,
+        attribute_service=attribute_service,
+    )
+
+    wishlist_counter_adapter = providers.Factory(
+        WishlistCounterAdapter,
+        wishlist_service=wishlist_service,
     )
 
     create_machinery_usecase = providers.Factory(
         CreateMachineryUseCase,
-        unit_of_work=machinery_unit_of_work,
-        attribute_validator=attribute_validator
+        uow=machinery_uow,
+        attribute_validator=attribute_validator_adapter,
     )
 
-    update_machinery_usecase = providers.Factory(
-        UpdateMachineryUseCase,
-        unit_of_work=machinery_unit_of_work,
-        attribute_validator=attribute_validator
+    get_machinery_list_usecase = providers.Factory(
+        GetMachineryListUseCase,
+        query=machinery_query
+    )
+
+    get_machinery_detail_usecase = providers.Factory(
+        GetMachineryDetailUseCase,
+        query=machinery_query
+    )
+
+    get_customer_machinery_usecase = providers.Factory(
+        GetCustomerMachineryUseCase,
+        query=machinery_query
     )
 
     activate_machinery_usecase = providers.Factory(
         ActivateMachineryUseCase,
-        unit_of_work=machinery_unit_of_work
+        uow=machinery_uow
     )
 
     deactivate_machinery_usecase = providers.Factory(
         DeactivateMachineryUseCase,
-        unit_of_work=machinery_unit_of_work
+        uow=machinery_uow
+    )
+
+    archive_machinery_usecase = providers.Factory(
+        ArchiveMachineryUseCase,
+        uow=machinery_uow
     )
 
     delete_machinery_usecase = providers.Factory(
         DeleteMachineryUseCase,
-        unit_of_work=machinery_unit_of_work
+        uow=machinery_uow
     )
 
-    filter_machinery_usecase = providers.Factory(
-        FilterMachineryUseCase,
-        machinery_reader=machinery_reader
+    get_customer_machinery_detail_usecase = providers.Factory(
+        GetCustomerMachineryDetailUseCase,
+        query=machinery_query,
+        wishlist_counter=wishlist_counter_adapter
     )
 
-    get_seller_machinery_usecase = providers.Factory(
-        GetSellerMachineryUseCase,
-        reader=machinery_reader
+    change_machinery_category_usecase = providers.Factory(
+        ChangeMachineryCategoryUseCase,
+        uow=machinery_uow
     )
 
-    get_detail_machinery_usecase = providers.Factory(
-        GetDetailMachineryUseCase,
-        reader=machinery_reader
+    change_machinery_general_usecase = providers.Factory(
+        ChangeMachineryGeneralUseCase,
+        uow=machinery_uow
     )
 
-    get_owner_detail_machinery_usecase = providers.Factory(
-        GetOwnerDetailMachineryUseCase,
-        reader=machinery_reader
+    change_operating_history_usecase = providers.Factory(
+        ChangeOperatingHistoryUseCase,
+        uow=machinery_uow
+    )
+
+    change_machinery_price_usecase = providers.Factory(
+        ChangeMachineryPriceUseCase,
+        uow=machinery_uow
+    )
+
+    change_machinery_spec_usecase = providers.Factory(
+        ChangeMachinerySpecUseCase,
+        uow=machinery_uow,
+        attribute_validator=attribute_validator_adapter,
+    )
+
+    change_machinery_description_usecase = providers.Factory(
+        ChangeMachineryDescriptionUseCase,
+        uow=machinery_uow
     )

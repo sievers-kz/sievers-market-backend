@@ -1,6 +1,7 @@
 from dependency_injector import containers, providers
 
 from src.core.references.application.services.attribute import AttributeService
+from src.core.references.application.services.region import RegionService
 from src.core.references.application.usecases import GetSubcategoryFilterUseCase, GetSubcategoryFormUseCase, \
     GetBrandsUseCase, GetRegionsUseCase, GetCountriesUseCase, GetColorsUseCase
 from src.core.references.infrastructure.filter_builder import FilterBuilderService
@@ -86,4 +87,9 @@ class ReferenceContainer(containers.DeclarativeContainer):
     attribute_service = providers.Factory(
         AttributeService,
         repository=attribute_repository
+    )
+
+    region_service = providers.Factory(
+        RegionService,
+        repository=region_repository
     )

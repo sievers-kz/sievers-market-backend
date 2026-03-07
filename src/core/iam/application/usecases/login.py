@@ -24,8 +24,8 @@ class LoginUserUseCase:
 
             account.login(login_data.raw_password, self.password_hasher)
 
-            access_token = self.token_service.create_token(account.id, TokenType.ACCESS, account.role)
-            refresh_token = self.token_service.create_token(account.id, TokenType.REFRESH, account.role)
+            access_token = self.token_service.create_token(account.id, TokenType.ACCESS)
+            refresh_token = self.token_service.create_token(account.id, TokenType.REFRESH)
             account.add_new_token(refresh_token.type, refresh_token.value, refresh_token.expires_at)
 
             await uow.account.save(account)

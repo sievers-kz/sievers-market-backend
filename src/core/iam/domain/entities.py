@@ -13,7 +13,6 @@ from src.core.shared.infrastructure.services.password_hasher import AbstractPass
 @dataclass(frozen=False)
 class Account(AggregateRoot):
     id: UUID
-    role: UserRole
     email: Email
     phone: Phone | None
     password: Password

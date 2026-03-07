@@ -28,13 +28,12 @@ class PyJWTTokenService(AbstractTokenService):
             TokenType.PASSWORD: password_reset_token_lifetime
         }
 
-    def create_token(self, user_id: uuid.UUID, token_type, role: UserRole):
+    def create_token(self, user_id: uuid.UUID, token_type):
         lifetime = self._lifetimes.get(token_type)
         expires_at = datetime.now(timezone.utc) + lifetime
         payload = {
             "jti": str(uuid.uuid4()),
             "sub": str(user_id),
-            "role": role,
             "exp": expires_at,
             "token_type": token_type.value
         }

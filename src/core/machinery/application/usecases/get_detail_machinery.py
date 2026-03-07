@@ -1,11 +1,11 @@
 from uuid import UUID
 
-from src.core.machinery.application.interfaces.abstract_machinery_reader import AbstractMachineryReader
+from src.core.machinery.application.interfaces.query import IMachineryQuery
 
 
-class GetDetailMachineryUseCase:
-    def __init__(self, reader: AbstractMachineryReader):
-        self.reader = reader
+class GetMachineryDetailUseCase:
+    def __init__(self, query: IMachineryQuery):
+        self.query = query
 
     async def execute(self, machinery_id: UUID):
-        return await self.reader.get_detail_machinery(machinery_id)
+        return await self.query.get_machinery_detail(machinery_id)
