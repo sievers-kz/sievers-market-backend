@@ -52,6 +52,7 @@ class ObjectStorageSettings(BaseSettings):
 
 
 class ApplicationSettings(BaseSettings):
+    mode: str = Field(alias="MODE")
     database: PostgresSettings = Field(default_factory=PostgresSettings)
     authentication: AuthenticationSettings = Field(default_factory=AuthenticationSettings)
     sendgrid: SendGridSettings = Field(default_factory=SendGridSettings)
