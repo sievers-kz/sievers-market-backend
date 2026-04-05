@@ -10,6 +10,11 @@ class Title:
         self.validate_required()
         self.validate_length()
 
+    @classmethod
+    def create(cls, brand_name: str, model: str | None = None) -> "Title":
+        raw_value = f"{brand_name} {model}".strip() if model else brand_name
+        return cls(value=raw_value)
+
     def validate_required(self):
         if not self.value:
             raise ValueError("Заголовок обязательное поле")

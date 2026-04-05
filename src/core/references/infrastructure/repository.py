@@ -94,6 +94,11 @@ class BrandRepository(AbstractBrandRepository):
         query_result = await self._session.execute(statement)
         return query_result.scalars().all()
 
+    async def get_by_id(self, brand_id: int):
+        statement = select(self.brand).where(self.brand.id == brand_id)
+        query_result = await self._session.execute(statement)
+        return query_result.scalars().first()
+
 
 class CountryRepository(AbstractCountryRepository):
     def __init__(self, session: AsyncSession):

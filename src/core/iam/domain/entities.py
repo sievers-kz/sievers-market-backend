@@ -21,12 +21,24 @@ class Account(AggregateRoot):
     updated_at: datetime | None
     tokens: list["Token"]
 
-    def confirm_account(self):
+    def confirm_account(self, token_value: str):
         if self.is_active:
             raise ValueError("Account is already confirmed")
+
+        token = self._get_token_by_value(token_value)
+        if not token:
+            raise ValueError("Confirmation token not found")
+
+        if token.is_expired():
+            raise ValueError("Confirmation token is expired")
+
         self.is_active = True
+        token.revoke_token()
 
     def resend_confirmation_code(self, token_value: str, expires_at: datetime):
+        if self.is_active:
+            raise ValueError("Account is already confirmed")
+
         self.revoke_all_tokens_by_type(TokenType.EMAIL)
         self.add_new_token(TokenType.EMAIL, token_value, expires_at)
 
@@ -38,11 +50,8 @@ class Account(AggregateRoot):
             raise ValueError("Invalid email or password")
 
     def logout(self, token_value: str):
-        self.revoke_token(token_value)
-
-    def revoke_token(self, token_value: str):
-        token = next((token for token in self.tokens if token.value == token_value), None)
-        if token and not token.is_revoked:
+        token = self._get_token_by_value(token_value)
+        if not token.is_revoked:
             token.revoke_token()
 
     def add_new_token(self, type: TokenType, value: str, expires_at: datetime):
@@ -51,18 +60,20 @@ class Account(AggregateRoot):
         return new_token
 
     def rotate_refresh_token(self, old_token: str, new_token: str, expires_at):
-        self.revoke_token(old_token)
+        old = self._get_token_by_value(old_token)
+        old.revoke_token()
         self.add_new_token(type=TokenType.REFRESH, value=new_token, expires_at=expires_at)
 
     def request_reset_password(self, token_value: str, expires_at: datetime):
+        self.revoke_all_tokens_by_type(TokenType.PASSWORD)
         self.add_new_token(TokenType.PASSWORD, token_value, expires_at)
 
     def reset_password(self, token_value: str, new_hashed_password: str):
-        self.revoke_token(token_value)
+        old_token = self._get_token_by_value(token_value)
+        old_token.revoke_token()
 
         self.password = Password(new_hashed_password)
         self.updated_at = datetime.now(timezone.utc)
-
         self.revoke_all_tokens_by_type(TokenType.REFRESH)
 
     def revoke_all_tokens_by_type(self, token_type: TokenType):
@@ -81,6 +92,10 @@ class Account(AggregateRoot):
 
         self.password = Password(new_hashed_password)
         self.updated_at = datetime.now(timezone.utc)
+        self.revoke_all_tokens_by_type(TokenType.REFRESH)
+
+    def _get_token_by_value(self, token_value: str):
+        return next((token for token in self.tokens if token.value == token_value), None)
 
 
 @dataclass(frozen=False)
@@ -108,3 +123,5 @@ class Token(Entity):
             raise ValueError("Token is already revoked")
         self.is_revoked = True
 
+    def is_expired(self):
+        return self.expires_at < datetime.now(timezone.utc)
