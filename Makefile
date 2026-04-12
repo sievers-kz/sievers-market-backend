@@ -19,6 +19,12 @@ db:
 test:
 	docker-compose exec app pytest -v
 
+coverage:
+	docker-compose exec app pytest --cov=src --cov-report=term-missing
+
+coverage-html:
+	docker-compose exec app pytest --cov=src --cov-report=html
+
 seed:
 	docker-compose exec app python -m fixtures.seed
 

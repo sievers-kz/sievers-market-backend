@@ -10,17 +10,16 @@ from src.core.shared.domain.enums import PriceCurrency
 
 class CreateMachineryRequest(DTO):
     subcategory_id: UUID
-    title: str
     price: int
     currency: PriceCurrency
     city_id: UUID
-    description: str | None
+    description: str | None = None
     brand_id: UUID
-    model: str | None
+    model: str | None = None
     year_of_issue: int
     condition: MachineryCondition
-    color_id: UUID | None
-    country_id: UUID | None
+    color_id: UUID | None = None
+    country_id: UUID | None = None
 
     attributes: dict[str, Any] = Field(
         default_factory=dict,
@@ -122,9 +121,9 @@ class ChangeMachineryCategoryRequest(DTO):
 
 class ChangeMachineryGeneralRequest(DTO):
     brand_id: UUID
-    model: str | None
-    color_id: UUID | None
-    country_id: UUID | None
+    model: str | None = None
+    color_id: UUID | None = None
+    country_id: UUID | None = None
 
 
 class ChangeOperatingHistoryRequest(DTO):

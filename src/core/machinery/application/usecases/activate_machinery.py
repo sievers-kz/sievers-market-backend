@@ -11,7 +11,7 @@ class ActivateMachineryUseCase:
     async def execute(self, customer_id: UUID, machinery_id: UUID):
         async with self.uow as uow:
             current_count = await uow.machinery.count_customer_machinery(customer_id)
-            if current_count > ACTIVE_LISTINGS_LIMIT:
+            if current_count >= ACTIVE_LISTINGS_LIMIT:
                 raise ValueError("Вы достигли лимита бесплатных объявлений")
 
             machinery = await uow.machinery.get_machinery_by_id(machinery_id)

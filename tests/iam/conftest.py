@@ -73,11 +73,6 @@ async def create_user_usecase(container, mock_notifier, mock_profile_creator):
 
 
 @pytest_asyncio.fixture
-async def account_repository(container):
-    return await container.iam.account_repository()
-
-
-@pytest_asyncio.fixture
 async def account_confirmation_usecase(container):
     return await container.iam.account_confirmation_usecase()
 
@@ -115,3 +110,8 @@ async def reset_password_usecase(container):
 @pytest_asyncio.fixture
 async def change_password_usecase(container):
     return await container.iam.change_password_usecase()
+
+
+@pytest_asyncio.fixture
+async def account_repository(container):
+    return await container.iam.account_repository()

@@ -2,7 +2,7 @@ import uuid
 from uuid import UUID
 
 from src.core.machinery.domain.entities import Machinery
-from src.core.machinery.domain.value_objects import Title, Price, YearOfIssue
+from src.core.machinery.domain.value_objects import Title, Price, YearOfIssue, Description
 from src.core.machinery.presentation.dto import CreateMachineryRequest
 from src.core.shared.domain.enums import ListingStatus, PriceCurrency
 from src.core.machinery.domain.enums import MachineryCondition
@@ -24,7 +24,7 @@ class MachineryFactory:
             price=Price(dto.price),
             currency=dto.currency,
             city_id=dto.city_id,
-            description=dto.description,
+            description=Description(dto.description),
             brand_id=dto.brand_id,
             model=dto.model,
             year_of_issue=YearOfIssue(dto.year_of_issue),

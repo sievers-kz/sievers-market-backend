@@ -29,10 +29,8 @@ class CreateMachineryUseCase:
             current_count = await uow.machinery.count_customer_machinery(customer_id)
             if current_count >= ACTIVE_LISTINGS_LIMIT:
                 raise ValueError("Вы достигли лимита бесплатных объявлений")
-
             machinery = MachineryFactory.create(customer_id, title, validated_attributes, dto)
 
             await uow.machinery.save(machinery)
             await uow.commit()
-
             return machinery.id

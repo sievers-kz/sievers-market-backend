@@ -60,3 +60,14 @@ class YearOfIssue:
         if self.value > current_year:
             raise ValueError(f"Год выпуска не может превышать текущий ({current_year})")
 
+
+@dataclass(frozen=True)
+class Description:
+    value: str
+
+    def __post_init__(self):
+        self.validate_length()
+
+    def validate_length(self):
+        if len(self.value) > 3000:
+            raise ValueError("Описание не должно превышать 3000 символов")

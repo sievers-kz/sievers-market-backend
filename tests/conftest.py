@@ -1,5 +1,6 @@
 import pytest
 import pytest_asyncio
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
@@ -7,6 +8,14 @@ from fixtures.seed import DataSeeder
 from src.configuration.database.connection import Base
 from src.configuration.dependencies.container import ApplicationContainer
 from src.configuration.settings.settings import ApplicationSettings
+from src.main import create_fastapi_app
+
+
+pytest_plugins = [
+    "tests.iam.conftest",
+    "tests.customer.conftest",
+    "tests.machinery.conftest"
+]
 
 
 @pytest.fixture(scope="session")
@@ -63,6 +72,12 @@ async def session_factory(test_engine):
         await transaction.rollback()
 
 
+@pytest_asyncio.fixture
+async def database_session(session_factory):
+    async with session_factory() as session:
+        yield session
+
+
 @pytest_asyncio.fixture(scope="function")
 async def container(session_factory, test_settings):
     container = ApplicationContainer()
@@ -71,3 +86,22 @@ async def container(session_factory, test_settings):
     container.gateways.session_factory.override(session_factory)
     yield container
 
+
+@pytest_asyncio.fixture(scope="function")
+async def client(container):
+    app = create_fastapi_app()
+    app.container = container
+    transport = ASGITransport(app=app)
+
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        yield client
+
+
+@pytest_asyncio.fixture
+async def brand_repository(container):
+    return await container.reference.brand_repository()
+
+
+@pytest_asyncio.fixture
+async def add_to_wishlist_usecase(container):
+    return await container.wishlist.add_to_wishlist_usecase()

@@ -7,6 +7,7 @@ from src.core.machinery.application.usecases import CreateMachineryUseCase, GetM
     ChangeMachinerySpecUseCase, ChangeMachineryDescriptionUseCase
 from src.core.machinery.infrastructure.adapters import AttributeValidatorAdapter, WishlistCounterAdapter
 from src.core.machinery.infrastructure.queries import MachineryQuery
+from src.core.machinery.infrastructure.repository import MachineryRepository
 from src.core.machinery.infrastructure.uow import MachineryUnitOfWork
 
 
@@ -18,6 +19,11 @@ class MachineryContainer(containers.DeclarativeContainer):
 
     machinery_query = providers.Factory(
         MachineryQuery,
+        session=database_session,
+    )
+
+    machinery_repository = providers.Factory(
+        MachineryRepository,
         session=database_session,
     )
 

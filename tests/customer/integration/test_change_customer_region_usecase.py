@@ -1,7 +1,7 @@
 import pytest
 
 from src.api.customer.dto import ChangeCustomerFullname
-from tests.customer.conftest import create_customer, customer_repository
+from tests.customer.conftest import customer_repository
 
 
 class TestChangeCustomerFullnameUseCase:
@@ -14,8 +14,6 @@ class TestChangeCustomerFullnameUseCase:
         create_customer
     ):
         created_customer = create_customer
-        await customer_repository.save(created_customer)
-
         fullname_dto = ChangeCustomerFullname(last_name="Testov", first_name="Testovov", patronymic="Testovich")
         await change_customer_fullname_usecase.execute(created_customer.account_id, fullname_dto)
 
@@ -31,8 +29,6 @@ class TestChangeCustomerFullnameUseCase:
         customer_repository
     ):
         created_customer = create_customer
-        await customer_repository.save(created_customer)
-
         fullname_dto = ChangeCustomerFullname(
             last_name="WrongLastName123",
             first_name="Test",
