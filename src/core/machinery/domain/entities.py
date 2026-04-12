@@ -1,9 +1,10 @@
+import uuid
 from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
 
 from src.core.machinery.domain.enums import MachineryCondition
-from src.core.machinery.domain.value_objects import Title, Price, YearOfIssue
+from src.core.machinery.domain.value_objects import Title, Price, YearOfIssue, Description
 from src.core.shared.domain.entities import AggregateRoot
 from src.core.shared.domain.enums import PriceCurrency, ListingStatus
 
@@ -17,7 +18,7 @@ class Machinery(AggregateRoot):
     price: Price
     currency: PriceCurrency
     city_id: UUID
-    description: str | None
+    description: Description | None
     brand_id: UUID
     model: str | None
     year_of_issue: YearOfIssue
@@ -66,4 +67,4 @@ class Machinery(AggregateRoot):
         self.attributes = spec
 
     def change_description(self, description: str):
-        self.description = description
+        self.description = Description(value=description)

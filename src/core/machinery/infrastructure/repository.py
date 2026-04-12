@@ -23,11 +23,12 @@ class MachineryRepository(IMachineryRepository):
     async def get_machinery_by_id(self, machinery_id: UUID) -> DomainMachinery:
         statement = select(self._machinery).where(self._machinery.id == machinery_id)
         query_result = await self._session.execute(statement)
+        result = query_result.scalar_one_or_none()
 
-        if not query_result:
+        if result is None:
             return None
 
-        return MachineryMapper.to_domain(query_result.scalar_one_or_none())
+        return MachineryMapper.to_domain(result)
 
     async def count_customer_machinery(self, customer_id: UUID) -> int:
         statement = (

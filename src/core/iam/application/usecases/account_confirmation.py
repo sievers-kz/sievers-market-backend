@@ -12,8 +12,7 @@ class AccountConfirmationUseCase:
             if not account:
                 raise ValueError("Invalid confirmation token")
 
-            account.confirm_account()
-            account.revoke_token(confirmation_data.confirm_token)
+            account.confirm_account(confirmation_data.confirm_token)
 
             await uow.account.save(account)
             await uow.commit()

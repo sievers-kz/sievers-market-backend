@@ -43,6 +43,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         database_session=gateways.database_session,
         attribute_service=reference.attribute_service,
         wishlist_service=wishlist.wishlist_service,
+        brand_repository=reference.brand_repository,
     )
 
     media = providers.Container(

@@ -41,17 +41,17 @@ class PyJWTTokenService(AbstractTokenService):
 
         return TokenData(type=token_type, value=token_str, expires_at=expires_at)
 
-    def verify_token(self, token: str, expected_type) -> dict:
+    def verify_token(self, token: str, expected_type: TokenType) -> dict:
         try:
             payload = jwt.decode(token, self._secret_key, algorithms=[self._algorithm])
 
             token_type = payload.get("token_type")
             if not token_type or token_type != expected_type.value:
-                pass
+                raise ValueError(f"Invalid token type. Expected {expected_type.value}")
             return payload
 
         except jwt.ExpiredSignatureError as exc:
-            pass
+            raise ValueError("Token has expired")
 
         except jwt.DecodeError as exc:
-            pass
+            raise ValueError("Invalid token signature or format")

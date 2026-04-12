@@ -7,6 +7,7 @@ from src.core.machinery.application.usecases import CreateMachineryUseCase, GetM
     ChangeMachinerySpecUseCase, ChangeMachineryDescriptionUseCase
 from src.core.machinery.infrastructure.adapters import AttributeValidatorAdapter, WishlistCounterAdapter
 from src.core.machinery.infrastructure.queries import MachineryQuery
+from src.core.machinery.infrastructure.repository import MachineryRepository
 from src.core.machinery.infrastructure.uow import MachineryUnitOfWork
 
 
@@ -14,9 +15,15 @@ class MachineryContainer(containers.DeclarativeContainer):
     database_session = providers.Dependency()
     attribute_service = providers.Dependency()
     wishlist_service = providers.Dependency()
+    brand_repository = providers.Dependency()
 
     machinery_query = providers.Factory(
         MachineryQuery,
+        session=database_session,
+    )
+
+    machinery_repository = providers.Factory(
+        MachineryRepository,
         session=database_session,
     )
 
@@ -39,6 +46,7 @@ class MachineryContainer(containers.DeclarativeContainer):
         CreateMachineryUseCase,
         uow=machinery_uow,
         attribute_validator=attribute_validator_adapter,
+        brand_repository=brand_repository
     )
 
     get_machinery_list_usecase = providers.Factory(

@@ -1,5 +1,3 @@
-import uuid
-
 from src.api.iam.dto import ResetPasswordData
 from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
 from src.core.iam.domain.enums import TokenType
@@ -20,7 +18,7 @@ class ResetPasswordUseCase:
 
     async def execute(self, reset_password_data: ResetPasswordData):
         try:
-            self.token_service.verify_token(reset_password_data.raw_password, TokenType.PASSWORD)
+            self.token_service.verify_token(reset_password_data.password_reset_token, TokenType.PASSWORD)
         except Exception:
             raise ValueError("Invalid reset password token")
 

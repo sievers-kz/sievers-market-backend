@@ -12,3 +12,6 @@ class MachineryCondition(str, Enum):
             self.USED: "Б/У"
         }
         return labels.get(self, "Неизвестное состояние")
+
+
+ACTIVE_LISTINGS_LIMIT = 5

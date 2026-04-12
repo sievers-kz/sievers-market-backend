@@ -10,6 +10,11 @@ class Title:
         self.validate_required()
         self.validate_length()
 
+    @classmethod
+    def create(cls, brand_name: str, model: str | None = None) -> "Title":
+        raw_value = f"{brand_name} {model}".strip() if model else brand_name
+        return cls(value=raw_value)
+
     def validate_required(self):
         if not self.value:
             raise ValueError("Заголовок обязательное поле")
@@ -55,3 +60,14 @@ class YearOfIssue:
         if self.value > current_year:
             raise ValueError(f"Год выпуска не может превышать текущий ({current_year})")
 
+
+@dataclass(frozen=True)
+class Description:
+    value: str
+
+    def __post_init__(self):
+        self.validate_length()
+
+    def validate_length(self):
+        if len(self.value) > 3000:
+            raise ValueError("Описание не должно превышать 3000 символов")
