@@ -1,7 +1,7 @@
 import uuid
 from uuid import UUID
 
-from src.api.media.dto import UpdateMediaDTO
+from src.core.media.presentation.dto import UpdateMediaDTO
 from src.core.media.application.interfaces.abstract_media_uow import AbstractMediaUnitOfWork
 from src.core.media.domain.entities import Media
 

@@ -5,9 +5,9 @@ from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter
 from fastapi.params import Depends, Security
 
-from src.api.shared.dto import CurrentCustomer
-from src.api.shared.security import get_current_customer
-from src.api.wishlist.dto import WishlistCard
+from src.core.shared.presentation.dto import CurrentCustomer
+from src.core.shared.presentation.security import get_current_customer
+from src.core.wishlist.presentation.dto import WishlistCard
 from src.configuration.dependencies.container import ApplicationContainer
 from src.core.wishlist.application.usecases import AddToWishlistUseCase, DeleteFromWishlistUseCase, GetWishlistUseCase
 

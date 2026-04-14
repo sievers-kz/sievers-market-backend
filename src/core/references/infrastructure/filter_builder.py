@@ -1,4 +1,4 @@
-from src.api.reference.dto import Option, FilterAttribute
+from src.core.references.presentation.dto import Option, FilterAttribute
 from src.core.references.domain.enums import WidgetType
 from src.core.references.infrastructure.models import SubcategoryAttribute
 

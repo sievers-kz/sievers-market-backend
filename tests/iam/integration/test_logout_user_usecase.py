@@ -1,6 +1,6 @@
 import pytest
 
-from src.api.iam.dto import CreateUserRequest, AccountConfirmation, LoginAccount, RefreshData
+from src.core.iam.presentation.dto import CreateUserRequest, AccountConfirmation, LoginAccount, RefreshData
 
 
 class TestLogoutUserUsecase:

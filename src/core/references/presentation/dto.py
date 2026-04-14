@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from src.core.machinery.domain.enums import MachineryCondition
+from src.core.shared.presentation.dto import DTO
 
 
 class BrandDTO(BaseModel):

@@ -51,12 +51,28 @@ class ObjectStorageSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
+class RedisConfig(BaseSettings):
+    host: str = Field(alias="REDIS_HOST")
+    port: int = Field(alias="REDIS_PORT")
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+
+class ResendSettings(BaseSettings):
+    api_key: str = Field(alias="RESEND_API_KEY")
+    from_email: str = Field(alias="RESEND_FROM_EMAIL")
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+
 class ApplicationSettings(BaseSettings):
     mode: str = Field(alias="MODE")
     database: PostgresSettings = Field(default_factory=PostgresSettings)
     authentication: AuthenticationSettings = Field(default_factory=AuthenticationSettings)
     sendgrid: SendGridSettings = Field(default_factory=SendGridSettings)
     object_storage: ObjectStorageSettings = Field(default_factory=ObjectStorageSettings)
+    redis_config: RedisConfig = Field(default_factory=RedisConfig)
+    resend_config: ResendSettings = Field(default_factory=ResendSettings)
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", env_file_encoding="utf-8")
 

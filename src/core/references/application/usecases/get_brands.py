@@ -1,4 +1,4 @@
-from src.api.reference.dto import BrandDTO
+from src.core.references.presentation.dto import BrandDTO
 from src.core.references.application.interfaces.abstract_brand_repository import AbstractBrandRepository
 
 

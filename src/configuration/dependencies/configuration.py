@@ -9,3 +9,5 @@ class ConfigurationContainer(containers.DeclarativeContainer):
     authentication = configuration.authentication
     sendgrid = configuration.sendgrid
     object_storage = configuration.object_storage
+    redis = configuration.redis_config
+    resend_config = configuration.resend_config

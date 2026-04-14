@@ -1,4 +1,4 @@
-from src.api.reference.dto import CountryDTO
+from src.core.references.presentation.dto import CountryDTO
 from src.core.references.application.interfaces.abstract_country_repository import AbstractCountryRepository
 
 

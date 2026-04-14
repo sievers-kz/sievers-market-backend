@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends
 from fastapi.params import Query
 from fastapi_filter import FilterDepends
 
-from src.api.shared.dto import CurrentCustomer
-from src.api.shared.security import get_current_customer
+from src.core.shared.presentation.dto import CurrentCustomer
+from src.core.shared.presentation.security import get_current_customer
 from src.configuration.dependencies.container import ApplicationContainer
 
 from src.core.machinery.application.usecases import (

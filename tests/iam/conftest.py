@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock
 
 import pytest_asyncio
 
-from src.api.iam.dto import CreateUserRequest
+from src.core.iam.presentation.dto import CreateUserRequest
 from src.core.iam.domain.entities import Account, Token
 from src.core.iam.domain.enums import TokenType
 from src.core.iam.domain.value_objects import Email, Phone, Password

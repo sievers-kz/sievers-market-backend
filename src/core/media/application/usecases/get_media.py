@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from src.api.media.dto import MediaResponse
+from src.core.media.presentation.dto import MediaResponse
 from src.core.media.application.interfaces.abstract_media_uow import AbstractMediaUnitOfWork
 
 

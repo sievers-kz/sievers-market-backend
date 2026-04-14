@@ -1,5 +1,5 @@
 import uuid
-from src.api.media.dto import BatchPresignedUrlRequest, BatchPresignedUrlResponse, PresignedUrlResponseItem
+from src.core.media.presentation.dto import BatchPresignedUrlRequest, BatchPresignedUrlResponse, PresignedUrlResponseItem
 from src.core.media.application.interfaces.abstract_object_storage import AbstractObjectStorage
 
 

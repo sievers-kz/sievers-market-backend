@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 
-from src.api.iam.dto import AccountConfirmation, LoginAccount, RefreshData
+from src.core.iam.presentation.dto import AccountConfirmation, LoginAccount, RefreshData
 from src.core.iam.domain.enums import TokenType
 from tests.iam.conftest import get_token_by_type, get_token_by_value, create_user_request
 

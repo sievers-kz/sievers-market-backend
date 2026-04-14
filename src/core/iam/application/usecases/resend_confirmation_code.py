@@ -1,22 +1,19 @@
 import asyncio
 
-from src.api.iam.dto import ResendCodeRequest
+from src.core.iam.application.services.otp import OTPService
+from src.core.iam.domain.enums import OTPType
+from src.core.iam.presentation.dto import ResendCodeRequest
 from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
-from src.core.iam.application.interfaces.abstract_account_notifier import AbstractAccountNotifier
-from src.core.iam.application.interfaces.abstract_token_service import AbstractTokenService
-from src.core.iam.domain.enums import TokenType
 
 
 class ResendConfirmationCodeUseCase:
     def __init__(
         self,
         unit_of_work: AbstractIAMUnitOfWork,
-        token_service: AbstractTokenService,
-        notifier: AbstractAccountNotifier
+        otp_service: OTPService,
     ):
         self.unit_of_work = unit_of_work
-        self.token_service = token_service
-        self.notifier = notifier
+        self.otp_service = otp_service
 
     async def execute(self, resend_data: ResendCodeRequest):
         async with self.unit_of_work as uow:
@@ -25,13 +22,8 @@ class ResendConfirmationCodeUseCase:
                 await asyncio.sleep(0.5)
                 return
 
-            email_token = self.token_service.create_token(account.id, TokenType.EMAIL)
-            account.resend_confirmation_code(email_token.value, email_token.expires_at)
-
-            await uow.account.save(account)
-            await uow.commit()
-
-            await self.notifier.send_confirmation_code(
-                destination=account.email.value,
-                code=email_token.value
-            )
+        await self.otp_service.send(
+            account_id=account.id,
+            email=account.email.value,
+            otp_type=OTPType.CONFIRMATION
+        )
