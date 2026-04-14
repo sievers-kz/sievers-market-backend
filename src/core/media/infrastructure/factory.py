@@ -1,6 +1,6 @@
 import uuid
 
-from src.api.media.dto import UploadMediaDTO
+from src.core.media.presentation.dto import UploadMediaDTO
 from src.core.media.domain.entities import Media
 
 

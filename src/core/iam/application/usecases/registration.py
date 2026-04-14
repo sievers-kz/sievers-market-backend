@@ -1,42 +1,40 @@
-import uuid
-
-from src.api.iam.dto import CreateUserRequest
-from src.core.iam.application.interfaces.abstract_factory import AbstractAccountFactory
+from src.core.customer.application.interfaces.abstract_customer_service import ICustomerService
+from src.core.iam.application.services.otp import OTPService
+from src.core.iam.domain.enums import OTPType
+from src.core.iam.presentation.dto import CreateUserRequest
+from src.core.iam.application.interfaces.abstract_factory import IAccountFactory
 from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
-from src.core.iam.application.interfaces.abstract_account_notifier import AbstractAccountNotifier
-from src.core.iam.application.interfaces.abstract_profile_creator import AbstractProfileCreator
-from src.core.iam.domain.entities import Account
-from src.core.iam.domain.enums import TokenType
-from src.core.iam.application.interfaces.abstract_token_service import AbstractTokenService
 
 
 class CreateUserUseCase:
     def __init__(
         self,
         unit_of_work: AbstractIAMUnitOfWork,
-        token_service: AbstractTokenService,
-        factory: AbstractAccountFactory,
-        profile_creator: AbstractProfileCreator,
-        notifier: AbstractAccountNotifier
+        factory: IAccountFactory,
+        customer_service: ICustomerService,
+        otp_service: OTPService,
     ):
         self.unit_of_work = unit_of_work
-        self.token_service = token_service
         self.factory = factory
-        self.profile_creator = profile_creator
-        self.notifier = notifier
+        self.customer_service = customer_service
+        self.otp_service = otp_service
 
     async def execute(self, dto: CreateUserRequest):
         async with self.unit_of_work as uow:
-            account_id = uuid.uuid4()
-            email_token = self.token_service.create_token(account_id, TokenType.EMAIL)
+            existing = await uow.account.get_account_by_email(dto.email)
+            if existing:
+                raise ValueError("Пользователь с таким email уже существует")
 
-            account: Account = self.factory.create(account_id, dto, [email_token])
+            account = self.factory.create(dto)
             await uow.account.save(account)
 
-            await self.profile_creator.create(account_id, dto.last_name, dto.first_name)
+            await self.customer_service.create(account_id=account.id, last_name=dto.last_name, first_name=dto.first_name)
             await uow.commit()
 
-            await self.notifier.send_confirmation_code(
-                destination=account.email.value,
-                code=email_token.value
-            )
+        await self.otp_service.send(
+            account_id=account.id,
+            email=dto.email,
+            otp_type=OTPType.CONFIRMATION,
+        )
+
+        return account.id

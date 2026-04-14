@@ -1,4 +1,4 @@
-from src.api.media.dto import UploadMediaDTO
+from src.core.media.presentation.dto import UploadMediaDTO
 from src.core.media.application.interfaces.abstract_media_uow import AbstractMediaUnitOfWork
 from src.core.media.infrastructure.factory import MediaFactory
 

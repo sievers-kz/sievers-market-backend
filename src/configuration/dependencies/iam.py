@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from dependency_injector import containers, providers
 
+from src.core.iam.application.services.otp import OTPService
 from src.core.iam.application.usecases import (
     CreateUserUseCase,
     AccountConfirmationUseCase,
@@ -12,8 +13,7 @@ from src.core.iam.application.usecases import (
     ResetPasswordUseCase,
     ChangePasswordUseCase, ResendConfirmationCodeUseCase
 )
-from src.core.iam.infrastructure.adapters.account_confirmation import EmailNotifierAdapter
-from src.core.iam.infrastructure.adapters.profile_creator import ProfileCreatorAdapter
+
 
 from src.core.iam.infrastructure.iam_unit_of_work import IAMUnitOfWork
 from src.core.iam.infrastructure.factory import AccountFactory
@@ -30,8 +30,8 @@ class IAMContainer(containers.DeclarativeContainer):
     customer_service = providers.Dependency()
 
     console_email_sender = providers.Dependency()
-    email_confirmation_template = providers.Dependency()
-    password_recovery_template = providers.Dependency()
+    redis_service = providers.Dependency()
+    arq_service = providers.Dependency()
 
     account_repository = providers.Factory(
         AccountRepository,
@@ -75,37 +75,30 @@ class IAMContainer(containers.DeclarativeContainer):
         )
     )
 
-    profile_creator_adapter = providers.Factory(
-        ProfileCreatorAdapter,
-        customer_service=customer_service,
-    )
-
-    email_notifier_adapter = providers.Factory(
-        EmailNotifierAdapter,
-        sender=console_email_sender,
-        email_confirmation_template=email_confirmation_template,
-        password_recovery_template=password_recovery_template
+    otp_service = providers.Factory(
+        OTPService,
+        cache=redis_service,
+        queue=arq_service,
     )
 
     create_user_usecase = providers.Factory(
         CreateUserUseCase,
         unit_of_work=iam_unit_of_work,
-        token_service=pyjwt_token_service,
         factory=account_factory,
-        profile_creator=profile_creator_adapter,
-        notifier=email_notifier_adapter
+        customer_service=customer_service,
+        otp_service=otp_service
     )
 
     account_confirmation_usecase = providers.Factory(
         AccountConfirmationUseCase,
-        unit_of_work=iam_unit_of_work
+        unit_of_work=iam_unit_of_work,
+        otp_service=otp_service,
     )
 
     resend_confirmation_code_usecase = providers.Factory(
         ResendConfirmationCodeUseCase,
         unit_of_work=iam_unit_of_work,
-        token_service=pyjwt_token_service,
-        notifier=email_notifier_adapter
+        otp_service=otp_service,
     )
 
     login_user_usecase = providers.Factory(
@@ -129,15 +122,14 @@ class IAMContainer(containers.DeclarativeContainer):
     forgot_password_usecase = providers.Factory(
         ForgotPasswordUseCase,
         unit_of_work=iam_unit_of_work,
-        token_service=pyjwt_token_service,
-        notifier=email_notifier_adapter
+        otp_service=otp_service,
     )
 
     reset_password_usecase = providers.Factory(
         ResetPasswordUseCase,
         unit_of_work=iam_unit_of_work,
-        token_service=pyjwt_token_service,
-        password_hasher=bcrypt_password_hasher
+        password_hasher=bcrypt_password_hasher,
+        otp_service=otp_service,
     )
 
     change_password_usecase = providers.Factory(

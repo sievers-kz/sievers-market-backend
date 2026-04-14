@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 
-from src.api.customer.routers import customer
-from src.api.iam.routers import iam
+from src.core.customer.presentation.routers import customer
+from src.core.iam.presentation.routers import iam
 from src.core.machinery.presentation.routers import machinery
-from src.api.reference.routers import reference
-from src.api.wishlist.routers import wishlist
-from src.api.media.routers import media
+from src.core.references.presentation.routers import reference
+from src.core.wishlist.presentation.routers import wishlist
+from src.core.media.presentation.routers import media
 from src.configuration.dependencies.container import ApplicationContainer
 
 
@@ -14,13 +14,13 @@ def create_fastapi_app() -> FastAPI:
     container = ApplicationContainer()
     container.wire(
         modules=[
-            "src.api.iam.routers",
-            "src.api.customer.routers",
+            "src.core.iam.presentation.routers",
+            "src.core.customer.presentation.routers",
             "src.core.machinery.presentation.routers",
-            "src.api.reference.routers",
-            "src.api.shared.security",
-            "src.api.wishlist.routers",
-            "src.api.media.routers"
+            "src.core.references.presentation.routers",
+            "src.core.shared.presentation.security",
+            "src.core.wishlist.presentation.routers",
+            "src.core.media.presentation.routers",
         ]
     )
     app.container = container
@@ -36,3 +36,4 @@ def create_fastapi_app() -> FastAPI:
 
 
 fastapi_app = create_fastapi_app()
+

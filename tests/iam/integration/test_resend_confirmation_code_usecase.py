@@ -1,6 +1,6 @@
 import pytest
 
-from src.api.iam.dto import CreateUserRequest, AccountConfirmation, ResendCodeRequest
+from src.core.iam.presentation.dto import CreateUserRequest, AccountConfirmation, ResendCodeRequest
 from tests.iam.conftest import mock_notifier
 
 

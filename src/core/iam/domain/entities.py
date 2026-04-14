@@ -21,19 +21,10 @@ class Account(AggregateRoot):
     updated_at: datetime | None
     tokens: list["Token"]
 
-    def confirm_account(self, token_value: str):
+    def confirm_account(self):
         if self.is_active:
             raise ValueError("Account is already confirmed")
-
-        token = self._get_token_by_value(token_value)
-        if not token:
-            raise ValueError("Confirmation token not found")
-
-        if token.is_expired():
-            raise ValueError("Confirmation token is expired")
-
         self.is_active = True
-        token.revoke_token()
 
     def resend_confirmation_code(self, token_value: str, expires_at: datetime):
         if self.is_active:
@@ -68,10 +59,7 @@ class Account(AggregateRoot):
         self.revoke_all_tokens_by_type(TokenType.PASSWORD)
         self.add_new_token(TokenType.PASSWORD, token_value, expires_at)
 
-    def reset_password(self, token_value: str, new_hashed_password: str):
-        old_token = self._get_token_by_value(token_value)
-        old_token.revoke_token()
-
+    def reset_password(self, new_hashed_password: str):
         self.password = Password(new_hashed_password)
         self.updated_at = datetime.now(timezone.utc)
         self.revoke_all_tokens_by_type(TokenType.REFRESH)

@@ -1,6 +1,6 @@
 import pytest
 
-from src.api.iam.dto import CreateUserRequest, AccountConfirmation, LoginAccount
+from src.core.iam.presentation.dto import CreateUserRequest, AccountConfirmation, LoginAccount
 from src.core.iam.domain.enums import TokenType
 
 

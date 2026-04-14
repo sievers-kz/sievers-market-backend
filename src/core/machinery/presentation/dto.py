@@ -1,9 +1,9 @@
 from typing import Any
 from uuid import UUID
 
-from pydantic import Field, field_validator
+from pydantic import Field
 
-from src.api.shared.dto import DTO
+from src.core.shared.presentation.dto import DTO
 from src.core.machinery.domain.enums import MachineryCondition
 from src.core.shared.domain.enums import PriceCurrency
 

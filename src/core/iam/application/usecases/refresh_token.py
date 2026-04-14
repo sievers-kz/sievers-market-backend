@@ -1,4 +1,4 @@
-from src.api.iam.dto import RefreshData, LoginResponse
+from src.core.iam.presentation.dto import RefreshData, LoginResponse
 from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
 from src.core.iam.domain.enums import TokenType
 from src.core.iam.infrastructure.services.pyjwt_token import AbstractTokenService

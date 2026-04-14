@@ -2,9 +2,9 @@ from typing import Annotated
 from uuid import UUID
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Security
 
-from src.api.reference.dto import CountryDTO, RegionDTO, BrandDTO, FilterAttribute, FormField, ColorDTO
+from src.core.references.presentation.dto import CountryDTO, RegionDTO, BrandDTO, FilterAttribute, FormField, ColorDTO
 from src.configuration.dependencies.container import ApplicationContainer
 
 from src.core.references.application.usecases import (
@@ -109,3 +109,5 @@ async def get_all_colors(
     ]
 ):
     return await usecase.execute()
+
+

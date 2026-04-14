@@ -5,11 +5,23 @@ from fastapi import APIRouter
 from fastapi.params import Depends
 from dependency_injector.wiring import inject, Provide
 
-from src.api.media.dto import UploadMediaDTO, UpdateMediaDTO, MediaResponse, \
-    BatchPresignedUrlResponse, BatchPresignedUrlRequest
+from src.core.media.presentation.dto import (
+    UploadMediaDTO,
+    UpdateMediaDTO,
+    MediaResponse,
+    BatchPresignedUrlResponse,
+    BatchPresignedUrlRequest
+)
+
 from src.configuration.dependencies.container import ApplicationContainer
-from src.core.media.application.usecases import GetPreSignedUrlsUseCase, UploadMediaUseCase, UpdateMediaUseCase, \
+
+from src.core.media.application.usecases import (
+    GetPreSignedUrlsUseCase,
+    UploadMediaUseCase,
+    UpdateMediaUseCase,
     GetMediaUseCase
+)
+
 
 media = APIRouter(prefix="/api/v1/media", tags=["Media"])
 

@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import delete, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.wishlist.dto import WishlistCard
+from src.core.wishlist.presentation.dto import WishlistCard
 from src.core.machinery.infrastructure.models import Machinery
 from src.core.references.infrastructure.models import Subcategory, City
 from src.core.wishlist.application.interfaces.abstract_wishlist_repository import AbstractWishlistRepository

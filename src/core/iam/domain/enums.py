@@ -21,3 +21,8 @@ class TokenType(str, enum.Enum):
     ACCESS = "access"
     EMAIL = "email"
     PASSWORD = "password"
+
+
+class OTPType(str, enum.Enum):
+    CONFIRMATION = "confirmation"
+    PASSWORD_RESET = "password_reset"

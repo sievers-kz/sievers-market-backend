@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from src.api.customer.dto import ChangeCustomerFullname
+from src.core.customer.presentation.dto import ChangeCustomerFullname
 from src.core.customer.application.interfaces.abstract_customer_uow import AbstractCustomerUnitOfWork
 
 

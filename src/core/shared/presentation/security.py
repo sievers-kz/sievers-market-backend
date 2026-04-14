@@ -5,7 +5,7 @@ from fastapi import HTTPException, status, Depends
 from dependency_injector.wiring import Provide, inject
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from src.api.shared.dto import CurrentUser, CurrentCustomer
+from src.core.shared.presentation.dto import CurrentUser, CurrentCustomer
 from src.configuration.dependencies.container import ApplicationContainer
 from src.core.customer.application.interfaces.abstract_customer_uow import AbstractCustomerUnitOfWork
 from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork

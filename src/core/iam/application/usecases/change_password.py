@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from src.api.iam.dto import ChangePasswordData
+from src.core.iam.presentation.dto import ChangePasswordData
 from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
 from src.core.shared.infrastructure.services.password_hasher import AbstractPasswordHasher
 

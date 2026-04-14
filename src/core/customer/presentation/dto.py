@@ -9,10 +9,6 @@ class ChangeCustomerFullname(BaseModel):
     patronymic: str | None = None
 
 
-class ChangeCustomerRegion(BaseModel):
-    region_id: UUID
-
-
 class CustomerResponse(BaseModel):
     last_name: str
     first_name: str

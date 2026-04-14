@@ -1,4 +1,4 @@
-from src.api.reference.dto import MachineryConfig, LivestockConfig, FormField, Option
+from src.core.references.presentation.dto import MachineryConfig, LivestockConfig, FormField, Option
 from src.core.references.domain.enums import WidgetType
 from src.core.references.infrastructure.models import SubcategoryAttribute
 

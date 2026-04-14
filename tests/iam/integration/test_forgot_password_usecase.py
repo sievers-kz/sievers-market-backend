@@ -1,6 +1,6 @@
 import pytest
 
-from src.api.iam.dto import AccountConfirmation, LoginAccount, ForgotPasswordData
+from src.core.iam.presentation.dto import AccountConfirmation, LoginAccount, ForgotPasswordData
 from src.core.iam.domain.enums import TokenType
 from tests.iam.conftest import create_user_request, get_token_by_type
 

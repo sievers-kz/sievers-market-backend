@@ -1,4 +1,4 @@
-from src.api.reference.dto import ColorDTO
+from src.core.references.presentation.dto import ColorDTO
 from src.core.references.application.interfaces.abstract_color_repository import AbstractColorRepository
 
 

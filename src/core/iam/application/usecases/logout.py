@@ -1,4 +1,4 @@
-from src.api.iam.dto import RefreshData
+from src.core.iam.presentation.dto import RefreshData
 from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
 
 

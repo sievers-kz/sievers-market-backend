@@ -1,4 +1,4 @@
-from src.api.reference.dto import RegionDTO
+from src.core.references.presentation.dto import RegionDTO
 from src.core.references.application.interfaces.abstract_region_repository import AbstractRegionRepository
 
 

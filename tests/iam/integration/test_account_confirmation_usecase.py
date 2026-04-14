@@ -3,7 +3,7 @@ from datetime import timedelta
 import pytest
 from freezegun import freeze_time
 
-from src.api.iam.dto import CreateUserRequest, AccountConfirmation
+from src.core.iam.presentation.dto import CreateUserRequest, AccountConfirmation
 
 
 class TestAccountConfirmationUsecase:

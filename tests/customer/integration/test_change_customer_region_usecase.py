@@ -1,6 +1,6 @@
 import pytest
 
-from src.api.customer.dto import ChangeCustomerFullname
+from src.core.customer.presentation.dto import ChangeCustomerFullname
 from tests.customer.conftest import customer_repository
 
 

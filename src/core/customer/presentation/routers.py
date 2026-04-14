@@ -3,14 +3,13 @@ from fastapi import APIRouter
 from fastapi.params import Depends, Security
 from typing_extensions import Annotated
 
-from src.api.customer.dto import ChangeCustomerFullname, ChangeCustomerRegion, CustomerResponse
-from src.api.shared.dto import CurrentUser
-from src.api.shared.security import get_current_user
+from src.core.customer.presentation.dto import ChangeCustomerFullname, CustomerResponse
+from src.core.shared.presentation.dto import CurrentUser
+from src.core.shared.presentation.security import get_current_user
 from src.configuration.dependencies.container import ApplicationContainer
 
 from src.core.customer.application.usecases import (
     ChangeCustomerFullnameUseCase,
-    ChangeCustomerRegionUseCase,
     GetCurrentCustomerUseCase,
 )
 
@@ -52,19 +51,3 @@ async def change_customer_fullname(
     return {"message": "Ваши данные успешно изменены!"}
 
 
-@customer.patch("/me/change-region")
-@inject
-async def change_customer_region(
-    dto: ChangeCustomerRegion,
-    usecase: Annotated[
-        ChangeCustomerRegionUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.customer.change_customer_region_usecase
-            ]
-        )
-    ],
-    current_user: CurrentUser = Security(get_current_user)
-):
-    await usecase.execute(current_user.id, dto)
-    return {"message": "Ваш регион изменен"}

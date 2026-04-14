@@ -1,8 +1,7 @@
 from datetime import datetime
-from typing import Optional, Literal, Union, Annotated
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
 
 from src.core.iam.domain.enums import TokenType
 
@@ -27,8 +26,9 @@ class ForgotPasswordData(BaseModel):
 
 
 class ResetPasswordData(BaseModel):
+    email: str
     raw_password: str
-    password_reset_token: str
+    password_reset_otp: str
 
 
 class RefreshData(BaseModel):
@@ -46,7 +46,8 @@ class LoginResponse(BaseModel):
 
 
 class AccountConfirmation(BaseModel):
-    confirm_token: str
+    account_id: UUID
+    confirm_code: str
 
 
 class CreateUserRequest(BaseModel):

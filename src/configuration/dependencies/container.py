@@ -20,12 +20,16 @@ class ApplicationContainer(containers.DeclarativeContainer):
         GatewaysContainer,
         database_config=configurations.database,
         sendgrid_config=configurations.sendgrid,
+        redis_config=configurations.redis,
     )
 
     shared = providers.Container(
         SharedContainer,
         session_factory=gateways.session_factory,
-        database_session=gateways.database_session
+        database_session=gateways.database_session,
+        redis_client=gateways.redis_client,
+        arq_pool=gateways.arq_pool,
+        resend_config=configurations.resend_config,
     )
 
     reference = providers.Container(
@@ -56,7 +60,6 @@ class ApplicationContainer(containers.DeclarativeContainer):
         CustomerContainer,
         database_session=gateways.database_session,
         session_factory=gateways.session_factory,
-        region_service=reference.region_service,
     )
 
     iam = providers.Container(
@@ -65,6 +68,6 @@ class ApplicationContainer(containers.DeclarativeContainer):
         database_session=gateways.database_session,
         customer_service=customer.customer_service,
         console_email_sender=shared.console_email_sender,
-        email_confirmation_template=configurations.sendgrid.email_confirmation_template_id,
-        password_recovery_template=configurations.sendgrid.password_recovery_template_id
+        redis_service=shared.redis_service,
+        arq_service=shared.arq_service,
     )

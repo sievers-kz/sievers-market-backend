@@ -1,4 +1,4 @@
-from src.api.iam.dto import LoginAccount, LoginResponse
+from src.core.iam.presentation.dto import LoginAccount, LoginResponse
 from src.core.iam.domain.enums import TokenType
 from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
 from src.core.iam.application.interfaces.abstract_token_service import AbstractTokenService
