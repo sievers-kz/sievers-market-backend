@@ -7,7 +7,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.core.shared.infrastructure.base_model import BaseModel
 
 if TYPE_CHECKING:
-    from src.core.references.infrastructure.models import City
     from src.core.iam.infrastructure.models import Account
 
 
@@ -38,14 +37,6 @@ class Customer(BaseModel):
         nullable=True
     )
 
-    city_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey(
-            "cities.id",
-            ondelete="SET NULL"
-        ),
-        nullable=True
-    )
-
     avatar_url: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
@@ -53,4 +44,3 @@ class Customer(BaseModel):
     )
 
     account: Mapped["Account"] = relationship()
-    city: Mapped["City | None"] = relationship()

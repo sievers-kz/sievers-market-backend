@@ -33,3 +33,5 @@ class BaseModel(Base):
     def get_enum_values(enum_class: enum.Enum):
         return [item.value for item in enum_class]
 
+
+

@@ -11,7 +11,7 @@ from src.core.shared.infrastructure.base_model import BaseModel
 
 if TYPE_CHECKING:
     from src.core.customer.infrastructure.models import Customer
-    from src.core.references.infrastructure.models import Subcategory
+    from src.core.catalog.infrastructure.models import Subcategory
     from src.core.references.infrastructure.models import City
     from src.core.references.infrastructure.models import Brand
     from src.core.references.infrastructure.models import Color

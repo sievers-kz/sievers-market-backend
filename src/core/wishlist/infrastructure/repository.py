@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.wishlist.presentation.dto import WishlistCard
 from src.core.machinery.infrastructure.models import Machinery
-from src.core.references.infrastructure.models import Subcategory, City
+from src.core.references.infrastructure.models import City
+from src.core.catalog.infrastructure.models import Subcategory
 from src.core.wishlist.application.interfaces.abstract_wishlist_repository import AbstractWishlistRepository
 from src.core.wishlist.domain.entities import Wishlist as DomainWishlist
 from src.core.wishlist.infrastructure.models import Wishlist as ORMWishlist
