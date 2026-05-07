@@ -1,11 +1,19 @@
 from abc import ABC, abstractmethod
+from typing import Any
+
+from src.core.references.domain.entities import Brand
 
 
-class AbstractBrandRepository(ABC):
+class IBrandRepository(ABC):
     @abstractmethod
-    async def get_all(self):
+    async def get_all(self) -> list[Brand]:
         raise NotImplementedError
 
     @abstractmethod
-    async def get_by_id(self, brand_id: int):
+    async def get_by_id(self, brand_id: int) -> Brand:
         raise NotImplementedError
+
+    @abstractmethod
+    async def save(self, brand: Brand) -> None:
+        raise NotImplementedError
+

@@ -9,7 +9,8 @@ from src.core.machinery.infrastructure.models import Machinery
 from src.core.machinery.presentation.dto import MachineryCardQuery, PaginatedMachinery, MachineryDetailQuery, \
     MachineryOwner
 from src.core.machinery.presentation.filters import MachineryFilter, MachineryOwnerFilter
-from src.core.references.infrastructure.models import Subcategory, City, Brand, Color, Country
+from src.core.references.infrastructure.models import City, Brand, Color, Country
+from src.core.catalog.infrastructure.models import Subcategory
 from src.core.shared.domain.enums import ListingStatus
 
 

@@ -20,14 +20,8 @@ from src.core.machinery.infrastructure.models import Machinery
 from src.core.wishlist.infrastructure.models import Wishlist
 from src.core.media.infrastructure.models import Media
 
+from src.core.catalog.infrastructure.models import Rubric, Category, Subcategory
 from src.core.references.infrastructure.models import (
-    Rubric,
-    Category,
-    Subcategory,
-    SubcategoryAttribute,
-    Attribute,
-    AttributeOption,
-    UnitOfMeasure,
     Region,
     City,
     Color,

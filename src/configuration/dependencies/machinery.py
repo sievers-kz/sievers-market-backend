@@ -5,7 +5,6 @@ from src.core.machinery.application.usecases import CreateMachineryUseCase, GetM
     ArchiveMachineryUseCase, DeleteMachineryUseCase, GetCustomerMachineryDetailUseCase, ChangeMachineryCategoryUseCase, \
     ChangeMachineryGeneralUseCase, ChangeOperatingHistoryUseCase, ChangeMachineryPriceUseCase, \
     ChangeMachinerySpecUseCase, ChangeMachineryDescriptionUseCase
-from src.core.machinery.infrastructure.adapters import AttributeValidatorAdapter, WishlistCounterAdapter
 from src.core.machinery.infrastructure.queries import MachineryQuery
 from src.core.machinery.infrastructure.repository import MachineryRepository
 from src.core.machinery.infrastructure.uow import MachineryUnitOfWork
@@ -13,7 +12,7 @@ from src.core.machinery.infrastructure.uow import MachineryUnitOfWork
 
 class MachineryContainer(containers.DeclarativeContainer):
     database_session = providers.Dependency()
-    attribute_service = providers.Dependency()
+    subcategory_service = providers.Dependency()
     wishlist_service = providers.Dependency()
     brand_repository = providers.Dependency()
 
@@ -32,20 +31,10 @@ class MachineryContainer(containers.DeclarativeContainer):
         session=database_session,
     )
 
-    attribute_validator_adapter = providers.Factory(
-        AttributeValidatorAdapter,
-        attribute_service=attribute_service,
-    )
-
-    wishlist_counter_adapter = providers.Factory(
-        WishlistCounterAdapter,
-        wishlist_service=wishlist_service,
-    )
-
     create_machinery_usecase = providers.Factory(
         CreateMachineryUseCase,
         uow=machinery_uow,
-        attribute_validator=attribute_validator_adapter,
+        subcategory_service=subcategory_service,
         brand_repository=brand_repository
     )
 
@@ -87,7 +76,7 @@ class MachineryContainer(containers.DeclarativeContainer):
     get_customer_machinery_detail_usecase = providers.Factory(
         GetCustomerMachineryDetailUseCase,
         query=machinery_query,
-        wishlist_counter=wishlist_counter_adapter
+        wishlist_service=wishlist_service
     )
 
     change_machinery_category_usecase = providers.Factory(
@@ -113,7 +102,7 @@ class MachineryContainer(containers.DeclarativeContainer):
     change_machinery_spec_usecase = providers.Factory(
         ChangeMachinerySpecUseCase,
         uow=machinery_uow,
-        attribute_validator=attribute_validator_adapter,
+        subcategory_service=subcategory_service,
     )
 
     change_machinery_description_usecase = providers.Factory(

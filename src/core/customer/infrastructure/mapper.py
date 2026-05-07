@@ -12,7 +12,6 @@ class CustomerMapper:
             last_name=buyer.fullname.last_name,
             first_name=buyer.fullname.first_name,
             patronymic=buyer.fullname.patronymic,
-            city_id=buyer.city_id,
             avatar_url=buyer.avatar_url
         )
 
@@ -26,6 +25,5 @@ class CustomerMapper:
                 first_name=buyer.first_name,
                 patronymic=buyer.patronymic
             ),
-            city_id=buyer.city_id,
             avatar_url=buyer.avatar_url
         )

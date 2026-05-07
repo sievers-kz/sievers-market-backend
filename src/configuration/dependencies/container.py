@@ -1,5 +1,6 @@
 from dependency_injector import containers, providers
 
+from src.configuration.dependencies.catalog import CatalogContainer
 from src.configuration.dependencies.customer import CustomerContainer
 from src.configuration.dependencies.configuration import ConfigurationContainer
 from src.configuration.dependencies.gateways import GatewaysContainer
@@ -21,6 +22,11 @@ class ApplicationContainer(containers.DeclarativeContainer):
         database_config=configurations.database,
         sendgrid_config=configurations.sendgrid,
         redis_config=configurations.redis,
+    )
+
+    catalog = providers.Container(
+        CatalogContainer,
+        database_session=gateways.database_session,
     )
 
     shared = providers.Container(
@@ -45,7 +51,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
     machinery = providers.Container(
         MachineryContainer,
         database_session=gateways.database_session,
-        attribute_service=reference.attribute_service,
+        subcategory_service=catalog.subcategory_service,
         wishlist_service=wishlist.wishlist_service,
         brand_repository=reference.brand_repository,
     )
@@ -71,3 +77,5 @@ class ApplicationContainer(containers.DeclarativeContainer):
         redis_service=shared.redis_service,
         arq_service=shared.arq_service,
     )
+
+
