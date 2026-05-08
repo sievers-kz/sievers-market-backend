@@ -82,6 +82,12 @@ class Account(AggregateRoot):
         self.updated_at = datetime.now(timezone.utc)
         self.revoke_all_tokens_by_type(TokenType.REFRESH)
 
+    def change_email(self, new_email: Email):
+        self.email = new_email
+
+    def change_phone(self, new_phone: Phone):
+        self.phone = new_phone
+
     def _get_token_by_value(self, token_value: str):
         return next((token for token in self.tokens if token.value == token_value), None)
 

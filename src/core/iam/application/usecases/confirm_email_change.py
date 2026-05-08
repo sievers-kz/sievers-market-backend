@@ -1,0 +1,42 @@
+from uuid import UUID
+
+from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
+from src.core.iam.application.services.otp import OTPService
+from src.core.iam.domain.enums import OTPType
+from src.core.iam.domain.value_objects import Email
+from src.core.iam.presentation.dto import ConfirmEmailChangeRequest
+from src.core.shared.application.interfaces.cache_service import ICacheService
+
+
+class ConfirmEmailChangeUseCase:
+    def __init__(
+        self,
+        uow: AbstractIAMUnitOfWork,
+        otp_service: OTPService,
+        cache_service: ICacheService
+    ):
+        self.uow = uow
+        self.otp_service = otp_service
+        self.cache_service = cache_service
+
+    async def execute(self, account_id: UUID, dto: ConfirmEmailChangeRequest):
+        pending_email = await self.cache_service.get(f"email_change:pending:{account_id}")
+        if not pending_email:
+            raise ValueError("Запрос на смену email истёк или не найден")
+
+        await self.otp_service.verify(
+            account_id=account_id,
+            otp_type=OTPType.CHANGE_EMAIL,
+            otp_value=dto.otp_code
+        )
+
+        async with self.uow as uow:
+            account = await uow.account.get_account_by_id(account_id)
+            if not account:
+                raise ValueError("Account not found")
+
+            account.change_email(Email(pending_email))
+            await uow.account.save(account)
+            await uow.commit()
+
+        await self.cache_service.delete(f"email_change:pending:{account_id}")

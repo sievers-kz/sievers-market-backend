@@ -26,8 +26,32 @@ async def send_otp_password_reset(ctx, to: str, code: str):
     )
 
 
+async def send_otp_change_email(ctx, to: str, code: str):
+    sender = ctx["resend_sender"]
+    await sender.send_email(
+        to_email=to,
+        subject="Ваш код подтверждения для изменения email",
+        html_content=f"<h3>Ваш код <strong>{code}</strong> для изменения email",
+    )
+
+
+async def send_otp_change_phone(ctx, to: str, code: str):
+    sender = ctx["resend_sender"]
+    await sender.send_email(
+        to_email=to,
+        subject="Ваш код подтверждения для изменения номера телефона",
+        html_content=f"<h3>Ваш код <strong>{code}</strong> для изменения номера телефона",
+    )
+
+
 class WorkerSettings:
-    functions = [send_otp_email, send_otp_password_reset]
+    functions = [
+        send_otp_email,
+        send_otp_password_reset,
+        send_otp_change_email,
+        send_otp_change_phone
+    ]
+
     on_startup = startup
     max_retries = 5
     redis_settings = RedisSettings(host="localhost", port=6379)

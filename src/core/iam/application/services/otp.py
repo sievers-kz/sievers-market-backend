@@ -10,7 +10,9 @@ from src.core.shared.infrastructure.tasks import TaskNames
 class OTPService:
     TASK_OTP_MAP = {
         OTPType.CONFIRMATION: TaskNames.SEND_OTP_EMAIL,
-        OTPType.PASSWORD_RESET: TaskNames.SEND_OTP_PASSWORD_RESET
+        OTPType.PASSWORD_RESET: TaskNames.SEND_OTP_PASSWORD_RESET,
+        OTPType.CHANGE_EMAIL: TaskNames.SEND_OTP_CHANGE_EMAIL,
+        OTPType.CHANGE_PHONE: TaskNames.SEND_OTP_CHANGE_PHONE,
     }
 
     def __init__(self, cache: ICacheService, queue: IQueueService):
