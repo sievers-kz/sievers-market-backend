@@ -26,3 +26,6 @@ class TokenType(str, enum.Enum):
 class OTPType(str, enum.Enum):
     CONFIRMATION = "confirmation"
     PASSWORD_RESET = "password_reset"
+    CHANGE_EMAIL = "change_email"
+    CHANGE_PHONE = "change_phone"
+

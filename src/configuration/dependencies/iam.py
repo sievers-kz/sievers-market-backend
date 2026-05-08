@@ -11,7 +11,8 @@ from src.core.iam.application.usecases import (
     LogoutUserUseCase,
     ForgotPasswordUseCase,
     ResetPasswordUseCase,
-    ChangePasswordUseCase, ResendConfirmationCodeUseCase
+    ChangePasswordUseCase, ResendConfirmationCodeUseCase, RequestEmailChangeUseCase, ConfirmEmailChangeUseCase,
+    RequestPhoneChangeUseCase, ConfirmPhoneChangeUseCase
 )
 
 
@@ -136,4 +137,32 @@ class IAMContainer(containers.DeclarativeContainer):
         ChangePasswordUseCase,
         unit_of_work=iam_unit_of_work,
         password_hasher=bcrypt_password_hasher
+    )
+
+    request_email_change_usecase = providers.Factory(
+        RequestEmailChangeUseCase,
+        uow=iam_unit_of_work,
+        otp_service=otp_service,
+        cache_service=redis_service,
+    )
+
+    confirm_email_change_usecase = providers.Factory(
+        ConfirmEmailChangeUseCase,
+        uow=iam_unit_of_work,
+        otp_service=otp_service,
+        cache_service=redis_service,
+    )
+
+    request_phone_change_usecase = providers.Factory(
+        RequestPhoneChangeUseCase,
+        uow=iam_unit_of_work,
+        otp_service=otp_service,
+        cache_service=redis_service,
+    )
+
+    confirm_phone_change_usecase = providers.Factory(
+        ConfirmPhoneChangeUseCase,
+        uow=iam_unit_of_work,
+        otp_service=otp_service,
+        cache_service=redis_service,
     )

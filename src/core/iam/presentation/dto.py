@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, EmailStr
 
 from src.core.iam.domain.enums import TokenType
+from src.core.shared.presentation.dto import DTO
 
 
 class ResendCodeRequest(BaseModel):
@@ -57,5 +58,17 @@ class CreateUserRequest(BaseModel):
     first_name: str
 
 
+class ChangeEmailRequest(DTO):
+    email: EmailStr
 
 
+class ConfirmEmailChangeRequest(DTO):
+    otp_code: str
+
+
+class ChangePhoneRequest(DTO):
+    phone: str
+
+
+class ConfirmPhoneChangeRequest(DTO):
+    otp_code: str
