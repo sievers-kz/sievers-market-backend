@@ -4,11 +4,10 @@ from httpx import AsyncClient, ASGITransport
 from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
-from fixtures.seed import DataSeeder
+from seeds.seed import DataSeeder
 from src.configuration.database.connection import Base
 from src.configuration.dependencies.container import ApplicationContainer
 from src.configuration.settings.settings import ApplicationSettings
-from src.main import create_fastapi_app
 
 
 pytest_plugins = [
@@ -85,16 +84,6 @@ async def container(session_factory, test_settings):
 
     container.gateways.session_factory.override(session_factory)
     yield container
-
-
-@pytest_asyncio.fixture(scope="function")
-async def client(container):
-    app = create_fastapi_app()
-    app.container = container
-    transport = ASGITransport(app=app)
-
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        yield client
 
 
 @pytest_asyncio.fixture

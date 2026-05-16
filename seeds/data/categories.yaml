@@ -160,6 +160,15 @@
               options: null
               position: 5
 
+            - key: max_speed
+              label: Максимальная скорость
+              type: integer
+              required: false
+              filterable: false
+              unit: { key: kmh, label: км/ч }
+              options: null
+              position: 6
+
         - name: Гусеничные тракторы
           attributes:
             - key: engine_power

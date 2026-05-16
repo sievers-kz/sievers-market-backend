@@ -2,12 +2,14 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock
 
+import pytest
 import pytest_asyncio
 
 from src.core.iam.presentation.dto import CreateUserRequest
 from src.core.iam.domain.entities import Account, Token
 from src.core.iam.domain.enums import TokenType
 from src.core.iam.domain.value_objects import Email, Phone, Password
+from src.core.shared.application.interfaces.queue_service import IQueueService
 
 
 def create_domain_account(
@@ -35,6 +37,13 @@ def create_user_request() -> CreateUserRequest:
     )
 
 
+@pytest.fixture
+def mock_arq(container):
+    mock = AsyncMock(spec=IQueueService)
+    container.shared.arq_service.override(mock)
+    return mock
+
+
 def get_token_by_type(tokens: list, target_type: TokenType):
     return next((t for t in tokens if t.type == target_type), None)
 
@@ -54,21 +63,7 @@ async def token_service(container):
 
 
 @pytest_asyncio.fixture
-async def mock_notifier(container):
-    mock = AsyncMock()
-    container.iam.email_notifier_adapter.override(mock)
-    return mock
-
-
-@pytest_asyncio.fixture
-async def mock_profile_creator(container):
-    mock = AsyncMock()
-    container.iam.profile_creator_adapter.override(mock)
-    return mock
-
-
-@pytest_asyncio.fixture
-async def create_user_usecase(container, mock_notifier, mock_profile_creator):
+async def create_user_usecase(container, mock_arq):
     return await container.iam.create_user_usecase()
 
 
@@ -115,3 +110,8 @@ async def change_password_usecase(container):
 @pytest_asyncio.fixture
 async def account_repository(container):
     return await container.iam.account_repository()
+
+
+@pytest.fixture
+def redis_service(container):
+    return container.shared.redis_service()

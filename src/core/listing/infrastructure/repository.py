@@ -1,0 +1,43 @@
+from uuid import UUID
+
+from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.core.listing.application.interfaces.repository import IListingRepository
+from src.core.listing.infrastructure.models import Listing as ORMListing
+from src.core.listing.domain.entities import Listing as DomainListing
+from src.core.listing.infrastructure.mapper import ListingMapper
+from src.core.listing.domain.enums import ListingStatus
+
+
+class ListingRepository(IListingRepository):
+    def __init__(self, session: AsyncSession):
+        self._session = session
+        self.model = ORMListing
+
+    async def save(self, listing: DomainListing) -> None:
+        mapped_model = ListingMapper.to_orm(listing)
+        await self._session.merge(mapped_model)
+        await self._session.flush()
+
+    async def get_by_id(self, listing_id: UUID) -> DomainListing:
+        statement = select(self.model).where(self.model.id == listing_id)
+        query_result = await self._session.execute(statement)
+        result = query_result.scalar_one_or_none()
+
+        if result is None:
+            return None
+        return ListingMapper.to_domain(result)
+
+    async def count_active_by_owner_id(self, owner_id: UUID) -> int:
+        statement = (
+            select(func.count())
+            .select_from(self.model)
+            .where(
+                self.model.owner_id == owner_id,
+                self.model.status == ListingStatus.ACTIVE,
+            )
+        )
+
+        query_result = await self._session.execute(statement)
+        return query_result.scalar_one()

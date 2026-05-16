@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from src.core.catalog.presentation.dto.subcategory import Attribute
 from src.core.shared.presentation.dto import DTO
 
@@ -25,3 +27,12 @@ class BrandSeed(DTO):
 class ColorSeed(DTO):
     name: str
     hex: str
+
+
+class RegionSeed(DTO):
+    name: str
+    cities: list[str]
+
+
+class CountrySeed(DTO):
+    name: str

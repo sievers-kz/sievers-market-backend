@@ -1,6 +1,9 @@
+import json
+
 from arq import ArqRedis, create_pool
 from arq.connections import RedisSettings
 from dependency_injector import containers, providers
+from minio import Minio
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
@@ -12,13 +15,11 @@ class GatewaysContainer(containers.DeclarativeContainer):
     database_config = providers.Configuration()
     sendgrid_config = providers.Configuration()
     redis_config = providers.Configuration()
-
-    buyer_repository = providers.Dependency()
-    seller_repository = providers.Dependency()
+    minio_config = providers.Configuration()
 
     async_engine = providers.Singleton(
         create_async_engine,
-        url=database_config.database_url
+        url=database_config.database_url,
     )
 
     session_factory = providers.Singleton(
@@ -43,6 +44,7 @@ class GatewaysContainer(containers.DeclarativeContainer):
         Redis,
         host=redis_config.host,
         port=redis_config.port,
+        db=redis_config.db,
         decode_responses=True,
     )
 
@@ -55,4 +57,12 @@ class GatewaysContainer(containers.DeclarativeContainer):
     arq_pool = providers.Singleton(
         create_pool,
         settings_=arq_redis_settings,
+    )
+
+    minio_client = providers.Singleton(
+        Minio,
+        endpoint=minio_config.endpoint,
+        access_key=minio_config.access_key,
+        secret_key=minio_config.secret_key,
+        secure=minio_config.secure_config
     )

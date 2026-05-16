@@ -1,7 +1,7 @@
 import pytest
 
 from src.core.iam.presentation.dto import ForgotPasswordData, ResetPasswordData, AccountConfirmation, LoginAccount
-from src.core.iam.domain.enums import TokenType
+from src.core.iam.domain.enums import TokenType, OTPType
 from tests.iam.conftest import create_user_request, get_token_by_type
 
 
@@ -16,15 +16,15 @@ class TestResetPasswordUsecase:
         forgot_password_usecase,
         reset_password_usecase,
         account_repository,
-        mock_notifier
+        redis_service,
     ):
         dto = create_user_request()
         await create_user_usecase.execute(dto)
 
         user_after_registration = await account_repository.get_account_by_email(dto.email)
-        email_token = get_token_by_type(user_after_registration.tokens, TokenType.EMAIL)
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user_after_registration.id}")
 
-        confirmation_dto = AccountConfirmation(confirm_token=email_token.value)
+        confirmation_dto = AccountConfirmation(account_id=user_after_registration.id, confirm_code=otp_code)
         await account_confirmation_usecase.execute(confirmation_dto)
 
         login_dto = LoginAccount(email=dto.email, raw_password=dto.raw_password)
@@ -34,49 +34,71 @@ class TestResetPasswordUsecase:
         await forgot_password_usecase.execute(forgot_password_data)
 
         user = await account_repository.get_account_by_email(dto.email)
-        password_token = get_token_by_type(user.tokens, TokenType.PASSWORD)
+        password_reset_otp_code = await redis_service.get(f"otp:{OTPType.PASSWORD_RESET.value}:{user.id}")
 
-        reset_password_data = ResetPasswordData(raw_password="super_secret", password_reset_token=password_token.value)
+        reset_password_data = ResetPasswordData(
+            email=dto.email,
+            raw_password="supersecret",
+            password_reset_otp=password_reset_otp_code
+        )
         await reset_password_usecase.execute(reset_password_data)
 
+        otp_after_reset = await redis_service.get(f"otp:{OTPType.PASSWORD_RESET.value}:{user.id}")
+        assert otp_after_reset is None
+
         user_after_reset_password = await account_repository.get_account_by_email(dto.email)
-        password_token = get_token_by_type(user_after_reset_password.tokens, TokenType.PASSWORD)
         refresh_tokens = [token for token in user_after_reset_password.tokens if token.type == TokenType.REFRESH]
 
-        assert password_token.is_revoked is True
         for token in refresh_tokens:
             assert token.is_revoked is True
 
+        login_dto = LoginAccount(email=dto.email, raw_password="supersecret")
+        response = await login_user_usecase.execute(login_dto)
+        assert response.access_token is not None
+
     @pytest.mark.asyncio
     @pytest.mark.integration
-    async def test_fails_on_reused_password_token(
+    async def test_fails_on_reused_otp(
         self,
         create_user_usecase,
         forgot_password_usecase,
         reset_password_usecase,
         account_repository,
+        redis_service,
     ):
         dto = create_user_request()
         await create_user_usecase.execute(dto)
 
+        user = await account_repository.get_account_by_email(dto.email)
         forgot_password_data = ForgotPasswordData(email=dto.email)
         await forgot_password_usecase.execute(forgot_password_data)
 
-        user = await account_repository.get_account_by_email(dto.email)
-        password_token = get_token_by_type(user.tokens, TokenType.PASSWORD)
-
-        reset_password_data = ResetPasswordData(raw_password="super_secret", password_reset_token=password_token.value)
+        otp_code = await redis_service.get(f"otp:{OTPType.PASSWORD_RESET.value}:{user.id}")
+        reset_password_data = ResetPasswordData(
+            email=dto.email,
+            raw_password="supersecret",
+            password_reset_otp=otp_code
+        )
         await reset_password_usecase.execute(reset_password_data)
 
-        with pytest.raises(Exception) as exc:
+        with pytest.raises(ValueError, match="Неверный OTP код"):
             await reset_password_usecase.execute(reset_password_data)
-
-        assert str(exc.value) == "Token is already revoked"
 
     @pytest.mark.asyncio
     @pytest.mark.integration
-    async def test_fails_with_wrong_token(self, reset_password_usecase):
-        reset_password_data = ResetPasswordData(raw_password="supersecret", password_reset_token="wrong_password_token")
-        with pytest.raises(Exception) as exc:
+    async def test_fails_with_wrong_otp(
+            self,
+            create_user_usecase,
+            reset_password_usecase,
+            account_repository,
+    ):
+        dto = create_user_request()
+        await create_user_usecase.execute(dto)
+
+        reset_password_data = ResetPasswordData(
+            email=dto.email,
+            raw_password="supersecret",
+            password_reset_otp="000000"
+        )
+        with pytest.raises(ValueError, match="Неверный OTP код"):
             await reset_password_usecase.execute(reset_password_data)
-        assert str(exc.value) == "Invalid reset password token"

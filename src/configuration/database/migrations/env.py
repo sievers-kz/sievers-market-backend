@@ -15,12 +15,12 @@ from src.core.iam.infrastructure.models import Account, Token
 
 from src.core.customer.infrastructure.models import Customer
 
-from src.core.machinery.infrastructure.models import Machinery
+from src.core.listing.infrastructure.models import Listing
 
-from src.core.wishlist.infrastructure.models import Wishlist
 from src.core.media.infrastructure.models import Media
 
 from src.core.catalog.infrastructure.models import Rubric, Category, Subcategory
+
 from src.core.references.infrastructure.models import (
     Region,
     City,

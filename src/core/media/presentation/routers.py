@@ -1,93 +1,51 @@
 from typing import Annotated
-from uuid import UUID
 
-from fastapi import APIRouter
-from fastapi.params import Depends
 from dependency_injector.wiring import inject, Provide
-
-from src.core.media.presentation.dto import (
-    UploadMediaDTO,
-    UpdateMediaDTO,
-    MediaResponse,
-    BatchPresignedUrlResponse,
-    BatchPresignedUrlRequest
-)
+from fastapi import APIRouter
+from fastapi.params import Depends, Security
 
 from src.configuration.dependencies.container import ApplicationContainer
-
-from src.core.media.application.usecases import (
-    GetPreSignedUrlsUseCase,
-    UploadMediaUseCase,
-    UpdateMediaUseCase,
-    GetMediaUseCase
-)
+from src.core.media.application.services.media_service import MediaService
+from src.core.media.presentation.dto import UploadUrlResponse, GenerateUploadUrlRequest, ConfirmUploadResponse, \
+    ConfirmUploadRequest
+from src.core.shared.presentation.dto import CurrentUser
+from src.core.shared.presentation.security import get_current_user
 
 
-media = APIRouter(prefix="/api/v1/media", tags=["Media"])
+media_router = APIRouter(prefix="/api/v1/media", tags=["Media"])
 
 
-@media.post("/pre-signed-url/{filename}", response_model=BatchPresignedUrlResponse)
+@media_router.post("/upload-url", response_model=list[UploadUrlResponse])
 @inject
-async def generate_presigned_url(
-    dto: BatchPresignedUrlRequest,
-    usecase: Annotated[
-        GetPreSignedUrlsUseCase,
+async def generate_upload_url(
+    dto: GenerateUploadUrlRequest,
+    service: Annotated[
+        MediaService,
         Depends(
             Provide[
-                ApplicationContainer.media.generate_presigned_url_usecase
+                ApplicationContainer.media.media_service
             ]
         )
     ],
+    current_user: CurrentUser = Security(get_current_user)
 ):
-    return await usecase.execute(dto)
+    return await service.generate_upload_url(dto)
 
 
-@media.post("/upload")
+@media_router.post("/confirm-upload", response_model=list[ConfirmUploadResponse])
 @inject
-async def upload_media(
-    dto: UploadMediaDTO,
-    usecase: Annotated[
-        UploadMediaUseCase,
+async def confirm_upload(
+    dto: ConfirmUploadRequest,
+    service: Annotated[
+        MediaService,
         Depends(
             Provide[
-                ApplicationContainer.media.upload_media_usecase
+                ApplicationContainer.media.media_service
             ]
         )
-    ]
+    ],
+    current_user: CurrentUser = Security(get_current_user)
 ):
-    await usecase.execute(dto)
-    return {"message": "Media uploaded successfully"}
+    media_response = await service.confirm_upload(current_user.id, dto)
+    return media_response
 
-
-@media.put("/update/{machinery_id}")
-@inject
-async def update_media(
-    machinery_id: UUID,
-    dto: UpdateMediaDTO,
-    usecase: Annotated[
-        UpdateMediaUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.media.update_media_usecase
-            ]
-        )
-    ]
-):
-    await usecase.execute(machinery_id, dto)
-    return {"message": "Media updated successfully"}
-
-
-@media.get("/{machinery_id}", response_model=list[MediaResponse])
-@inject
-async def get_media(
-    machinery_id: UUID,
-    usecase: Annotated[
-        GetMediaUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.media.get_media_usecase
-            ]
-        )
-    ]
-):
-    return await usecase.execute(machinery_id)

@@ -7,7 +7,7 @@ from pydantic import TypeAdapter
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 
-from seeds.schemas import RubricSeed, ColorSeed, BrandSeed
+from seeds.schemas import RubricSeed, ColorSeed, BrandSeed, RegionSeed, CountrySeed
 from src.configuration.settings.settings import PostgresSettings
 from src.core.catalog.domain.enums import CatalogStatus
 
@@ -80,6 +80,53 @@ class DataSeeder:
             self.session.add(Color(name=color_dto.name, hex=color_dto.hex))
         logger.info("✅ Colors seeded with DTO")
 
+    async def seed_countries(self):
+        raw_data = self._load_yaml("countries.yaml")
+        if not raw_data:
+            return
+
+        try:
+            adapter = TypeAdapter(list[CountrySeed])
+            countries_data = adapter.validate_python(raw_data)
+
+            for c_dto in countries_data:
+                country = Country(
+                    name=c_dto.name,
+                )
+                self.session.add(country)
+
+            logger.info("✅ Countries seeded")
+        except Exception as e:
+            logger.error(f"❌ Countries seeding failed: {e}")
+            raise
+
+    async def seed_locations(self):
+        raw_data = self._load_yaml("locations.yaml")
+        if not raw_data:
+            return
+
+        try:
+            adapter = TypeAdapter(list[RegionSeed])
+            regions_data = adapter.validate_python(raw_data)
+
+            for r_dto in regions_data:
+                region = Region(name=r_dto.name)
+                self.session.add(region)
+
+                await self.session.flush()
+
+                for city_name in r_dto.cities:
+                    city = City(
+                        name=city_name,
+                        region_id=region.id
+                    )
+                    self.session.add(city)
+
+            logger.info("✅ Regions and Cities seeded")
+        except Exception as e:
+            logger.error(f"❌ Locations seeding failed: {e}")
+            raise
+
     async def seed_catalog_hierarchy(self):
         raw_data = self._load_yaml("categories.yaml")
         if not raw_data:
@@ -121,6 +168,8 @@ class DataSeeder:
         try:
             await self.seed_brands()
             await self.seed_colors()
+            await self.seed_countries()
+            await self.seed_locations()
             await self.seed_catalog_hierarchy()
 
             await self.session.commit()

@@ -5,11 +5,10 @@ from src.configuration.dependencies.customer import CustomerContainer
 from src.configuration.dependencies.configuration import ConfigurationContainer
 from src.configuration.dependencies.gateways import GatewaysContainer
 from src.configuration.dependencies.iam import IAMContainer
-from src.configuration.dependencies.machinery import MachineryContainer
+from src.configuration.dependencies.listing import ListingContainer
 from src.configuration.dependencies.media import MediaContainer
 from src.configuration.dependencies.reference import ReferenceContainer
 from src.configuration.dependencies.shared import SharedContainer
-from src.configuration.dependencies.wishlist import WishlistContainer
 
 
 class ApplicationContainer(containers.DeclarativeContainer):
@@ -22,6 +21,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         database_config=configurations.database,
         sendgrid_config=configurations.sendgrid,
         redis_config=configurations.redis,
+        minio_config=configurations.minio_config,
     )
 
     catalog = providers.Container(
@@ -43,25 +43,6 @@ class ApplicationContainer(containers.DeclarativeContainer):
         database_session=gateways.database_session
     )
 
-    wishlist = providers.Container(
-        WishlistContainer,
-        database_session=gateways.database_session
-    )
-
-    machinery = providers.Container(
-        MachineryContainer,
-        database_session=gateways.database_session,
-        subcategory_service=catalog.subcategory_service,
-        wishlist_service=wishlist.wishlist_service,
-        brand_repository=reference.brand_repository,
-    )
-
-    media = providers.Container(
-        MediaContainer,
-        object_storage_config=configurations.object_storage,
-        database_session=gateways.database_session
-    )
-
     customer = providers.Container(
         CustomerContainer,
         database_session=gateways.database_session,
@@ -78,4 +59,16 @@ class ApplicationContainer(containers.DeclarativeContainer):
         arq_service=shared.arq_service,
     )
 
+    listing = providers.Container(
+        ListingContainer,
+        database_session=gateways.database_session,
+        customer_repository=customer.customer_repository,
+        subcategory_service=catalog.subcategory_service,
+    )
 
+    media = providers.Container(
+        MediaContainer,
+        database_session=gateways.database_session,
+        minio_client=gateways.minio_client,
+        minio_config=configurations.minio_config,
+    )

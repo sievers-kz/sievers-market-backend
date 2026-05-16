@@ -8,6 +8,6 @@ class ConfigurationContainer(containers.DeclarativeContainer):
     database = configuration.database
     authentication = configuration.authentication
     sendgrid = configuration.sendgrid
-    object_storage = configuration.object_storage
+    minio_config = configuration.minio_config
     redis = configuration.redis_config
     resend_config = configuration.resend_config

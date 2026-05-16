@@ -1,7 +1,8 @@
 import pytest
 
+from src.core.iam.domain.enums import OTPType
 from src.core.iam.presentation.dto import CreateUserRequest, AccountConfirmation, ResendCodeRequest
-from tests.iam.conftest import mock_notifier
+from tests.iam.conftest import create_user_request
 
 
 class TestResendConfirmationCodeUsecase:
@@ -13,7 +14,7 @@ class TestResendConfirmationCodeUsecase:
         account_confirmation_usecase,
         account_repository,
         resend_confirmation_code_usecase,
-        mock_notifier
+        redis_service,
     ):
         dto = CreateUserRequest(
             email="test@example.com",
@@ -23,55 +24,36 @@ class TestResendConfirmationCodeUsecase:
         )
         await create_user_usecase.execute(dto)
 
-        mock_notifier.send_confirmation_code.reset_mock()
+        user = await account_repository.get_account_by_email(dto.email)
+        await redis_service.delete(f"otp:cooldown:{OTPType.CONFIRMATION.value}:{user.id}")
 
         resend_dto = ResendCodeRequest(email=dto.email)
         await resend_confirmation_code_usecase.execute(resend_dto)
 
-        user = await account_repository.get_account_by_email(dto.email)
-        assert len(user.tokens) == 2
-
-        old_token = user.tokens[0]
-        new_token = user.tokens[1]
-
-        assert old_token.is_revoked is True
-        assert new_token.is_revoked is False
-
-        mock_notifier.send_confirmation_code.assert_called_once_with(
-            destination=dto.email,
-            code=new_token.value
-        )
+        new_otp = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user.id}")
+        assert new_otp is not None
 
     @pytest.mark.asyncio
     @pytest.mark.integration
-    async def test_resend_fails_if_already_confirmed(
+    async def test_cooldown_blocks_immediate_resend(
         self,
         create_user_usecase,
-        account_confirmation_usecase,
         resend_confirmation_code_usecase,
         account_repository,
-        mock_notifier
+        redis_service,
     ):
-        dto = CreateUserRequest(
-            email="test@example.com",
-            raw_password="super_secret",
-            last_name="Test",
-            first_name="Test",
-        )
+        dto = create_user_request()
         await create_user_usecase.execute(dto)
 
-        user = await account_repository.get_account_by_email(dto.email)
-        token_value = user.tokens[0].value
-
-        confirmation_dto = AccountConfirmation(confirm_token=token_value)
-        await account_confirmation_usecase.execute(confirmation_dto)
-
-        mock_notifier.send_confirmation_code.reset_mock()
         resend_dto = ResendCodeRequest(email=dto.email)
-
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError, match="Подождите перед повторной отправкой"):
             await resend_confirmation_code_usecase.execute(resend_dto)
 
-        confirmed_user = await account_repository.get_account_by_email(dto.email)
-        assert len(confirmed_user.tokens) == 1
-        mock_notifier.send_confirmation_code.assert_not_called()
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_silent_on_nonexistent_email(
+        self,
+        resend_confirmation_code_usecase,
+    ):
+        resend_dto = ResendCodeRequest(email="ghost@example.com")
+        await resend_confirmation_code_usecase.execute(resend_dto)

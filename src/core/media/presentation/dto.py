@@ -1,48 +1,37 @@
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import Field
 
 from src.core.media.domain.enums import MediaType
+from src.core.shared.presentation.dto import DTO
 
 
-class FilePresignedRequest(BaseModel):
-    client_file_name: str
-    mime_type: str
+class FileUploadInput(DTO):
+    client_filename: str
+    mime_type: MediaType
 
 
-class BatchPresignedUrlRequest(BaseModel):
-    files: list[FilePresignedRequest]
+class GenerateUploadUrlRequest(DTO):
+    files: list[FileUploadInput]
 
 
-class PresignedUrlResponseItem(BaseModel):
-    client_file_name: str
+class UploadUrlResponse(DTO):
+    client_filename: str
     upload_url: str
     file_path: str
 
 
-class BatchPresignedUrlResponse(BaseModel):
-    items: list[PresignedUrlResponseItem]
-
-
-class MediaMetadata(BaseModel):
+class ConfirmUploadItem(DTO):
     file_path: str
-    mime_type: MediaType
-    media_size: int
+    media_type: MediaType
+    media_size: int = Field(description="Размер файла в байтах")
 
 
-class UploadMediaDTO(BaseModel):
-    machinery_id: UUID
-    files: list[MediaMetadata]
+class ConfirmUploadRequest(DTO):
+    files: list[ConfirmUploadItem]
 
 
-class UpdateMediaDTO(BaseModel):
-    delete_ids: list[UUID] | None = None
-    append_files: list[MediaMetadata]
-
-
-class MediaResponse(BaseModel):
-    id: UUID
-    media_url: str
+class ConfirmUploadResponse(DTO):
+    media_id: UUID
     media_type: MediaType
     media_size: int
-    position: int

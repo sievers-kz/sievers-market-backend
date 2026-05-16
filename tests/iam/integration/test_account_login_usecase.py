@@ -1,7 +1,7 @@
 import pytest
 
 from src.core.iam.presentation.dto import CreateUserRequest, AccountConfirmation, LoginAccount
-from src.core.iam.domain.enums import TokenType
+from src.core.iam.domain.enums import TokenType, OTPType
 
 
 class TestAccountLoginUseCase:
@@ -12,7 +12,8 @@ class TestAccountLoginUseCase:
         create_user_usecase,
         account_confirmation_usecase,
         login_user_usecase,
-        account_repository
+        account_repository,
+        redis_service,
     ):
         dto = CreateUserRequest(
             email="test@example.com",
@@ -23,9 +24,9 @@ class TestAccountLoginUseCase:
         await create_user_usecase.execute(dto)
 
         user = await account_repository.get_account_by_email(dto.email)
-        token_value = user.tokens[0].value
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user.id}")
 
-        confirmation_dto = AccountConfirmation(confirm_token=token_value)
+        confirmation_dto = AccountConfirmation(account_id=user.id, confirm_code=otp_code)
         await account_confirmation_usecase.execute(confirmation_dto)
 
         login_dto = LoginAccount(email=dto.email, raw_password=dto.raw_password)
@@ -35,9 +36,9 @@ class TestAccountLoginUseCase:
         assert response.refresh_token is not None
 
         logged_in_user = await account_repository.get_account_by_email(dto.email)
-        assert len(logged_in_user.tokens) == 2
+        assert len(logged_in_user.tokens) == 1
 
-        refresh_token = logged_in_user.tokens[-1]
+        refresh_token = logged_in_user.tokens[0]
         assert refresh_token.type == TokenType.REFRESH
         assert refresh_token.value == response.refresh_token
         assert refresh_token.is_revoked is False
@@ -49,7 +50,8 @@ class TestAccountLoginUseCase:
         create_user_usecase,
         account_confirmation_usecase,
         account_repository,
-        login_user_usecase
+        login_user_usecase,
+        redis_service,
     ):
         dto = CreateUserRequest(
             email="test@example.com",
@@ -60,9 +62,9 @@ class TestAccountLoginUseCase:
         await create_user_usecase.execute(dto)
 
         user = await account_repository.get_account_by_email(dto.email)
-        token_value = user.tokens[0].value
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user.id}")
 
-        confirmation_dto = AccountConfirmation(confirm_token=token_value)
+        confirmation_dto = AccountConfirmation(account_id=user.id, confirm_code=otp_code)
         await account_confirmation_usecase.execute(confirmation_dto)
 
         user_before_login = await account_repository.get_account_by_email(dto.email)
