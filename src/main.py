@@ -4,10 +4,9 @@ from scalar_fastapi import get_scalar_api_reference, Theme, Layout
 from src.core.catalog.presentation.routers.catalog import catalog_router
 from src.core.customer.presentation.routers import customer
 from src.core.iam.presentation.routers import iam
-from src.core.machinery.presentation.routers import machinery
+from src.core.listing.presentation.routers import listing_router
 from src.core.references.presentation.routers.reference import reference_router
-from src.core.wishlist.presentation.routers import wishlist
-from src.core.media.presentation.routers import media
+from src.core.media.presentation.routers import media_router
 from src.configuration.dependencies.container import ApplicationContainer
 
 
@@ -24,10 +23,9 @@ class ApplicationFactory:
             modules=[
                 "src.core.iam.presentation.routers",
                 "src.core.customer.presentation.routers",
-                "src.core.machinery.presentation.routers",
                 "src.core.shared.presentation.security",
-                "src.core.wishlist.presentation.routers",
                 "src.core.media.presentation.routers",
+                "src.core.listing.presentation.routers",
             ],
             packages=[
                 "src.core.catalog.presentation.routers",
@@ -41,10 +39,9 @@ class ApplicationFactory:
             iam,
             customer,
             reference_router,
-            wishlist,
-            media,
             catalog_router,
-            machinery,
+            listing_router,
+            media_router,
         ]
         for router in routers:
             self.app.include_router(router)

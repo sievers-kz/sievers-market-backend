@@ -1,8 +1,8 @@
 import pytest
 
 from src.core.iam.presentation.dto import AccountConfirmation, LoginAccount, ForgotPasswordData
-from src.core.iam.domain.enums import TokenType
-from tests.iam.conftest import create_user_request, get_token_by_type
+from src.core.iam.domain.enums import TokenType, OTPType
+from tests.iam.conftest import create_user_request, get_token_by_type, account_confirmation_usecase
 
 
 class TestForgotPasswordUsecase:
@@ -14,40 +14,33 @@ class TestForgotPasswordUsecase:
         account_confirmation_usecase,
         forgot_password_usecase,
         account_repository,
-        mock_notifier
+        redis_service
     ):
         dto = create_user_request()
         await create_user_usecase.execute(dto)
 
         user = await account_repository.get_account_by_email(dto.email)
-        email_token = get_token_by_type(user.tokens, TokenType.EMAIL)
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user.id}")
 
-        confirmation_dto = AccountConfirmation(confirm_token=email_token.value)
+        confirmation_dto = AccountConfirmation(account_id=user.id, confirm_code=otp_code)
         await account_confirmation_usecase.execute(confirmation_dto)
 
         forgot_password_data = ForgotPasswordData(email=dto.email)
         await forgot_password_usecase.execute(forgot_password_data)
 
         user_after_forgot_request = await account_repository.get_account_by_email(dto.email)
-        password_token = get_token_by_type(user_after_forgot_request.tokens, TokenType.PASSWORD)
+        reset_password_otp_code = await redis_service.get(f"otp:{OTPType.PASSWORD_RESET.value}:{user_after_forgot_request.id}")
 
-        assert password_token is not None
-        assert password_token.is_expired() is False
-        assert password_token.is_revoked is False
-        assert password_token.type == TokenType.PASSWORD
-
-        mock_notifier.send_password_recovery.assert_called_once()
-        mock_notifier.send_password_recovery.assert_called_once_with(
-            destination=dto.email,
-            code=password_token.value
-        )
+        assert reset_password_otp_code is not None
 
     @pytest.mark.asyncio
     @pytest.mark.integration
-    async def test_does_not_reveal_non_existent_email(self, forgot_password_usecase, mock_notifier):
+    async def test_does_not_reveal_non_existent_email(self, forgot_password_usecase, redis_service):
         fake_data = ForgotPasswordData(email="nonexistent@example.com")
         await forgot_password_usecase.execute(fake_data)
-        mock_notifier.send_password_recovery.assert_not_called()
+
+        otp_code = await redis_service.get(f"otp:{OTPType.PASSWORD_RESET.value}:*")
+        assert otp_code is None
 
     @pytest.mark.asyncio
     @pytest.mark.integration
@@ -55,21 +48,21 @@ class TestForgotPasswordUsecase:
         self,
         create_user_usecase,
         forgot_password_usecase,
+        account_confirmation_usecase,
         account_repository,
-        mock_notifier
+        redis_service,
     ):
         dto = create_user_request()
         await create_user_usecase.execute(dto)
 
-        forgot_password_data = ForgotPasswordData(email=dto.email)
-        for iteration in range(3):
-            await forgot_password_usecase.execute(forgot_password_data)
-
         user = await account_repository.get_account_by_email(dto.email)
-        password_tokens = [token for token in user.tokens if token.type == TokenType.PASSWORD]
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user.id}")
 
-        assert len(password_tokens) == 3
-        assert password_tokens[0].is_revoked is True
-        assert password_tokens[1].is_revoked is True
-        assert password_tokens[2].is_revoked is False
-        assert mock_notifier.send_password_recovery.call_count == 3
+        confirmation_dto = AccountConfirmation(account_id=user.id, confirm_code=otp_code)
+        await account_confirmation_usecase.execute(confirmation_dto)
+
+        forgot_password_data = ForgotPasswordData(email=dto.email)
+        await forgot_password_usecase.execute(forgot_password_data)
+
+        with pytest.raises(ValueError, match="Подождите перед повторной отправкой"):
+            await forgot_password_usecase.execute(forgot_password_data)

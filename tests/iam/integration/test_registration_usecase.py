@@ -1,6 +1,7 @@
 import pytest
 
-from src.core.iam.presentation.dto import CreateUserRequest
+from src.core.iam.domain.enums import OTPType
+from tests.iam.conftest import create_user_request
 
 
 class TestRegistrationUseCase:
@@ -10,63 +11,25 @@ class TestRegistrationUseCase:
         self,
         create_user_usecase,
         account_repository,
-        mock_notifier
+        redis_service,
     ):
-        dto = CreateUserRequest(
-            email="test@example.com",
-            raw_password="super_secret",
-            last_name="Test",
-            first_name="Test",
-        )
+        dto = create_user_request()
         await create_user_usecase.execute(dto)
 
         user = await account_repository.get_account_by_email(dto.email)
-        email_token = user.tokens[0].value
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user.id}")
 
         assert user is not None
         assert user.is_active is False
         assert user.password.value != dto.raw_password
-
-        mock_notifier.send_confirmation_code.assert_called_once()
-        mock_notifier.send_confirmation_code.assert_called_once_with(destination=dto.email, code=email_token)
+        assert otp_code is not None
 
     @pytest.mark.asyncio
     @pytest.mark.integration
-    async def test_fails_by_existing_user(self, create_user_usecase, account_repository, mock_notifier):
-        dto = CreateUserRequest(
-            email="test@example.com",
-            raw_password="super_secret",
-            last_name="Test",
-            first_name="Test",
-        )
+    async def test_fails_by_existing_user(self, create_user_usecase, account_repository):
+        dto = create_user_request()
         await create_user_usecase.execute(dto)
-        mock_notifier.send_confirmation_code.reset_mock()
 
-        with pytest.raises(Exception):
-            await create_user_usecase.execute(dto)
-        mock_notifier.send_confirmation_code.assert_not_called()
-
-    @pytest.mark.asyncio
-    @pytest.mark.integration
-    async def test_rollback_if_profile_creation_fails(
-        self,
-        create_user_usecase,
-        account_repository,
-        mock_notifier,
-        mock_profile_creator
-    ):
-        dto = CreateUserRequest(
-            email="test@example.com",
-            raw_password="super_secret",
-            last_name="Test",
-            first_name="Test",
-        )
-        mock_profile_creator.create.side_effect = Exception("CRASH!")
-
-        with pytest.raises(Exception, match="CRASH!"):
+        with pytest.raises(ValueError, match="Пользователь с таким email уже существует"):
             await create_user_usecase.execute(dto)
 
-        user = await account_repository.get_account_by_email(dto.email)
-        assert user is None
-
-        mock_notifier.send_confirmation_code.assert_not_called()

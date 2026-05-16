@@ -1,7 +1,7 @@
 import pytest
 
 from src.core.iam.presentation.dto import AccountConfirmation, LoginAccount, ChangePasswordData
-from src.core.iam.domain.enums import TokenType
+from src.core.iam.domain.enums import TokenType, OTPType
 from tests.iam.conftest import create_user_request, get_token_by_type
 
 
@@ -15,16 +15,17 @@ class TestChangePasswordUseCase:
         login_user_usecase,
         change_password_usecase,
         account_repository,
-        password_hasher
+        password_hasher,
+        redis_service,
     ):
         dto = create_user_request()
         await create_user_usecase.execute(dto)
 
         user = await account_repository.get_account_by_email(dto.email)
-        email_token = get_token_by_type(user.tokens, TokenType.EMAIL)
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user.id}")
         old_password_hash = user.password.value
 
-        confirmation_dto = AccountConfirmation(confirm_token=email_token.value)
+        confirmation_dto = AccountConfirmation(account_id=user.id, confirm_code=otp_code)
         await account_confirmation_usecase.execute(confirmation_dto)
 
         login_dto = LoginAccount(email=dto.email, raw_password=dto.raw_password)
@@ -49,15 +50,16 @@ class TestChangePasswordUseCase:
         login_user_usecase,
         change_password_usecase,
         account_repository,
-        password_hasher
+        password_hasher,
+        redis_service,
     ):
         dto = create_user_request()
         await create_user_usecase.execute(dto)
 
         user = await account_repository.get_account_by_email(dto.email)
-        email_token = get_token_by_type(user.tokens, TokenType.EMAIL)
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user.id}")
 
-        confirmation_dto = AccountConfirmation(confirm_token=email_token.value)
+        confirmation_dto = AccountConfirmation(account_id=user.id, confirm_code=otp_code)
         await account_confirmation_usecase.execute(confirmation_dto)
 
         login_dto = LoginAccount(email=dto.email, raw_password=dto.raw_password)
@@ -82,14 +84,15 @@ class TestChangePasswordUseCase:
         login_user_usecase,
         change_password_usecase,
         account_repository,
+        redis_service,
     ):
         dto = create_user_request()
         await create_user_usecase.execute(dto)
 
         user = await account_repository.get_account_by_email(dto.email)
-        email_token = get_token_by_type(user.tokens, TokenType.EMAIL)
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user.id}")
 
-        confirmation_dto = AccountConfirmation(confirm_token=email_token.value)
+        confirmation_dto = AccountConfirmation(account_id=user.id, confirm_code=otp_code)
         await account_confirmation_usecase.execute(confirmation_dto)
 
         login_dto = LoginAccount(email=dto.email, raw_password=dto.raw_password)

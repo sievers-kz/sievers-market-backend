@@ -12,36 +12,15 @@ from tests.iam.conftest import create_domain_account, get_token_by_type, get_tok
 @pytest.mark.unit
 def test_confirm_account_success():
     account = create_domain_account(is_active=False)
-    token_value = "secret_confirm_token"
-    expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
-    account.add_new_token(TokenType.EMAIL, token_value, expires_at)
-    account.confirm_account(token_value)
+    account.confirm_account()
     assert account.is_active is True
-
-
-@pytest.mark.unit
-def test_confirm_account_fails_when_token_not_found():
-    account = create_domain_account(is_active=False)
-    with pytest.raises(ValueError, match="Confirmation token not found"):
-        account.confirm_account(token_value="non_existent_token")
-
-
-@pytest.mark.unit
-def test_confirm_account_fails_when_token_expired():
-    account = create_domain_account(is_active=False)
-    token_value = "secret_confirm_token"
-    expires_at = datetime.now(timezone.utc) - timedelta(hours=1)
-    account.add_new_token(TokenType.EMAIL, token_value, expires_at)
-
-    with pytest.raises(ValueError, match="Confirmation token is expired"):
-        account.confirm_account(token_value)
 
 
 @pytest.mark.unit
 def test_confirm_account_fails_when_already_active():
     account = create_domain_account(is_active=True)
     with pytest.raises(ValueError, match="Account is already confirmed"):
-        account.confirm_account(token_value="secret_confirm_token")
+        account.confirm_account()
 
 
 @pytest.mark.unit
@@ -154,14 +133,8 @@ def test_reset_password_success():
     expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
     account.add_new_token(TokenType.REFRESH, fake_refresh_token, expires_at)
 
-    reset_password_token = "reset_password_token"
-    expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
-    account.add_new_token(TokenType.PASSWORD, reset_password_token, expires_at)
     new_hashed_password = "new_hashed_password"
-
-    account.reset_password(reset_password_token, new_hashed_password)
-    revoked_password_token = get_token_by_value(account.tokens, reset_password_token)
-    assert revoked_password_token.is_revoked is True
+    account.reset_password(new_hashed_password)
 
     revoked_refresh_tokens = [token for token in account.tokens if token.type == TokenType.REFRESH]
     for token in revoked_refresh_tokens:

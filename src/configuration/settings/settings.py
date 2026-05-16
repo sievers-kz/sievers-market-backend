@@ -41,12 +41,12 @@ class SendGridSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
-class ObjectStorageSettings(BaseSettings):
-    object_storage_endpoint: str = Field(alias="OBJECT_STORAGE_ENDPOINT")
-    object_storage_access_key: str = Field(alias="OBJECT_STORAGE_ACCESS_KEY")
-    object_storage_secret_key: str = Field(alias="OBJECT_STORAGE_SECRET_KEY")
-    object_storage_bucket_name: str = Field(alias="OBJECT_STORAGE_BUCKET_NAME")
-    object_storage_secure_config: bool = Field(alias="OBJECT_STORAGE_SECURE_CONFIG")
+class MinioConfig(BaseSettings):
+    endpoint: str = Field(alias="MINIO_ENDPOINT")
+    access_key: str = Field(alias="MINIO_ACCESS_KEY")
+    secret_key: str = Field(alias="MINIO_SECRET_KEY")
+    bucket_name: str = Field(alias="MINIO_BUCKET_NAME")
+    secure_config: bool = Field(alias="MINIO_SECURE_CONFIG")
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -54,6 +54,7 @@ class ObjectStorageSettings(BaseSettings):
 class RedisConfig(BaseSettings):
     host: str = Field(alias="REDIS_HOST")
     port: int = Field(alias="REDIS_PORT")
+    db: int = Field(alias="REDIS_DB")
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -70,7 +71,7 @@ class ApplicationSettings(BaseSettings):
     database: PostgresSettings = Field(default_factory=PostgresSettings)
     authentication: AuthenticationSettings = Field(default_factory=AuthenticationSettings)
     sendgrid: SendGridSettings = Field(default_factory=SendGridSettings)
-    object_storage: ObjectStorageSettings = Field(default_factory=ObjectStorageSettings)
+    minio_config: MinioConfig = Field(default_factory=MinioConfig)
     redis_config: RedisConfig = Field(default_factory=RedisConfig)
     resend_config: ResendSettings = Field(default_factory=ResendSettings)
 

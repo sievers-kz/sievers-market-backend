@@ -10,7 +10,6 @@ class RedisService(ICacheService):
         self.client = client
 
     async def set(self, key: str, value: Any, ttl: int) -> None:
-        print(f"DEBUG: Setting key {key} with TTL {ttl}")  # Глянем в консоль бэкенда
         await self.client.setex(key, ttl, value)
 
     async def get(self, key: str) -> Any:
