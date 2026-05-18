@@ -1,3 +1,4 @@
+from typing import TypeVar, Generic
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
@@ -19,3 +20,13 @@ class CurrentSeller(BaseModel):
 
 class DTO(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+
+
+T = TypeVar("T")
+
+
+class PaginatedResponse(DTO, Generic[T]):
+    items: list[T]
+    total: int
+    page: int
+    pages: int
