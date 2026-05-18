@@ -579,6 +579,21 @@ files = [
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
+name = "cloc"
+version = "0.2.5"
+description = "Command Line Object Chaining (cloc) - Modern cli framework for simple and complex cli applications"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "cloc-0.2.5.tar.gz", hash = "sha256:469164d445169ef3635c5cbae21db2e6126ebc2d71f7151f482674414c0c3363"},
+]
+
+[package.dependencies]
+colored = "*"
+requests = "*"
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
@@ -589,6 +604,18 @@ markers = "platform_system == \"Windows\" or sys_platform == \"win32\""
 files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
+]
+
+[[package]]
+name = "colored"
+version = "2.3.2"
+description = "Simple python library for color and formatting to terminal"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "colored-2.3.2-py3-none-any.whl", hash = "sha256:f192e0545b7214f5479031495d14f4a46b29695650c46a50bf5bb8fb5cbd7893"},
+    {file = "colored-2.3.2.tar.gz", hash = "sha256:d6b7f0737a732c54c92b271f2932c91e386238c8b6ded49d4180eed44eb50684"},
 ]
 
 [[package]]
@@ -3192,4 +3219,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "03c792d8693f159557faf54b9dbb8c98fe6c0b29d1750758648aed96fedfba2d"
+content-hash = "b50b751adb84de582717c550410d1892b8b605d16fe11dabc1047c09cea6645b"

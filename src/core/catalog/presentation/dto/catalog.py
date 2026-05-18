@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from src.core.shared.domain.enums import PriceCurrency
 from src.core.shared.presentation.dto import DTO
 
 
@@ -25,3 +26,16 @@ class RubricResponse(DTO):
     id: UUID
     name: str
     categories: list[CategoryResponse]
+
+
+class ListingCardResponse(DTO):
+    id: UUID
+    last_name: str
+    first_name: str
+    subcategory: str
+    title: str
+    price: int
+    currency: str
+    city: str
+    preview_image: UUID
+

@@ -1,20 +1,25 @@
 from uuid import UUID
 
 from pydantic import TypeAdapter
-from sqlalchemy import select
+from sqlalchemy import select, cast
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import load_only, joinedload
+from sqlalchemy.dialects.postgresql import UUID as PsqlUUID
 
 from src.core.catalog.application.interfaces.query_service import ICatalogQueryService
 from src.core.catalog.domain.enums import CatalogStatus
 from src.core.catalog.infrastructure.models import Subcategory, Rubric, Category
-from src.core.catalog.presentation.dto.catalog import AttributeResponse, RubricResponse
+from src.core.catalog.presentation.dto.catalog import AttributeResponse, RubricResponse, ListingCardResponse
 from src.core.catalog.presentation.dto.subcategory import Attribute
+from src.core.customer.infrastructure.models import Customer
+from src.core.listing.infrastructure.models import Listing
+from src.core.references.infrastructure.models import City
+from src.core.shared.infrastructure.services.query_service import QueryService
 
 
-class CatalogQueryService(ICatalogQueryService):
+class CatalogQueryService(QueryService, ICatalogQueryService):
     def __init__(self, session: AsyncSession):
-        self._session = session
+        super().__init__(session=session)
 
     async def get_subcategory_attributes(self, subcategory_id: UUID) -> list[Attribute]:
         statement = (
@@ -53,3 +58,38 @@ class CatalogQueryService(ICatalogQueryService):
         query_result = await self._session.execute(statement)
         results = query_result.scalars().unique().all()
         return TypeAdapter(list[RubricResponse]).validate_python(results)
+
+    async def get_listings_card(
+        self,
+        category_id: UUID,
+        subcategory_id: UUID | None,
+        page: int = 1,
+        limit: int = 20,
+    ) -> list:
+        statement = (
+            select(
+                Listing.id,
+                Customer.last_name.label("last_name"),
+                Customer.first_name.label("first_name"),
+                Subcategory.name.label("subcategory"),
+                Listing.title,
+                Listing.price,
+                Listing.currency,
+                City.name.label("city"),
+                cast(Listing.gallery[0]["media_id"].as_string(), PsqlUUID).label("preview_image")
+            )
+            .join(Customer, Listing.owner_id == Customer.account_id)
+            .join(Subcategory, Listing.subcategory_id == Subcategory.id)
+            .join(City, Listing.city_id == City.id)
+            .where(Listing.category_id == category_id)
+        )
+
+        if subcategory_id is not None:
+            statement = statement.where(Listing.subcategory_id == subcategory_id)
+
+        return await self.paginate(
+            statement=statement,
+            schema=ListingCardResponse,
+            page=page,
+            limit=limit,
+        )
