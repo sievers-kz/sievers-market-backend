@@ -9,9 +9,12 @@ from sqlalchemy.dialects.postgresql import UUID as PsqlUUID
 from src.core.catalog.application.interfaces.query_service import ICatalogQueryService
 from src.core.catalog.domain.enums import CatalogStatus
 from src.core.catalog.infrastructure.models import Subcategory, Rubric, Category
-from src.core.catalog.presentation.dto.catalog import AttributeResponse, RubricResponse, ListingCardResponse
+from src.core.catalog.presentation.dto.catalog import AttributeResponse, RubricResponse, ListingCardResponse, \
+    ListingDetailResponse
 from src.core.catalog.presentation.dto.subcategory import Attribute
 from src.core.customer.infrastructure.models import Customer
+from src.core.iam.infrastructure.models import Account
+from src.core.listing.domain.enums import ListingStatus
 from src.core.listing.infrastructure.models import Listing
 from src.core.references.infrastructure.models import City
 from src.core.shared.infrastructure.services.query_service import QueryService
@@ -81,7 +84,10 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
             .join(Customer, Listing.owner_id == Customer.account_id)
             .join(Subcategory, Listing.subcategory_id == Subcategory.id)
             .join(City, Listing.city_id == City.id)
-            .where(Listing.category_id == category_id)
+            .where(
+                Listing.category_id == category_id,
+                Listing.status == ListingStatus.ACTIVE
+            )
         )
 
         if subcategory_id is not None:
@@ -93,3 +99,39 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
             page=page,
             limit=limit,
         )
+
+    async def get_listing_details(self, listing_id: UUID) -> ListingDetailResponse:
+        statement = (
+            select(
+                Listing.id,
+                Listing.owner_id,
+                Account.email,
+                Account.phone,
+                Customer.last_name.label("last_name"),
+                Customer.first_name.label("first_name"),
+                Subcategory.name.label("subcategory"),
+                Listing.title,
+                Listing.price,
+                Listing.currency,
+                City.name.label("city"),
+                Listing.description,
+                Listing.gallery,
+                Listing.attributes,
+            )
+            .join(Account, Listing.owner_id == Account.id)
+            .join(Customer, Listing.owner_id == Customer.account_id)
+            .join(Subcategory, Listing.subcategory_id == Subcategory.id)
+            .join(City, Listing.city_id == City.id)
+            .where(
+                Listing.id == listing_id,
+                Listing.status == ListingStatus.ACTIVE
+            )
+        )
+
+        query_result = await self._session.execute(statement)
+        result = query_result.mappings().one_or_none()
+
+        if not result:
+            return None
+
+        return ListingDetailResponse.model_validate(result)

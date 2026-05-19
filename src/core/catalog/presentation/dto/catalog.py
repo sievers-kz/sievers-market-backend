@@ -1,5 +1,9 @@
 from uuid import UUID
 
+from typing import Any
+
+from pydantic import field_validator
+
 from src.core.shared.domain.enums import PriceCurrency
 from src.core.shared.presentation.dto import DTO
 
@@ -39,3 +43,24 @@ class ListingCardResponse(DTO):
     city: str
     preview_image: UUID
 
+
+class ListingDetailResponse(DTO):
+    id: UUID
+    owner_id: UUID
+    email: str
+    phone: str | None
+    last_name: str
+    first_name: str
+    subcategory: str
+    title: str
+    price: int
+    currency: str
+    city: str
+    description: str | None
+    gallery: list[UUID]
+    attributes: dict[str, Any]
+
+    @field_validator("gallery", mode="before")
+    @classmethod
+    def extract_media_ids(cls, v):
+        return [item["media_id"] for item in v]
