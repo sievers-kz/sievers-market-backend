@@ -64,3 +64,5 @@ class ApplicationFactory:
 
 
 fastapi_app = ApplicationFactory().build()
+
+

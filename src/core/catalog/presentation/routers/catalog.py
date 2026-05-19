@@ -7,7 +7,8 @@ from fastapi.params import Depends, Query
 
 from src.configuration.dependencies.container import ApplicationContainer
 from src.core.catalog.infrastructure.query import CatalogQueryService
-from src.core.catalog.presentation.dto.catalog import AttributeResponse, RubricResponse, ListingCardResponse
+from src.core.catalog.presentation.dto.catalog import AttributeResponse, RubricResponse, ListingCardResponse, \
+    ListingDetailResponse
 from src.core.catalog.presentation.routers.subcategory import subcategory_router
 from src.core.shared.presentation.dto import PaginatedResponse
 
@@ -63,3 +64,19 @@ async def get_listings_card(
     limit: int = Query(20, alias="limit"),
 ):
     return await service.get_listings_card(category_id, subcategory_id, page, limit)
+
+
+@catalog_router.get("/{listing_id}", response_model=ListingDetailResponse)
+@inject
+async def get_listing_details(
+    listing_id: UUID,
+    service: Annotated[
+        CatalogQueryService,
+        Depends(
+            Provide[
+                ApplicationContainer.catalog.query_service
+            ]
+        )
+    ]
+):
+    return await service.get_listing_details(listing_id)
