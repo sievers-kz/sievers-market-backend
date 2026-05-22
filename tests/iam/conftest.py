@@ -52,9 +52,9 @@ def get_token_by_value(tokens: list, target_value: str):
     return next((t for t in tokens if t.value == target_value), None)
 
 
-@pytest_asyncio.fixture
-async def password_hasher(container):
-    return container.iam.bcrypt_password_hasher()
+@pytest.fixture
+def password_service(container):
+    return container.iam.password_service()
 
 
 @pytest_asyncio.fixture

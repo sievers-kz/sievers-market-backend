@@ -7,7 +7,6 @@ from src.core.iam.domain.enums import UserRole, TokenType
 from src.core.iam.domain.value_objects import Email, Phone, Password
 
 from src.core.shared.domain.entities import AggregateRoot, Entity
-from src.core.shared.infrastructure.services.password_hasher import AbstractPasswordHasher
 
 
 @dataclass(frozen=False)
@@ -21,6 +20,19 @@ class Account(AggregateRoot):
     updated_at: datetime | None
     tokens: list["Token"]
 
+    @classmethod
+    def register(cls, email: Email, password: Password) -> "Account":
+        return cls(
+            id=uuid.uuid4(),
+            email=email,
+            phone=Phone(None),
+            password=password,
+            is_active=False,
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
+            tokens=[],
+        )
+
     def confirm_account(self):
         if self.is_active:
             raise ValueError("Account is already confirmed")
@@ -33,12 +45,9 @@ class Account(AggregateRoot):
         self.revoke_all_tokens_by_type(TokenType.EMAIL)
         self.add_new_token(TokenType.EMAIL, token_value, expires_at)
 
-    def login(self, raw_password: str, password_hasher: AbstractPasswordHasher):
+    def login(self):
         if not self.is_active:
             raise ValueError("Account is not confirmed")
-
-        if not self.password.verify(raw_password, password_hasher):
-            raise ValueError("Invalid email or password")
 
     def logout(self, token_value: str):
         token = self._get_token_by_value(token_value)
@@ -69,15 +78,7 @@ class Account(AggregateRoot):
             if token.type == token_type and not token.is_revoked:
                 token.revoke_token()
 
-    def change_password(
-        self,
-        raw_old_password: str,
-        new_hashed_password: str,
-        password_hasher: AbstractPasswordHasher
-    ):
-        if not self.password.verify(raw_old_password, password_hasher):
-            raise ValueError("Invalid password")
-
+    def change_password(self, new_hashed_password: str):
         self.password = Password(new_hashed_password)
         self.updated_at = datetime.now(timezone.utc)
         self.revoke_all_tokens_by_type(TokenType.REFRESH)

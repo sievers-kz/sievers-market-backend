@@ -11,17 +11,20 @@ from src.core.iam.application.usecases import (
     LogoutUserUseCase,
     ForgotPasswordUseCase,
     ResetPasswordUseCase,
-    ChangePasswordUseCase, ResendConfirmationCodeUseCase, RequestEmailChangeUseCase, ConfirmEmailChangeUseCase,
-    RequestPhoneChangeUseCase, ConfirmPhoneChangeUseCase
+    ChangePasswordUseCase,
+    ResendConfirmationCodeUseCase,
+    RequestEmailChangeUseCase,
+    ConfirmEmailChangeUseCase,
+    RequestPhoneChangeUseCase,
+    ConfirmPhoneChangeUseCase
 )
 
 
 from src.core.iam.infrastructure.iam_unit_of_work import IAMUnitOfWork
-from src.core.iam.infrastructure.factory import AccountFactory
 from src.core.iam.infrastructure.repository import AccountRepository
+from src.core.iam.infrastructure.services.password_service import PasswordService
 
 from src.core.iam.infrastructure.services.pyjwt_token import PyJWTTokenService
-from src.core.shared.infrastructure.services.password_hasher import BcryptPasswordHasher
 from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormalizer
 
 
@@ -29,10 +32,15 @@ class IAMContainer(containers.DeclarativeContainer):
     auth_config = providers.Configuration()
     database_session = providers.Dependency()
     customer_service = providers.Dependency()
-
     console_email_sender = providers.Dependency()
     redis_service = providers.Dependency()
     arq_service = providers.Dependency()
+    bloom_filter = providers.Dependency()
+
+    password_service = providers.Factory(
+        PasswordService,
+        bloom=bloom_filter,
+    )
 
     account_repository = providers.Factory(
         AccountRepository,
@@ -44,14 +52,7 @@ class IAMContainer(containers.DeclarativeContainer):
         session=database_session
     )
 
-    bcrypt_password_hasher = providers.Singleton(BcryptPasswordHasher)
     phonenumber_normalizer = providers.Singleton(PhoneNormalizer)
-
-    account_factory = providers.Factory(
-        AccountFactory,
-        phone_normalizer=phonenumber_normalizer,
-        password_hasher=bcrypt_password_hasher
-    )
 
     pyjwt_token_service = providers.Singleton(
         PyJWTTokenService,
@@ -85,9 +86,9 @@ class IAMContainer(containers.DeclarativeContainer):
     create_user_usecase = providers.Factory(
         CreateUserUseCase,
         unit_of_work=iam_unit_of_work,
-        factory=account_factory,
         customer_service=customer_service,
-        otp_service=otp_service
+        otp_service=otp_service,
+        password_service=password_service
     )
 
     account_confirmation_usecase = providers.Factory(
@@ -106,7 +107,7 @@ class IAMContainer(containers.DeclarativeContainer):
         LoginUserUseCase,
         unit_of_work=iam_unit_of_work,
         token_service=pyjwt_token_service,
-        password_hasher=bcrypt_password_hasher
+        password_service=password_service
     )
 
     refresh_token_usecase = providers.Factory(
@@ -129,14 +130,14 @@ class IAMContainer(containers.DeclarativeContainer):
     reset_password_usecase = providers.Factory(
         ResetPasswordUseCase,
         unit_of_work=iam_unit_of_work,
-        password_hasher=bcrypt_password_hasher,
+        password_service=password_service,
         otp_service=otp_service,
     )
 
     change_password_usecase = providers.Factory(
         ChangePasswordUseCase,
         unit_of_work=iam_unit_of_work,
-        password_hasher=bcrypt_password_hasher
+        password_service=password_service
     )
 
     request_email_change_usecase = providers.Factory(

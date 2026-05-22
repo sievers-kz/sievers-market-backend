@@ -1,11 +1,8 @@
 from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock
-
 import pytest
 
 from src.core.iam.domain.enums import TokenType
 from src.core.iam.domain.value_objects import Password
-from src.core.shared.infrastructure.services.password_hasher import AbstractPasswordHasher
 from tests.iam.conftest import create_domain_account, get_token_by_type, get_token_by_value
 
 
@@ -27,32 +24,14 @@ def test_confirm_account_fails_when_already_active():
 def test_login_success():
     account = create_domain_account(is_active=True)
     account.password = Password(value="hashed_password")
-
-    mock_hasher = MagicMock(spec=AbstractPasswordHasher)
-    mock_hasher.verify_password.return_value = True
-
-    account.login("my_correct_password", mock_hasher)
-    mock_hasher.verify_password.assert_called_once()
+    account.login()
 
 
 @pytest.mark.unit
 def test_login_fails_when_user_inactive():
     account = create_domain_account(is_active=False)
-    mock_hasher = MagicMock(spec=AbstractPasswordHasher)
     with pytest.raises(ValueError, match="Account is not confirmed"):
-        account.login("my_incorrect_password", mock_hasher)
-
-
-@pytest.mark.unit
-def test_login_fails_with_invalid_credentials():
-    account = create_domain_account(is_active=True)
-    account.password = Password(value="current_password")
-
-    mock_hasher = MagicMock(spec=AbstractPasswordHasher)
-    mock_hasher.verify_password.return_value = False
-
-    with pytest.raises(ValueError, match="Invalid email or password"):
-        account.login("invalid_password", mock_hasher)
+        account.login()
 
 
 @pytest.mark.unit
@@ -63,35 +42,11 @@ def test_change_password_success():
     expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
     account.add_new_token(TokenType.REFRESH, "refresh_token_123", expires_at)
 
-    mock_hasher = MagicMock(spec=AbstractPasswordHasher)
-    mock_hasher.verify_password.return_value = True
+    account.change_password("new_hashed_password")
 
-    account.change_password(
-        "my_old_raw_password",
-        "new_hashed_password",
-        mock_hasher
-    )
     assert account.password.value == "new_hashed_password"
-
     refresh_token = get_token_by_type(account.tokens, TokenType.REFRESH)
     assert refresh_token.is_revoked is True
-    mock_hasher.verify_password.assert_called_once()
-
-
-@pytest.mark.unit
-def test_change_password_fails_with_wrong_old_password():
-    account = create_domain_account(is_active=True)
-    account.password = Password(value="old_hashed_password")
-
-    mock_hasher = MagicMock(spec=AbstractPasswordHasher)
-    mock_hasher.verify_password.return_value = False
-
-    with pytest.raises(ValueError, match="Invalid password"):
-        account.change_password(
-            "wrong_old_password",
-            "new_hashed_password",
-            mock_hasher
-        )
 
 
 @pytest.mark.unit

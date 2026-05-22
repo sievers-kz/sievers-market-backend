@@ -1,9 +1,5 @@
 from dataclasses import dataclass
 import re
-from datetime import datetime
-
-from src.core.iam.domain.enums import TokenType
-from src.core.shared.infrastructure.services.password_hasher import AbstractPasswordHasher
 
 
 @dataclass(frozen=True)
@@ -49,7 +45,4 @@ class Password:
     def validate_required(self):
         if not self.value:
             raise ValueError("Пароль обязателен")
-
-    def verify(self, raw_password: str, hasher: AbstractPasswordHasher):
-        return hasher.verify_password(raw_password, self.value)
 

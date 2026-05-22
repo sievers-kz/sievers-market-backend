@@ -1,6 +1,7 @@
+from unittest.mock import MagicMock
+
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
 from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
@@ -13,7 +14,6 @@ from src.configuration.settings.settings import ApplicationSettings
 pytest_plugins = [
     "tests.iam.conftest",
     "tests.customer.conftest",
-    "tests.machinery.conftest"
 ]
 
 
@@ -77,20 +77,20 @@ async def database_session(session_factory):
         yield session
 
 
+@pytest.fixture(scope="function")
+def mock_bloom():
+    bloom = MagicMock()
+    bloom.__contains__ = MagicMock(return_value=False)
+    return bloom
+
+
 @pytest_asyncio.fixture(scope="function")
-async def container(session_factory, test_settings):
+async def container(session_factory, test_settings, mock_bloom):
     container = ApplicationContainer()
     container.configurations.configuration.from_pydantic(test_settings)
-
     container.gateways.session_factory.override(session_factory)
+    container.gateways.bloom_filter.override(mock_bloom)
+
     yield container
 
 
-@pytest_asyncio.fixture
-async def brand_repository(container):
-    return await container.reference.brand_repository()
-
-
-@pytest_asyncio.fixture
-async def add_to_wishlist_usecase(container):
-    return await container.wishlist.add_to_wishlist_usecase()

@@ -8,6 +8,7 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from src.configuration.database.connection import get_database_session
+from src.configuration.dependencies.resources import init_bloom
 from src.core.shared.infrastructure.services.email_sender import SendGridEmailSender
 
 
@@ -65,4 +66,10 @@ class GatewaysContainer(containers.DeclarativeContainer):
         access_key=minio_config.access_key,
         secret_key=minio_config.secret_key,
         secure=minio_config.secure_config
+    )
+
+    bloom_filter = providers.Resource(
+        init_bloom,
+        client=minio_client,
+        bucket_name=minio_config.bucket_name,
     )
