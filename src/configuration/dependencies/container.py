@@ -57,6 +57,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         console_email_sender=shared.console_email_sender,
         redis_service=shared.redis_service,
         arq_service=shared.arq_service,
+        bloom_filter=gateways.bloom_filter
     )
 
     listing = providers.Container(

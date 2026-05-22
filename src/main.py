@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from scalar_fastapi import get_scalar_api_reference, Theme, Layout
 
@@ -12,11 +14,20 @@ from src.configuration.dependencies.container import ApplicationContainer
 
 class ApplicationFactory:
     def __init__(self):
+        self.container = ApplicationContainer()
         self.app = FastAPI(
             title="AGROW Marketplace",
             version="1.0.0",
+            lifespan=self._lifespan(),
         )
-        self.container = ApplicationContainer()
+
+    def _lifespan(self):
+        @asynccontextmanager
+        async def lifespan(app: FastAPI):
+            await self.container.init_resources()
+            yield
+            await self.container.shutdown_resources()
+        return lifespan
 
     def _wire_dependency(self):
         self.container.wire(

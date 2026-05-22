@@ -15,7 +15,7 @@ class TestChangePasswordUseCase:
         login_user_usecase,
         change_password_usecase,
         account_repository,
-        password_hasher,
+        password_service,
         redis_service,
     ):
         dto = create_user_request()
@@ -39,7 +39,7 @@ class TestChangePasswordUseCase:
         new_password_hash = user_after_change_password.password.value
 
         assert new_password_hash != old_password_hash
-        assert user_after_change_password.password.verify(new_raw_password, password_hasher)
+        assert password_service.verify(new_raw_password, user_after_change_password.password.value)
 
     @pytest.mark.asyncio
     @pytest.mark.integration
@@ -50,7 +50,7 @@ class TestChangePasswordUseCase:
         login_user_usecase,
         change_password_usecase,
         account_repository,
-        password_hasher,
+        password_service,
         redis_service,
     ):
         dto = create_user_request()
@@ -73,7 +73,7 @@ class TestChangePasswordUseCase:
         with pytest.raises(Exception) as exc:
             await change_password_usecase.execute(user.id, change_password_dto)
 
-        assert str(exc.value) == "Invalid password"
+        assert str(exc.value) == "Incorrect password"
 
     @pytest.mark.asyncio
     @pytest.mark.integration
