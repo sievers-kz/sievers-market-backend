@@ -13,7 +13,11 @@ from src.core.iam.presentation.dto import (
     ChangePasswordData,
     LoginAccount,
     ResendCodeRequest,
-    CreateUserRequest, ChangeEmailRequest, ConfirmEmailChangeRequest, ConfirmPhoneChangeRequest, ChangePhoneRequest,
+    CreateUserRequest,
+    ChangeEmailRequest,
+    ConfirmEmailChangeRequest,
+    ConfirmPhoneChangeRequest,
+    ChangePhoneRequest,
 )
 
 from src.core.shared.presentation.dto import CurrentUser
@@ -30,7 +34,10 @@ from src.core.iam.application.usecases import (
     ResetPasswordUseCase,
     ChangePasswordUseCase,
     ResendConfirmationCodeUseCase,
-    CreateUserUseCase, ConfirmEmailChangeUseCase, RequestEmailChangeUseCase, ConfirmPhoneChangeUseCase,
+    CreateAccountUseCase,
+    ConfirmEmailChangeUseCase,
+    RequestEmailChangeUseCase,
+    ConfirmPhoneChangeUseCase,
     RequestPhoneChangeUseCase
 )
 
@@ -43,10 +50,10 @@ iam = APIRouter(prefix="/api/v1/iam", tags=["IAM"])
 async def create_new_user(
     dto: CreateUserRequest,
     usecase: Annotated[
-        CreateUserUseCase,
+        CreateAccountUseCase,
         Depends(
             Provide[
-                ApplicationContainer.iam.create_user_usecase
+                ApplicationContainer.iam.create_account_usecase
             ]
         )
     ]
@@ -71,8 +78,11 @@ async def confirm_email(
         )
     ]
 ):
-    await usecase.execute(dto)
-    return {"message": "Ваша электронная почта успешно подтверждена!"}
+    response = await usecase.execute(dto)
+    return {
+        "message": "Ваша электронная почта успешно подтверждена!",
+        "response": response,
+    }
 
 
 @iam.post("/resend-code")

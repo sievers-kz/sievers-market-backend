@@ -2,7 +2,7 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import UUID, DateTime, func, Text, Boolean, Integer
+from sqlalchemy import UUID, DateTime, func, Text, Boolean, Integer, Enum
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -29,9 +29,13 @@ class BaseModel(Base):
         nullable=False,
     )
 
-    @staticmethod
-    def get_enum_values(enum_class: enum.Enum):
-        return [item.value for item in enum_class]
-
+    type_annotation_map = {
+        enum.Enum: Enum(
+            enum.Enum,  # Абстрактный маркер
+            native_enum=False,  # Отключает родные Enum базы данных (будет VARCHAR)
+            # Заставляет SQLAlchemy динамически брать .value конкретного энума
+            values_callable=lambda obj: [item.value for item in obj],
+        )
+    }
 
 

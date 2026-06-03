@@ -1,13 +1,20 @@
+from src.core.iam.application.interfaces.abstract_token_service import AbstractTokenService
 from src.core.iam.application.services.otp import OTPService
-from src.core.iam.domain.enums import OTPType
-from src.core.iam.presentation.dto import AccountConfirmation
+from src.core.iam.domain.enums import OTPType, TokenType
+from src.core.iam.presentation.dto import AccountConfirmation, LoginResponse
 from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
 
 
 class AccountConfirmationUseCase:
-    def __init__(self, unit_of_work: AbstractIAMUnitOfWork, otp_service: OTPService):
+    def __init__(
+        self,
+        unit_of_work: AbstractIAMUnitOfWork,
+        otp_service: OTPService,
+        token_service: AbstractTokenService
+    ):
         self.unit_of_work = unit_of_work
         self.otp_service = otp_service
+        self.token_service = token_service
 
     async def execute(self, confirmation_data: AccountConfirmation):
         async with self.unit_of_work as uow:
@@ -21,6 +28,12 @@ class AccountConfirmationUseCase:
                 otp_value=confirmation_data.confirm_code,
             )
 
+            access_token = self.token_service.create_token(account.id, TokenType.ACCESS)
+            refresh_token = self.token_service.create_token(account.id, TokenType.REFRESH)
+            account.add_new_token(refresh_token.type, refresh_token.value, refresh_token.expires_at)
+
             account.confirm_account()
             await uow.account.save(account)
             await uow.commit()
+
+            return LoginResponse(access_token=access_token.value, refresh_token=refresh_token.value)

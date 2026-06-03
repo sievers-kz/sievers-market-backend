@@ -10,6 +10,7 @@ from src.core.listing.presentation.routers import listing_router
 from src.core.references.presentation.routers.reference import reference_router
 from src.core.media.presentation.routers import media_router
 from src.configuration.dependencies.container import ApplicationContainer
+from src.core.vendor.presentation.router import vendor_router
 
 
 class ApplicationFactory:
@@ -34,6 +35,7 @@ class ApplicationFactory:
             modules=[
                 "src.core.iam.presentation.routers",
                 "src.core.customer.presentation.routers",
+                "src.core.vendor.presentation.router",
                 "src.core.shared.presentation.security",
                 "src.core.media.presentation.routers",
                 "src.core.listing.presentation.routers",
@@ -49,6 +51,7 @@ class ApplicationFactory:
         routers = [
             iam,
             customer,
+            vendor_router,
             reference_router,
             catalog_router,
             listing_router,

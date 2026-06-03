@@ -3,6 +3,7 @@ from dependency_injector import containers, providers
 from src.core.shared.infrastructure.services.arq_service import ArqService
 from src.core.shared.infrastructure.services.email_sender import ConsoleEmailSender, SendGridEmailSender, \
     ResendEmailSender
+from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormalizer
 from src.core.shared.infrastructure.services.redis_service import RedisService
 
 
@@ -10,6 +11,7 @@ class SharedContainer(containers.DeclarativeContainer):
     resend_config = providers.Configuration()
 
     console_email_sender = providers.Singleton(ConsoleEmailSender)
+    phone_normalizer = providers.Singleton(PhoneNormalizer)
 
     resend_sender = providers.Singleton(
         ResendEmailSender,

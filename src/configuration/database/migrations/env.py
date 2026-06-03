@@ -15,6 +15,8 @@ from src.core.iam.infrastructure.models import Account, Token
 
 from src.core.customer.infrastructure.models import Customer
 
+from src.core.vendor.infrastructure.models import Vendor
+
 from src.core.listing.infrastructure.models import Listing
 
 from src.core.media.infrastructure.models import Media

@@ -1,4 +1,4 @@
-from .registration import CreateUserUseCase
+from .registration import CreateAccountUseCase
 from .account_confirmation import AccountConfirmationUseCase
 from .login import LoginUserUseCase
 from .refresh_token import RefreshTokenUseCase
@@ -14,7 +14,7 @@ from .confirm_phone_change import ConfirmPhoneChangeUseCase
 
 
 __all__ = [
-    "CreateUserUseCase",
+    "CreateAccountUseCase",
     "AccountConfirmationUseCase",
     "LoginUserUseCase",
     "RefreshTokenUseCase",
