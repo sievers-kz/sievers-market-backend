@@ -10,7 +10,7 @@ from src.core.catalog.application.interfaces.query_service import ICatalogQueryS
 from src.core.catalog.domain.enums import CatalogStatus
 from src.core.catalog.infrastructure.models import Subcategory, Rubric, Category
 from src.core.catalog.presentation.dto.catalog import AttributeResponse, RubricResponse, ListingCardResponse, \
-    ListingDetailResponse
+    ListingDetailResponse, VendorCardResponse
 from src.core.catalog.presentation.dto.subcategory import Attribute
 from src.core.customer.infrastructure.models import Customer
 from src.core.iam.infrastructure.models import Account
@@ -18,6 +18,7 @@ from src.core.listing.domain.enums import ListingStatus
 from src.core.listing.infrastructure.models import Listing
 from src.core.references.infrastructure.models import City
 from src.core.shared.infrastructure.services.query_service import QueryService
+from src.core.vendor.infrastructure.models import Vendor
 
 
 class CatalogQueryService(QueryService, ICatalogQueryService):
@@ -135,3 +136,21 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
             return None
 
         return ListingDetailResponse.model_validate(result)
+
+    async def get_vendors_card(self, page: int = 1, limit: int = 20) -> list[VendorCardResponse]:
+        statement = (
+            select(
+                Vendor.id.label("vendor_id"),
+                Vendor.is_verified,
+                Vendor.legal_name,
+                Vendor.shop_name,
+                Vendor.logotype
+            ).where(Vendor.is_verified == True)
+        )
+
+        return await self.paginate(
+            statement=statement,
+            schema=VendorCardResponse,
+            page=page,
+            limit=limit,
+        )
