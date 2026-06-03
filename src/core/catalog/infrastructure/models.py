@@ -13,15 +13,7 @@ class Rubric(BaseModel):
     __tablename__ = "rubrics"
     name: Mapped[str] = mapped_column(String(50), nullable=False)
     attributes: Mapped[list] = mapped_column(JSONB, nullable=True, default=list)
-
-    status: Mapped[CatalogStatus] = mapped_column(
-        Enum(
-            CatalogStatus,
-            native_enum=False,
-            values_callable=BaseModel.get_enum_values
-        ),
-        nullable=False
-    )
+    status: Mapped[CatalogStatus] = mapped_column(nullable=False)
 
     categories: Mapped[list["Category"]] = relationship(
         lazy="selectin",
@@ -33,15 +25,7 @@ class Category(BaseModel):
     __tablename__ = "categories"
     rubric_id: Mapped[UUID] = mapped_column(ForeignKey("rubrics.id", ondelete="CASCADE"), nullable=False)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-
-    status: Mapped[CatalogStatus] = mapped_column(
-        Enum(
-            CatalogStatus,
-            native_enum=False,
-            values_callable=BaseModel.get_enum_values
-        ),
-        nullable=False
-    )
+    status: Mapped[CatalogStatus] = mapped_column(nullable=False)
 
     subcategories: Mapped[list["Subcategory"]] = relationship(
         lazy="selectin",
@@ -54,15 +38,7 @@ class Subcategory(BaseModel):
     category_id: Mapped[UUID] = mapped_column(ForeignKey("categories.id", ondelete="CASCADE"), nullable=False)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     attributes: Mapped[list] = mapped_column(JSONB, nullable=True, default=list)
-
-    status: Mapped[CatalogStatus] = mapped_column(
-        Enum(
-            CatalogStatus,
-            native_enum=False,
-            values_callable=BaseModel.get_enum_values
-        ),
-        nullable=False
-    )
+    status: Mapped[CatalogStatus] = mapped_column(nullable=False)
 
     __table_args__ = (
         Index("ix_subcategory_attributes_gin", "attributes", postgresql_using="gin"),

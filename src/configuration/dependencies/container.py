@@ -9,6 +9,7 @@ from src.configuration.dependencies.listing import ListingContainer
 from src.configuration.dependencies.media import MediaContainer
 from src.configuration.dependencies.reference import ReferenceContainer
 from src.configuration.dependencies.shared import SharedContainer
+from src.configuration.dependencies.vendor import VendorContainer
 
 
 class ApplicationContainer(containers.DeclarativeContainer):
@@ -53,7 +54,6 @@ class ApplicationContainer(containers.DeclarativeContainer):
         IAMContainer,
         auth_config=configurations.authentication,
         database_session=gateways.database_session,
-        customer_service=customer.customer_service,
         console_email_sender=shared.console_email_sender,
         redis_service=shared.redis_service,
         arq_service=shared.arq_service,
@@ -72,4 +72,10 @@ class ApplicationContainer(containers.DeclarativeContainer):
         database_session=gateways.database_session,
         minio_client=gateways.minio_client,
         minio_config=configurations.minio_config,
+    )
+
+    vendor = providers.Container(
+        VendorContainer,
+        database_session=gateways.database_session,
+        phone_normalizer=shared.phone_normalizer,
     )

@@ -21,7 +21,7 @@ class Account(AggregateRoot):
     tokens: list["Token"]
 
     @classmethod
-    def register(cls, email: Email, password: Password) -> "Account":
+    def create(cls, email: Email, password: Password) -> "Account":
         return cls(
             id=uuid.uuid4(),
             email=email,

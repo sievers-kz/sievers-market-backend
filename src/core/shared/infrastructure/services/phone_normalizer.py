@@ -1,20 +1,15 @@
-from abc import ABC, abstractmethod
-
 import phonenumbers
 from phonenumbers import PhoneNumberFormat
 
 
-class AbstractPhoneNormalizer(ABC):
-    @abstractmethod
-    def normalize(self, phone_str: str):
-        raise NotImplementedError
+class PhoneNormalizer:
+    def __init__(self, default_region: str = "KZ"):
+        self.default_region = default_region
 
-
-class PhoneNormalizer(AbstractPhoneNormalizer):
     def normalize(self, phone_str: str):
         try:
-            parsed = phonenumbers.parse(phone_str, "KZ")
-            if not phonenumbers.is_valid_number_for_region(parsed, "KZ"):
+            parsed = phonenumbers.parse(phone_str, self.default_region)
+            if not phonenumbers.is_valid_number_for_region(parsed, self.default_region):
                 raise ValueError("Invalid phone number format")
 
             return phonenumbers.format_number(parsed, PhoneNumberFormat.E164)

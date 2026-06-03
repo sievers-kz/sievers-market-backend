@@ -55,14 +55,7 @@ class Token(BaseModel):
         nullable=False
     )
 
-    type: Mapped[TokenType] = mapped_column(
-        Enum(
-            TokenType,
-            native_enum=False,
-            values_callable=BaseModel.get_enum_values
-        ),
-        nullable=False
-    )
+    type: Mapped[TokenType] = mapped_column(nullable=False)
 
     value: Mapped[str] = mapped_column(
         Text,

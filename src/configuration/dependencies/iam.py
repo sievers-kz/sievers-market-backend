@@ -4,7 +4,7 @@ from dependency_injector import containers, providers
 
 from src.core.iam.application.services.otp import OTPService
 from src.core.iam.application.usecases import (
-    CreateUserUseCase,
+    CreateAccountUseCase,
     AccountConfirmationUseCase,
     LoginUserUseCase,
     RefreshTokenUseCase,
@@ -31,7 +31,6 @@ from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormal
 class IAMContainer(containers.DeclarativeContainer):
     auth_config = providers.Configuration()
     database_session = providers.Dependency()
-    customer_service = providers.Dependency()
     console_email_sender = providers.Dependency()
     redis_service = providers.Dependency()
     arq_service = providers.Dependency()
@@ -83,10 +82,9 @@ class IAMContainer(containers.DeclarativeContainer):
         queue=arq_service,
     )
 
-    create_user_usecase = providers.Factory(
-        CreateUserUseCase,
-        unit_of_work=iam_unit_of_work,
-        customer_service=customer_service,
+    create_account_usecase = providers.Factory(
+        CreateAccountUseCase,
+        uow=iam_unit_of_work,
         otp_service=otp_service,
         password_service=password_service
     )
@@ -95,6 +93,7 @@ class IAMContainer(containers.DeclarativeContainer):
         AccountConfirmationUseCase,
         unit_of_work=iam_unit_of_work,
         otp_service=otp_service,
+        token_service=pyjwt_token_service
     )
 
     resend_confirmation_code_usecase = providers.Factory(
