@@ -64,3 +64,11 @@ class ListingDetailResponse(DTO):
     @classmethod
     def extract_media_ids(cls, v):
         return [item["media_id"] for item in v]
+
+
+class VendorCardResponse(DTO):
+    vendor_id: UUID
+    is_verified: bool
+    legal_name: str
+    shop_name: str | None
+    logotype: dict | None
