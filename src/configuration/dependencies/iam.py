@@ -15,12 +15,10 @@ from src.core.iam.application.usecases import (
     ResendConfirmationCodeUseCase,
     RequestEmailChangeUseCase,
     ConfirmEmailChangeUseCase,
-    RequestPhoneChangeUseCase,
-    ConfirmPhoneChangeUseCase
 )
 
 
-from src.core.iam.infrastructure.iam_unit_of_work import IAMUnitOfWork
+from src.core.iam.infrastructure.uow import IAMUnitOfWork
 from src.core.iam.infrastructure.repository import AccountRepository
 from src.core.iam.infrastructure.services.password_service import PasswordService
 
@@ -153,16 +151,3 @@ class IAMContainer(containers.DeclarativeContainer):
         cache_service=redis_service,
     )
 
-    request_phone_change_usecase = providers.Factory(
-        RequestPhoneChangeUseCase,
-        uow=iam_unit_of_work,
-        otp_service=otp_service,
-        cache_service=redis_service,
-    )
-
-    confirm_phone_change_usecase = providers.Factory(
-        ConfirmPhoneChangeUseCase,
-        uow=iam_unit_of_work,
-        otp_service=otp_service,
-        cache_service=redis_service,
-    )

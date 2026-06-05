@@ -4,7 +4,7 @@ from uuid import UUID
 from src.core.customer.domain.entities import Customer
 
 
-class AbstractCustomerRepository(ABC):
+class ICustomerRepository(ABC):
     @abstractmethod
     async def save(self, customer: Customer) -> None:
         raise NotImplementedError
@@ -12,3 +12,4 @@ class AbstractCustomerRepository(ABC):
     @abstractmethod
     async def get_by_account_id(self, account_id: UUID) -> Customer:
         raise NotImplementedError
+

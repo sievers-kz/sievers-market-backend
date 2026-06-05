@@ -3,13 +3,13 @@ import asyncio
 from src.core.iam.application.services.otp import OTPService
 from src.core.iam.domain.enums import OTPType
 from src.core.iam.presentation.dto import ResendCodeRequest
-from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
+from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 
 
 class ResendConfirmationCodeUseCase:
     def __init__(
         self,
-        unit_of_work: AbstractIAMUnitOfWork,
+        unit_of_work: IIAMUnitOfWork,
         otp_service: OTPService,
     ):
         self.unit_of_work = unit_of_work

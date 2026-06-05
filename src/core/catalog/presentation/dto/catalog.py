@@ -34,8 +34,7 @@ class RubricResponse(DTO):
 
 class ListingCardResponse(DTO):
     id: UUID
-    last_name: str
-    first_name: str
+    display_owner_name: str
     subcategory: str
     title: str
     price: int
@@ -49,8 +48,7 @@ class ListingDetailResponse(DTO):
     owner_id: UUID
     email: str
     phone: str | None
-    last_name: str
-    first_name: str
+    display_owner_name: str
     subcategory: str
     title: str
     price: int
@@ -69,6 +67,5 @@ class ListingDetailResponse(DTO):
 class VendorCardResponse(DTO):
     vendor_id: UUID
     is_verified: bool
-    legal_name: str
-    shop_name: str | None
+    display_name: str
     logotype: dict | None

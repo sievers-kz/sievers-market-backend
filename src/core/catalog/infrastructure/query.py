@@ -5,6 +5,7 @@ from sqlalchemy import select, cast
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import load_only, joinedload
 from sqlalchemy.dialects.postgresql import UUID as PsqlUUID
+from sqlalchemy.sql.functions import coalesce
 
 from src.core.catalog.application.interfaces.query_service import ICatalogQueryService
 from src.core.catalog.domain.enums import CatalogStatus
@@ -12,8 +13,6 @@ from src.core.catalog.infrastructure.models import Subcategory, Rubric, Category
 from src.core.catalog.presentation.dto.catalog import AttributeResponse, RubricResponse, ListingCardResponse, \
     ListingDetailResponse, VendorCardResponse
 from src.core.catalog.presentation.dto.subcategory import Attribute
-from src.core.customer.infrastructure.models import Customer
-from src.core.iam.infrastructure.models import Account
 from src.core.listing.domain.enums import ListingStatus
 from src.core.listing.infrastructure.models import Listing
 from src.core.references.infrastructure.models import City
@@ -73,8 +72,10 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
         statement = (
             select(
                 Listing.id,
-                Customer.last_name.label("last_name"),
-                Customer.first_name.label("first_name"),
+                coalesce(
+                    Vendor.shop_name,
+                    Vendor.legal_name
+                ).label("display_owner_name"),
                 Subcategory.name.label("subcategory"),
                 Listing.title,
                 Listing.price,
@@ -82,7 +83,7 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
                 City.name.label("city"),
                 cast(Listing.gallery[0]["media_id"].as_string(), PsqlUUID).label("preview_image")
             )
-            .join(Customer, Listing.owner_id == Customer.account_id)
+            .join(Vendor, Listing.owner_id == Vendor.id)
             .join(Subcategory, Listing.subcategory_id == Subcategory.id)
             .join(City, Listing.city_id == City.id)
             .where(
@@ -106,10 +107,13 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
             select(
                 Listing.id,
                 Listing.owner_id,
-                Account.email,
-                Account.phone,
-                Customer.last_name.label("last_name"),
-                Customer.first_name.label("first_name"),
+                coalesce(
+                    Vendor.shop_name,
+                    Vendor.legal_name
+                ).label("display_owner_name"),
+                Vendor.contact_phone,
+                Vendor.legal_address,
+                Vendor.logotype,
                 Subcategory.name.label("subcategory"),
                 Listing.title,
                 Listing.price,
@@ -119,8 +123,7 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
                 Listing.gallery,
                 Listing.attributes,
             )
-            .join(Account, Listing.owner_id == Account.id)
-            .join(Customer, Listing.owner_id == Customer.account_id)
+            .join(Vendor, Listing.owner_id == Vendor.id)
             .join(Subcategory, Listing.subcategory_id == Subcategory.id)
             .join(City, Listing.city_id == City.id)
             .where(
@@ -142,8 +145,10 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
             select(
                 Vendor.id.label("vendor_id"),
                 Vendor.is_verified,
-                Vendor.legal_name,
-                Vendor.shop_name,
+                coalesce(
+                    Vendor.shop_name,
+                    Vendor.legal_name
+                ).label("display_name"),
                 Vendor.logotype
             ).where(Vendor.is_verified == True)
         )
@@ -154,3 +159,4 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
             page=page,
             limit=limit,
         )
+

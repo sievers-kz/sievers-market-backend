@@ -2,13 +2,13 @@ from uuid import UUID
 
 from src.core.iam.application.interfaces.password_service import IPasswordService
 from src.core.iam.presentation.dto import ChangePasswordData
-from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
+from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 
 
 class ChangePasswordUseCase:
     def __init__(
         self,
-        unit_of_work: AbstractIAMUnitOfWork,
+        unit_of_work: IIAMUnitOfWork,
         password_service: IPasswordService
     ):
         self.unit_of_work = unit_of_work

@@ -1,7 +1,7 @@
 import pytest
 
 from src.core.iam.domain.enums import OTPType
-from src.core.iam.presentation.dto import CreateUserRequest, AccountConfirmation, ResendCodeRequest
+from src.core.iam.presentation.dto import CreateAccountRequest, AccountConfirmation, ResendCodeRequest
 from tests.iam.conftest import create_user_request
 
 
@@ -16,11 +16,9 @@ class TestResendConfirmationCodeUsecase:
         resend_confirmation_code_usecase,
         redis_service,
     ):
-        dto = CreateUserRequest(
+        dto = CreateAccountRequest(
             email="test@example.com",
             raw_password="super_secret",
-            last_name="Test",
-            first_name="Test",
         )
         await create_user_usecase.execute(dto)
 

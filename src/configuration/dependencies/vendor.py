@@ -1,7 +1,7 @@
 from dependency_injector import containers, providers
 
 from src.core.vendor.application.services.vendor_validation import VendorValidationService
-from src.core.vendor.application.usecases import CreateVendorUseCase, ChangeContactFullnameUseCase, \
+from src.core.vendor.application.usecases import RegisterVendorUseCase, ChangeContactFullnameUseCase, \
     ChangeContactPhoneUseCase, ChangeLogotypeUseCase, ChangeShopNameUseCase
 from src.core.vendor.infrastructure.query import VendorQueryService
 from src.core.vendor.infrastructure.uow import VendorUnitOfWork
@@ -20,7 +20,7 @@ class VendorContainer(containers.DeclarativeContainer):
     )
 
     create_vendor_usecase = providers.Factory(
-        CreateVendorUseCase,
+        RegisterVendorUseCase,
         uow=uow
     )
 

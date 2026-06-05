@@ -22,10 +22,6 @@ class CreateListingUseCase:
         validated_attributes = await self.subcategory_service.validate_attributes(dto.subcategory_id, dto.attributes)
 
         async with self.uow as uow:
-            count = await uow.listing.count_active_by_owner_id(owner_id)
-            if count >= 5:
-                raise ValueError("Превышен лимит объявлений")
-
             listing = Listing(
                 id=uuid.uuid4(),
                 owner_id=owner_id,

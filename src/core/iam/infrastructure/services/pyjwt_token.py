@@ -4,11 +4,11 @@ from datetime import timedelta, datetime, timezone
 import jwt
 
 from src.core.iam.presentation.dto import TokenData
-from src.core.iam.application.interfaces.abstract_token_service import AbstractTokenService
+from src.core.iam.application.interfaces.token_service import ITokenService
 from src.core.iam.domain.enums import TokenType, UserRole
 
 
-class PyJWTTokenService(AbstractTokenService):
+class PyJWTTokenService(ITokenService):
     def __init__(
         self,
         secret_key: str,

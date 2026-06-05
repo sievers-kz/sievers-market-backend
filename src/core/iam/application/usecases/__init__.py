@@ -9,8 +9,6 @@ from .change_password import ChangePasswordUseCase
 from .resend_confirmation_code import ResendConfirmationCodeUseCase
 from .request_change_email import RequestEmailChangeUseCase
 from .confirm_email_change import ConfirmEmailChangeUseCase
-from .request_phone_change import RequestPhoneChangeUseCase
-from .confirm_phone_change import ConfirmPhoneChangeUseCase
 
 
 __all__ = [
@@ -25,6 +23,4 @@ __all__ = [
     "ResendConfirmationCodeUseCase",
     "RequestEmailChangeUseCase",
     "ConfirmEmailChangeUseCase",
-    "RequestPhoneChangeUseCase",
-    "ConfirmPhoneChangeUseCase",
 ]

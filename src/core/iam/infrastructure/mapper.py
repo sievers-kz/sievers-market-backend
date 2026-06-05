@@ -1,5 +1,5 @@
 from src.core.iam.domain.entities import Account as DomainAccount, Token as DomainToken
-from src.core.iam.domain.value_objects import Email, Phone, Password
+from src.core.iam.domain.value_objects import Email, Password
 from src.core.iam.infrastructure.models import Account as ORMAccount, Token as ORMToken
 
 
@@ -9,7 +9,6 @@ class AccountMapper:
         tokens = TokenMapper.to_orm(account.tokens)
         return ORMAccount(
             id=account.id,
-            phone=account.phone.value,
             email=account.email.value,
             password_hash=account.password.value,
             is_active=account.is_active,
@@ -23,7 +22,6 @@ class AccountMapper:
         tokens = TokenMapper.to_domain(account.tokens)
         return DomainAccount(
             id=account.id,
-            phone=Phone(account.phone),
             email=Email(account.email),
             password=Password(account.password_hash),
             is_active=account.is_active,

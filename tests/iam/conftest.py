@@ -5,10 +5,10 @@ from unittest.mock import AsyncMock
 import pytest
 import pytest_asyncio
 
-from src.core.iam.presentation.dto import CreateUserRequest
+from src.core.iam.presentation.dto import CreateAccountRequest
 from src.core.iam.domain.entities import Account, Token
 from src.core.iam.domain.enums import TokenType
-from src.core.iam.domain.value_objects import Email, Phone, Password
+from src.core.iam.domain.value_objects import Email, Password
 from src.core.shared.application.interfaces.queue_service import IQueueService
 
 
@@ -19,7 +19,6 @@ def create_domain_account(
     return Account(
         id=uuid.uuid4(),
         email=Email("test@example.com"),
-        phone=Phone("+77472006243"),
         password=Password("$2b$12$fakehashstring..."),
         is_active=is_active,
         created_at=datetime.now(timezone.utc),
@@ -28,12 +27,10 @@ def create_domain_account(
     )
 
 
-def create_user_request() -> CreateUserRequest:
-    return CreateUserRequest(
+def create_user_request() -> CreateAccountRequest:
+    return CreateAccountRequest(
         email="test@example.com",
         raw_password="super_secret",
-        last_name="Test",
-        first_name="Test",
     )
 
 

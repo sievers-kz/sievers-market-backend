@@ -21,21 +21,6 @@ class Email:
 
 
 @dataclass(frozen=True)
-class Phone:
-    value: str
-
-    def __post_init__(self):
-        if self.value is None:
-            return
-        self.validate()
-
-    def validate(self):
-        pattern = r"^\+77[0-9]\d{8}$"
-        if not re.match(pattern, self.value):
-            raise ValueError("Неправильный формат номера телефона")
-
-
-@dataclass(frozen=True)
 class Password:
     value: str
 

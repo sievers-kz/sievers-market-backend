@@ -5,13 +5,13 @@ from fastapi import HTTPException, status, Depends
 from dependency_injector.wiring import Provide, inject
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from src.core.shared.presentation.dto import CurrentUser, CurrentCustomer
+from src.core.shared.presentation.dto import CurrentUser, CurrentCustomer, CurrentVendor
 from src.configuration.dependencies.container import ApplicationContainer
-from src.core.customer.application.interfaces.abstract_customer_uow import AbstractCustomerUnitOfWork
-from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
+from src.core.customer.application.interfaces.uow import ICustomerUnitOfWork
+from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 from src.core.iam.domain.enums import TokenType, UserRole
-from src.core.iam.infrastructure.services.pyjwt_token import AbstractTokenService
-
+from src.core.iam.infrastructure.services.pyjwt_token import ITokenService
+from src.core.vendor.application.interfaces.uow import IVendorUnitOfWork
 
 bearer_scheme = HTTPBearer(
     scheme_name="BearerAuth",
@@ -23,7 +23,7 @@ bearer_scheme = HTTPBearer(
 @inject
 async def get_current_user_id(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
-    token_service: AbstractTokenService
+    token_service: ITokenService
     = Depends(
         Provide[
             ApplicationContainer.iam.pyjwt_token_service
@@ -55,7 +55,7 @@ async def get_current_user_id(
 
 @inject
 async def get_current_user(
-    unit_of_work: AbstractIAMUnitOfWork
+    unit_of_work: IIAMUnitOfWork
     = Depends(
         Provide[
             ApplicationContainer.iam.iam_unit_of_work
@@ -79,10 +79,10 @@ async def get_current_user(
 @inject
 async def get_current_customer(
     unit_of_work: Annotated[
-        AbstractCustomerUnitOfWork,
+        ICustomerUnitOfWork,
         Depends(
             Provide[
-                ApplicationContainer.customer.customer_unit_of_work
+                ApplicationContainer.customer.uow
             ]
         )
     ],
@@ -99,3 +99,24 @@ async def get_current_customer(
         return CurrentCustomer(id=customer.id)
 
 
+@inject
+async def get_current_vendor(
+    uow: Annotated[
+        IVendorUnitOfWork,
+        Depends(
+            Provide[
+                ApplicationContainer.vendor.uow
+            ]
+        )
+    ],
+    account: CurrentUser = Depends(get_current_user)
+):
+    async with uow:
+        vendor = await uow.vendor.get_by_account_id(account.id)
+        if not vendor:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not registered as a vendor or your status is pending moderation"
+            )
+
+        return CurrentVendor(id=vendor.id)

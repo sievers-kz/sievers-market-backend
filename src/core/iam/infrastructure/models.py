@@ -18,13 +18,6 @@ class Account(BaseModel):
         index=True
     )
 
-    phone: Mapped[str | None] = mapped_column(
-        String(32),
-        unique=True,
-        nullable=True,
-        index=True
-    )
-
     password_hash: Mapped[str] = mapped_column(
         Text,
         nullable=False

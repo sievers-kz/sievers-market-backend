@@ -29,15 +29,3 @@ class ListingRepository(IListingRepository):
             return None
         return ListingMapper.to_domain(result)
 
-    async def count_active_by_owner_id(self, owner_id: UUID) -> int:
-        statement = (
-            select(func.count())
-            .select_from(self.model)
-            .where(
-                self.model.owner_id == owner_id,
-                self.model.status == ListingStatus.ACTIVE,
-            )
-        )
-
-        query_result = await self._session.execute(statement)
-        return query_result.scalar_one()

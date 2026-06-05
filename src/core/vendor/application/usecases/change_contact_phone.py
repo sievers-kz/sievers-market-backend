@@ -11,9 +11,9 @@ class ChangeContactPhoneUseCase:
         self.uow = uow
         self.phone_normalizer = phone_normalizer
 
-    async def execute(self, account_id: UUID, dto: ChangeContactPhoneRequest):
+    async def execute(self, vendor_id: UUID, dto: ChangeContactPhoneRequest):
         async with self.uow as uow:
-            vendor: Vendor = await uow.vendor.get_by_account_id(account_id)
+            vendor: Vendor = await uow.vendor.get_by_id(vendor_id)
             normalized_phone = self.phone_normalizer.normalize(dto.contact_phone)
             vendor.change_contact_phone(normalized_phone)
 

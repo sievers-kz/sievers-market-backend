@@ -1,16 +1,16 @@
-from src.core.iam.application.interfaces.abstract_token_service import AbstractTokenService
+from src.core.iam.application.interfaces.token_service import ITokenService
 from src.core.iam.application.services.otp import OTPService
 from src.core.iam.domain.enums import OTPType, TokenType
 from src.core.iam.presentation.dto import AccountConfirmation, LoginResponse
-from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
+from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 
 
 class AccountConfirmationUseCase:
     def __init__(
         self,
-        unit_of_work: AbstractIAMUnitOfWork,
+        unit_of_work: IIAMUnitOfWork,
         otp_service: OTPService,
-        token_service: AbstractTokenService
+        token_service: ITokenService
     ):
         self.unit_of_work = unit_of_work
         self.otp_service = otp_service

@@ -47,7 +47,6 @@ class ApplicationContainer(containers.DeclarativeContainer):
     customer = providers.Container(
         CustomerContainer,
         database_session=gateways.database_session,
-        session_factory=gateways.session_factory,
     )
 
     iam = providers.Container(
