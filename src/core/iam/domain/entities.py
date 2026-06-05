@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from src.core.iam.domain.enums import UserRole, TokenType
-from src.core.iam.domain.value_objects import Email, Phone, Password
+from src.core.iam.domain.value_objects import Email, Password
 
 from src.core.shared.domain.entities import AggregateRoot, Entity
 
@@ -13,7 +13,6 @@ from src.core.shared.domain.entities import AggregateRoot, Entity
 class Account(AggregateRoot):
     id: UUID
     email: Email
-    phone: Phone | None
     password: Password
     is_active: bool
     created_at: datetime
@@ -25,7 +24,6 @@ class Account(AggregateRoot):
         return cls(
             id=uuid.uuid4(),
             email=email,
-            phone=Phone(None),
             password=password,
             is_active=False,
             created_at=datetime.now(timezone.utc),
@@ -85,9 +83,6 @@ class Account(AggregateRoot):
 
     def change_email(self, new_email: Email):
         self.email = new_email
-
-    def change_phone(self, new_phone: Phone):
-        self.phone = new_phone
 
     def _get_token_by_value(self, token_value: str):
         return next((token for token in self.tokens if token.value == token_value), None)

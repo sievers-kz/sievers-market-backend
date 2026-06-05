@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from scalar_fastapi import get_scalar_api_reference, Theme, Layout
 
 from src.core.catalog.presentation.routers.catalog import catalog_router
-from src.core.customer.presentation.routers import customer
+from src.core.customer.presentation.routers import customer_router
 from src.core.iam.presentation.routers import iam
 from src.core.listing.presentation.routers import listing_router
 from src.core.references.presentation.routers.reference import reference_router
@@ -50,7 +50,7 @@ class ApplicationFactory:
     def _include_routers(self):
         routers = [
             iam,
-            customer,
+            customer_router,
             vendor_router,
             reference_router,
             catalog_router,

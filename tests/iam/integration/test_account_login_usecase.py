@@ -1,6 +1,6 @@
 import pytest
 
-from src.core.iam.presentation.dto import CreateUserRequest, AccountConfirmation, LoginAccount
+from src.core.iam.presentation.dto import CreateAccountRequest, AccountConfirmation, LoginAccount
 from src.core.iam.domain.enums import TokenType, OTPType
 
 
@@ -15,11 +15,9 @@ class TestAccountLoginUseCase:
         account_repository,
         redis_service,
     ):
-        dto = CreateUserRequest(
+        dto = CreateAccountRequest(
             email="test@example.com",
             raw_password="super_secret",
-            last_name="Test",
-            first_name="Test",
         )
         await create_user_usecase.execute(dto)
 
@@ -53,11 +51,9 @@ class TestAccountLoginUseCase:
         login_user_usecase,
         redis_service,
     ):
-        dto = CreateUserRequest(
+        dto = CreateAccountRequest(
             email="test@example.com",
             raw_password="super_secret",
-            last_name="Test",
-            first_name="Test",
         )
         await create_user_usecase.execute(dto)
 
@@ -87,11 +83,9 @@ class TestAccountLoginUseCase:
     @pytest.mark.asyncio
     @pytest.mark.integration
     async def test_fails_with_unconfirmed_account(self, create_user_usecase, login_user_usecase):
-        dto = CreateUserRequest(
+        dto = CreateAccountRequest(
             email="test@example.com",
             raw_password="super_secret",
-            last_name="Test",
-            first_name="Test",
         )
         await create_user_usecase.execute(dto)
 

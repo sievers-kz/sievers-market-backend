@@ -5,7 +5,7 @@ from src.core.vendor.domain.entities import Vendor
 from src.core.vendor.presentation.dto import CreateVendorRequest
 
 
-class CreateVendorUseCase:
+class RegisterVendorUseCase:
     def __init__(self, uow: IVendorUnitOfWork):
         self.uow = uow
 

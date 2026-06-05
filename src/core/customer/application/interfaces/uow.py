@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 
-from src.core.customer.application.interfaces.abstract_customer_repository import AbstractCustomerRepository
+from src.core.customer.application.interfaces.repository import ICustomerRepository
 
 
-class AbstractCustomerUnitOfWork(ABC):
+class ICustomerUnitOfWork(ABC):
     @property
     @abstractmethod
-    def customer(self) -> AbstractCustomerRepository:
+    def customer(self) -> ICustomerRepository:
         raise NotImplementedError

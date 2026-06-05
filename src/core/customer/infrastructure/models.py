@@ -6,9 +6,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.shared.infrastructure.base_model import BaseModel
 
-if TYPE_CHECKING:
-    from src.core.iam.infrastructure.models import Account
-
 
 class Customer(BaseModel):
     __tablename__ = "customers"
@@ -43,4 +40,3 @@ class Customer(BaseModel):
         server_default="default_avatar.png"
     )
 
-    account: Mapped["Account"] = relationship()

@@ -1,15 +1,15 @@
 from src.core.iam.application.interfaces.password_service import IPasswordService
 from src.core.iam.presentation.dto import LoginAccount, LoginResponse
 from src.core.iam.domain.enums import TokenType
-from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
-from src.core.iam.application.interfaces.abstract_token_service import AbstractTokenService
+from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
+from src.core.iam.application.interfaces.token_service import ITokenService
 
 
 class LoginUserUseCase:
     def __init__(
         self,
-        unit_of_work: AbstractIAMUnitOfWork,
-        token_service: AbstractTokenService,
+        unit_of_work: IIAMUnitOfWork,
+        token_service: ITokenService,
         password_service: IPasswordService,
     ):
         self.unit_of_work = unit_of_work

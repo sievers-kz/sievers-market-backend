@@ -1,16 +1,16 @@
 from uuid import UUID
 
 from src.core.customer.presentation.dto import ChangeCustomerFullname
-from src.core.customer.application.interfaces.abstract_customer_uow import AbstractCustomerUnitOfWork
+from src.core.customer.application.interfaces.uow import ICustomerUnitOfWork
 
 
 class ChangeCustomerFullnameUseCase:
-    def __init__(self, unit_of_work: AbstractCustomerUnitOfWork):
-        self.unit_of_work = unit_of_work
+    def __init__(self, uow: ICustomerUnitOfWork):
+        self.uow = uow
 
-    async def execute(self, account_id: UUID, fullname_data: ChangeCustomerFullname):
-        async with self.unit_of_work as uow:
-            customer = await uow.customer.get_by_account_id(account_id)
+    async def execute(self, customer_id: UUID, fullname_data: ChangeCustomerFullname):
+        async with self.uow as uow:
+            customer = await uow.customer.get_by_id(customer_id)
             if customer is None:
                 raise ValueError("Customer not found")
 

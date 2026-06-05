@@ -1,9 +1,9 @@
 from src.core.iam.presentation.dto import RefreshData
-from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
+from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 
 
 class LogoutUserUseCase:
-    def __init__(self, unit_of_work: AbstractIAMUnitOfWork):
+    def __init__(self, unit_of_work: IIAMUnitOfWork):
         self.unit_of_work = unit_of_work
 
     async def execute(self, refresh_data: RefreshData):

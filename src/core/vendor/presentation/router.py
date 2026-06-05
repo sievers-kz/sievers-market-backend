@@ -5,12 +5,12 @@ from fastapi import APIRouter
 from fastapi.params import Depends, Security
 
 from src.configuration.dependencies.container import ApplicationContainer
-from src.core.shared.presentation.dto import CurrentUser
-from src.core.shared.presentation.security import get_current_user
+from src.core.shared.presentation.dto import CurrentUser, CurrentVendor
+from src.core.shared.presentation.security import get_current_user, get_current_vendor
 
 from src.core.vendor.application.services.vendor_validation import VendorValidationService
 from src.core.vendor.application.usecases import (
-    CreateVendorUseCase,
+    RegisterVendorUseCase,
     ChangeContactFullnameUseCase,
     ChangeContactPhoneUseCase,
     ChangeShopNameUseCase,
@@ -43,7 +43,7 @@ async def verify_vendor(
             ]
         )
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_user: CurrentUser = Security(get_current_user),
 ):
     return await service.verify(tax_id)
 
@@ -53,7 +53,7 @@ async def verify_vendor(
 async def create_vendor(
     dto: CreateVendorRequest,
     usecase: Annotated[
-        CreateVendorUseCase,
+        RegisterVendorUseCase,
         Depends(
             Provide[
                 ApplicationContainer.vendor.create_vendor_usecase
@@ -78,9 +78,9 @@ async def change_contact_fullname(
             ]
         )
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
-    await usecase.execute(current_user.id, dto)
+    await usecase.execute(current_vendor.id, dto)
     return {"message": "Contact fullname successfully changed"}
 
 
@@ -96,9 +96,9 @@ async def change_contact_phone(
             ]
         )
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
-    await usecase.execute(current_user.id, dto)
+    await usecase.execute(current_vendor.id, dto)
     return {"message": "Contact phone successfully changed"}
 
 
@@ -114,9 +114,9 @@ async def change_shop_name(
             ]
         )
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
-    await usecase.execute(current_user.id, dto)
+    await usecase.execute(current_vendor.id, dto)
     return {"message": "Shop name successfully changed"}
 
 
@@ -132,9 +132,9 @@ async def change_logotype(
             ]
         )
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
-    await usecase.execute(current_user.id, dto)
+    await usecase.execute(current_vendor.id, dto)
     return {"message": "Logotype successfully changed"}
 
 
@@ -149,6 +149,6 @@ async def get_me(
             ]
         )
     ],
-    current_user: CurrentUser = Security(get_current_user),
+    current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
-    return await service.get_me(current_user.id)
+    return await service.get_me(current_vendor.id)

@@ -4,7 +4,7 @@ from uuid import UUID
 from src.core.iam.domain.entities import Account
 
 
-class AbstractAccountRepository(ABC):
+class IAccountRepository(ABC):
     @abstractmethod
     async def save(self, account: Account):
         raise NotImplementedError

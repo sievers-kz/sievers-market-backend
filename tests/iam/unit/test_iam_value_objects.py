@@ -1,6 +1,6 @@
 import pytest
 
-from src.core.iam.domain.value_objects import Email, Phone
+from src.core.iam.domain.value_objects import Email
 
 
 class TestEmailValueObject:
@@ -20,14 +20,3 @@ class TestEmailValueObject:
             Email(value="test")
 
 
-class TestPhoneValueObject:
-    @pytest.mark.unit
-    def test_successful_phone_creation(self):
-        phone = Phone(value="+77472006243")
-        assert phone.value == "+77472006243"
-        assert phone is not None
-
-    @pytest.mark.unit
-    def test_phone_format_raises(self):
-        with pytest.raises(ValueError, match="Неправильный формат номера телефона"):
-            Phone(value="123456789")

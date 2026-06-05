@@ -1,17 +1,16 @@
-from src.core.customer.application.interfaces.abstract_customer_service import ICustomerService
 from src.core.iam.application.interfaces.password_service import IPasswordService
 from src.core.iam.application.services.otp import OTPService
 from src.core.iam.domain.entities import Account
 from src.core.iam.domain.enums import OTPType
 from src.core.iam.domain.value_objects import Email, Password
-from src.core.iam.presentation.dto import CreateUserRequest
-from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
+from src.core.iam.presentation.dto import CreateAccountRequest
+from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 
 
 class CreateAccountUseCase:
     def __init__(
         self,
-        uow: AbstractIAMUnitOfWork,
+        uow: IIAMUnitOfWork,
         otp_service: OTPService,
         password_service: IPasswordService,
     ):
@@ -19,7 +18,7 @@ class CreateAccountUseCase:
         self.otp_service = otp_service
         self.password_service = password_service
 
-    async def execute(self, dto: CreateUserRequest):
+    async def execute(self, dto: CreateAccountRequest):
         async with self.uow as uow:
             existing = await uow.account.get_account_by_email(dto.email)
             if existing:

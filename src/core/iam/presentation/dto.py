@@ -51,11 +51,9 @@ class AccountConfirmation(BaseModel):
     confirm_code: str
 
 
-class CreateUserRequest(BaseModel):
+class CreateAccountRequest(BaseModel):
     email: EmailStr
     raw_password: str
-    last_name: str
-    first_name: str
 
 
 class ChangeEmailRequest(DTO):
@@ -66,9 +64,3 @@ class ConfirmEmailChangeRequest(DTO):
     otp_code: str
 
 
-class ChangePhoneRequest(DTO):
-    phone: str
-
-
-class ConfirmPhoneChangeRequest(DTO):
-    otp_code: str

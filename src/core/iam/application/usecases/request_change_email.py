@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
+from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 from src.core.iam.application.services.otp import OTPService
 from src.core.iam.domain.enums import OTPType
 from src.core.iam.domain.value_objects import Email
@@ -11,7 +11,7 @@ from src.core.shared.application.interfaces.cache_service import ICacheService
 class RequestEmailChangeUseCase:
     def __init__(
         self,
-        uow: AbstractIAMUnitOfWork,
+        uow: IIAMUnitOfWork,
         otp_service: OTPService,
         cache_service: ICacheService
     ):

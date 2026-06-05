@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class AbstractIAMUnitOfWork(ABC):
+class IIAMUnitOfWork(ABC):
     @property
     @abstractmethod
     def account(self):

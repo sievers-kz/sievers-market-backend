@@ -13,11 +13,9 @@ from src.core.iam.presentation.dto import (
     ChangePasswordData,
     LoginAccount,
     ResendCodeRequest,
-    CreateUserRequest,
+    CreateAccountRequest,
     ChangeEmailRequest,
     ConfirmEmailChangeRequest,
-    ConfirmPhoneChangeRequest,
-    ChangePhoneRequest,
 )
 
 from src.core.shared.presentation.dto import CurrentUser
@@ -37,8 +35,6 @@ from src.core.iam.application.usecases import (
     CreateAccountUseCase,
     ConfirmEmailChangeUseCase,
     RequestEmailChangeUseCase,
-    ConfirmPhoneChangeUseCase,
-    RequestPhoneChangeUseCase
 )
 
 
@@ -48,7 +44,7 @@ iam = APIRouter(prefix="/api/v1/iam", tags=["IAM"])
 @iam.post("/registration")
 @inject
 async def create_new_user(
-    dto: CreateUserRequest,
+    dto: CreateAccountRequest,
     usecase: Annotated[
         CreateAccountUseCase,
         Depends(
@@ -239,37 +235,3 @@ async def confirm_email_change(
     return {"message": "Ваша электронная почта успешно подтверждена!"}
 
 
-@iam.post("/phone/change")
-@inject
-async def request_change_phone(
-    dto: ChangePhoneRequest,
-    usecase: Annotated[
-        RequestPhoneChangeUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.iam.request_phone_change_usecase
-            ]
-        )
-    ],
-    current_user: CurrentUser = Security(get_current_user)
-):
-    await usecase.execute(current_user.id, dto)
-    return {"message": "Мы отправили письмо подтверждения на вашу электронную почту"}
-
-
-@iam.patch("/phone/confirm")
-@inject
-async def confirm_change_phone(
-    dto: ConfirmPhoneChangeRequest,
-    usecase: Annotated[
-        ConfirmPhoneChangeUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.iam.confirm_phone_change_usecase
-            ]
-        )
-    ],
-    current_user: CurrentUser = Security(get_current_user)
-):
-    await usecase.execute(current_user.id, dto)
-    return {"message": "Ваш номер телефона успешно изменен!"}

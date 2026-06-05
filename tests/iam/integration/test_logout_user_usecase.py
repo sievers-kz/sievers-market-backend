@@ -1,7 +1,7 @@
 import pytest
 
 from src.core.iam.domain.enums import OTPType
-from src.core.iam.presentation.dto import CreateUserRequest, AccountConfirmation, LoginAccount, RefreshData
+from src.core.iam.presentation.dto import CreateAccountRequest, AccountConfirmation, LoginAccount, RefreshData
 from tests.iam.conftest import create_user_request, get_token_by_value
 
 

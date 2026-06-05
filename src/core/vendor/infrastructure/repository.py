@@ -19,6 +19,14 @@ class VendorRepository(IVendorRepository):
         await self._session.merge(mapped_model)
         await self._session.flush()
 
+    async def get_by_id(self, vendor_id: UUID) -> Vendor:
+        statement = select(self.model).where(self.model.id == vendor_id)
+        result = (await self._session.execute(statement)).scalar_one_or_none()
+
+        if not result:
+            return None
+        return VendorMapper.to_domain(result)
+
     async def get_by_tax_id(self, tax_id: str) -> Vendor:
         statement = select(self.model).where(self.model.tax_id == tax_id)
         result = (await self._session.execute(statement)).scalar_one_or_none()

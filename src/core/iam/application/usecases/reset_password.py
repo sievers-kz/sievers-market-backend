@@ -1,14 +1,14 @@
 from src.core.iam.application.interfaces.password_service import IPasswordService
 from src.core.iam.application.services.otp import OTPService
 from src.core.iam.presentation.dto import ResetPasswordData
-from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
+from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 from src.core.iam.domain.enums import OTPType
 
 
 class ResetPasswordUseCase:
     def __init__(
         self,
-        unit_of_work: AbstractIAMUnitOfWork,
+        unit_of_work: IIAMUnitOfWork,
         password_service: IPasswordService,
         otp_service: OTPService,
     ):

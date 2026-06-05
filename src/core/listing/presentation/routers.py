@@ -10,8 +10,8 @@ from src.core.listing.application.usecases import CreateListingUseCase, ChangeLi
     ChangeListingPriceUseCase, ChangeListingLocationUseCase, ChangeListingDescriptionUseCase
 from src.core.listing.presentation.dto import CreateListingRequest, ChangeListingAttributeRequest, \
     ChangeListingDescriptionRequest, ChangeListingLocationRequest, ChangeListingPriceRequest
-from src.core.shared.presentation.dto import CurrentUser
-from src.core.shared.presentation.security import get_current_user
+from src.core.shared.presentation.dto import CurrentVendor
+from src.core.shared.presentation.security import get_current_vendor
 
 listing_router = APIRouter(prefix="/listing", tags=["Listing"])
 
@@ -28,9 +28,9 @@ async def create_listing(
             ]
         )
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_vendor: CurrentVendor = Security(get_current_vendor)
 ):
-    await usecase.execute(current_user.id, dto)
+    await usecase.execute(current_vendor.id, dto)
     return {"message": "Listing created successfully"}
 
 
@@ -47,7 +47,7 @@ async def change_listing_price(
             ]
         )
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_vendor: CurrentVendor = Security(get_current_vendor)
 ):
     await usecase.execute(listing_id, dto)
     return {"message": "Listing price changed successfully"}
@@ -66,7 +66,7 @@ async def change_listing_location(
             ]
         )
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_vendor: CurrentVendor = Security(get_current_vendor)
 ):
     await usecase.execute(listing_id, dto)
     return {"message": "Listing location changed successfully"}
@@ -85,7 +85,7 @@ async def change_listing_description(
             ]
         )
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_vendor: CurrentVendor = Security(get_current_vendor)
 ):
     await usecase.execute(listing_id, dto)
     return {"message": "Listing description changed successfully"}
@@ -104,7 +104,7 @@ async def change_listing_attribute(
             ]
         )
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_vendor: CurrentVendor = Security(get_current_vendor)
 ):
     await usecase.execute(listing_id, dto)
     return {"message": "Listing attribute changed successfully"}

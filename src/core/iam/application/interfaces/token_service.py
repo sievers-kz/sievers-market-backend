@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 
 
-class AbstractTokenService(ABC):
+class ITokenService(ABC):
     @abstractmethod
     def create_token(self, user_id: UUID, token_type):
         raise NotImplementedError

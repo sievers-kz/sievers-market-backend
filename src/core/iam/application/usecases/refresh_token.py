@@ -1,14 +1,14 @@
 from src.core.iam.presentation.dto import RefreshData, LoginResponse
-from src.core.iam.application.interfaces.abstract_iam_uow import AbstractIAMUnitOfWork
+from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 from src.core.iam.domain.enums import TokenType
-from src.core.iam.infrastructure.services.pyjwt_token import AbstractTokenService
+from src.core.iam.infrastructure.services.pyjwt_token import ITokenService
 
 
 class RefreshTokenUseCase:
     def __init__(
         self,
-        unit_of_work: AbstractIAMUnitOfWork,
-        token_service: AbstractTokenService
+        unit_of_work: IIAMUnitOfWork,
+        token_service: ITokenService
     ):
         self.unit_of_work = unit_of_work
         self.token_service = token_service

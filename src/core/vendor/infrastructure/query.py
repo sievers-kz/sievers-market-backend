@@ -13,7 +13,7 @@ class VendorQueryService(QueryService):
     def __init__(self, session: AsyncSession):
         super().__init__(session=session)
 
-    async def get_me(self, account_id: UUID) -> VendorProfileResponse:
+    async def get_me(self, vendor_id: UUID) -> VendorProfileResponse:
         statement = (
             select(
                 Account.email,
@@ -32,7 +32,7 @@ class VendorQueryService(QueryService):
                 Vendor.logotype
             )
             .join(Account, Vendor.account_id == Account.id)
-            .where(Vendor.account_id == account_id)
+            .where(Vendor.id == vendor_id)
         )
 
         result = (await self._session.execute(statement)).mappings().one_or_none()
