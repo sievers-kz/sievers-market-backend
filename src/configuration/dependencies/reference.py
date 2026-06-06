@@ -11,6 +11,7 @@ from src.core.references.infrastructure.uow import ReferenceUnitOfWork
 
 
 class ReferenceContainer(containers.DeclarativeContainer):
+    session_factory = providers.Dependency()
     database_session = providers.Dependency()
 
     brand_repository = providers.Factory(
@@ -25,7 +26,7 @@ class ReferenceContainer(containers.DeclarativeContainer):
 
     reference_unit_of_work = providers.Factory(
         ReferenceUnitOfWork,
-        session=database_session
+        session_factory=session_factory
     )
 
     brand_service = providers.Factory(

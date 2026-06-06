@@ -28,6 +28,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
 
     catalog = providers.Container(
         CatalogContainer,
+        session_factory=gateways.session_factory,
         database_session=gateways.database_session,
     )
 
@@ -42,17 +43,20 @@ class ApplicationContainer(containers.DeclarativeContainer):
 
     reference = providers.Container(
         ReferenceContainer,
+        session_factory=gateways.session_factory,
         database_session=gateways.database_session
     )
 
     customer = providers.Container(
         CustomerContainer,
+        session_factory=gateways.session_factory,
         database_session=gateways.database_session,
     )
 
     iam = providers.Container(
         IAMContainer,
         auth_config=configurations.authentication,
+        session_factory=gateways.session_factory,
         database_session=gateways.database_session,
         console_email_sender=shared.console_email_sender,
         redis_service=shared.redis_service,
@@ -62,6 +66,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
 
     listing = providers.Container(
         ListingContainer,
+        session_factory=gateways.session_factory,
         database_session=gateways.database_session,
         customer_repository=customer.customer_repository,
         subcategory_service=catalog.subcategory_service,
@@ -69,6 +74,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
 
     media = providers.Container(
         MediaContainer,
+        session_factory=gateways.session_factory,
         database_session=gateways.database_session,
         minio_client=gateways.minio_client,
         minio_config=configurations.minio_config,
@@ -76,6 +82,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
 
     vendor = providers.Container(
         VendorContainer,
+        session_factory=gateways.session_factory,
         database_session=gateways.database_session,
         phone_normalizer=shared.phone_normalizer,
     )

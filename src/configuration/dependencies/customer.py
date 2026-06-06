@@ -11,6 +11,7 @@ from src.core.customer.infrastructure.repository import CustomerRepository
 
 
 class CustomerContainer(containers.DeclarativeContainer):
+    session_factory = providers.Dependency()
     database_session = providers.Dependency()
 
     query_service = providers.Factory(
@@ -25,7 +26,7 @@ class CustomerContainer(containers.DeclarativeContainer):
 
     uow = providers.Factory(
         CustomerUnitOfWork,
-        session=database_session
+        session_factory=session_factory
     )
 
     change_customer_fullname_usecase = providers.Factory(

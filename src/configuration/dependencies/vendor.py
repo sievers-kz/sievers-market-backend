@@ -9,6 +9,7 @@ from src.core.vendor.infrastructure.vendor_fetchers import MockVendorFetcher
 
 
 class VendorContainer(containers.DeclarativeContainer):
+    session_factory = providers.Dependency()
     database_session = providers.Dependency()
     phone_normalizer = providers.Dependency()
 
@@ -16,7 +17,7 @@ class VendorContainer(containers.DeclarativeContainer):
 
     uow = providers.Factory(
         VendorUnitOfWork,
-        session=database_session,
+        session_factory=session_factory
     )
 
     create_vendor_usecase = providers.Factory(

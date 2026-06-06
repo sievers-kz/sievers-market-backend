@@ -8,11 +8,12 @@ from src.core.catalog.infrastructure.uow import CatalogUnitOfWork
 
 
 class CatalogContainer(containers.DeclarativeContainer):
+    session_factory = providers.Dependency()
     database_session = providers.Dependency()
 
     catalog_unit_of_work = providers.Factory(
         CatalogUnitOfWork,
-        session=database_session
+        session_factory=session_factory
     )
 
     rubric_service = providers.Factory(
