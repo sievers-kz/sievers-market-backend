@@ -5,6 +5,8 @@ from typing import Any
 from uuid import UUID
 
 from src.core.vendor.domain.enums import LegalForm
+from src.core.vendor.domain.exceptions import ContactFullnameRequiredError, ContactFullnameFormatError, \
+    InvalidTaxNumberError, InvalidLogotypeSizeError
 
 
 @dataclass(frozen=True)
@@ -19,18 +21,18 @@ class ContactFullname:
 
     def validate_required_fields(self):
         if not self.contact_last_name:
-            raise ValueError("Last name is required")
+            raise ContactFullnameRequiredError(field="Фамилия")
         if not self.contact_first_name:
-            raise ValueError("First name is required")
+            raise ContactFullnameRequiredError(field="Имя")
 
     def validate_fields_format(self):
         fullname_format = r"^[a-zA-Zа-яА-ЯёЁ\s-]+$"
         if not re.match(fullname_format, self.contact_last_name):
-            raise ValueError("Invalid last name format")
+            raise ContactFullnameFormatError(field="Фамилия")
         if not re.match(fullname_format, self.contact_first_name):
-            raise ValueError("Invalid first name format")
+            raise ContactFullnameFormatError(field="Имя")
         if self.contact_patronymic and not re.match(fullname_format, self.contact_patronymic):
-            raise ValueError("Invalid patronymic format")
+            raise ContactFullnameFormatError(field="Отчество")
 
 
 @dataclass(frozen=True)
@@ -41,12 +43,12 @@ class TaxID:
     def __post_init__(self):
         self.validate_format()
         if not self._check_rk_checksum():
-            raise ValueError("Некорректный идентификационный номер")
+            raise InvalidTaxNumberError()
         self.validate_tax_by_type()
 
     def validate_format(self):
         if not self.value.isdigit() or len(self.value) != 12:
-            raise ValueError("Идентификационный номер должен состоять строго из 12 цифр")
+            raise InvalidTaxNumberError()
 
     def validate_tax_by_type(self):
         if self.type == LegalForm.IE:
@@ -59,18 +61,18 @@ class TaxID:
         try:
             datetime.datetime.strptime(birth_date_str, "%y%m%d")
         except ValueError:
-            raise ValueError("Некорректный идентификационный номер")
+            raise InvalidTaxNumberError()
 
         if self.value[6] not in ("1", "2", "3", "4", "5", "6"):
-            raise ValueError("Некорректный идентификационный номер")
+            raise InvalidTaxNumberError()
 
     def _validate_bin_structure(self) -> None:
         month = int(self.value[2:4])
         if month < 1 or month > 12:
-            raise ValueError("Некорректный идентификационный номер")
+            raise InvalidTaxNumberError()
 
         if self.value[4] not in ("4", "5", "6"):
-            raise ValueError("Некорректный идентификационный номер")
+            raise InvalidTaxNumberError()
 
     def _check_rk_checksum(self) -> bool:
         """Алгоритм проверки контрольного разряда ИИН/БИН Республики Казахстан"""
@@ -98,7 +100,7 @@ class Logotype:
 
     def __post_init__(self):
         if self.media_size > self.MAX_SIZE_BYTES:
-            raise ValueError("Размер логотипа не должен превышать 2 МБ")
+            raise InvalidLogotypeSizeError()
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Logotype":

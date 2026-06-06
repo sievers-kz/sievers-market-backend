@@ -33,7 +33,6 @@ class VendorRepository(IVendorRepository):
 
         if not result:
             return None
-
         return VendorMapper.to_domain(result)
 
     async def get_by_account_id(self, account_id: UUID) -> Vendor:
@@ -41,6 +40,5 @@ class VendorRepository(IVendorRepository):
         result = (await self._session.execute(statement)).scalar_one_or_none()
 
         if not result:
-            raise ValueError("Не удалось найти данные продавца")
-
+            return None
         return VendorMapper.to_domain(result)

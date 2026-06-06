@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 import re
 
+from src.core.iam.domain.exceptions import EmailRequiredError, InvalidEmailFormatError, PasswordRequiredError
+
 
 @dataclass(frozen=True)
 class Email:
@@ -12,12 +14,12 @@ class Email:
 
     def validate_required(self):
         if not self.value:
-            raise ValueError("Email обязателен")
+            raise EmailRequiredError()
 
     def validate_format(self):
         email_format = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         if not re.match(email_format, self.value):
-            raise ValueError("Неправильный формат email")
+            raise InvalidEmailFormatError()
 
 
 @dataclass(frozen=True)
@@ -29,5 +31,7 @@ class Password:
 
     def validate_required(self):
         if not self.value:
-            raise ValueError("Пароль обязателен")
+            raise PasswordRequiredError()
+
+
 

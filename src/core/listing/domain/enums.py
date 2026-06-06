@@ -16,3 +16,4 @@ class ListingStatus(str, Enum):
             self.DELETED: "Удален"
         }
         return labels.get(self, "Неизвестное состояние")
+

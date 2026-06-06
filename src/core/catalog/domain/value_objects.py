@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from src.core.catalog.domain.enums import AttributeType
+from src.core.catalog.domain.exceptions import AttributeRequiredError, AttributeTypeError, AttributeOptionError
 
 
 @dataclass(frozen=True)
@@ -27,7 +28,7 @@ class Attribute:
 
     def _validate_key_required(self, value: Any) -> None:
         if self.required and (value is None or value == ""):
-            raise ValueError(f"Поле {self.label} обязательно")
+            raise AttributeRequiredError(field=value)
 
     def _cast_type(self, value: Any) -> Any:
         try:
@@ -39,11 +40,11 @@ class Attribute:
                 return str(value).lower() in ("true", "1", "yes")
             if self.type == AttributeType.ENUMERATE:
                 if value not in (self.options or []):
-                    raise ValueError(f"Недопустимый выбор для {self.label}")
+                    raise AttributeOptionError()
                 return value
             return str(value)
         except (ValueError, TypeError):
-            raise ValueError(f"Ошибка типа в поле {self.label}")
+            raise AttributeTypeError(field=value)
 
     @classmethod
     def from_dict(cls, data: dict) -> "Attribute":

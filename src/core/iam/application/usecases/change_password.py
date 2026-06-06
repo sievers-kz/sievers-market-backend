@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from src.core.iam.application.interfaces.password_service import IPasswordService
+from src.core.iam.domain.exceptions import PasswordMismatchError, AccountNotFoundError
 from src.core.iam.presentation.dto import ChangePasswordData
 from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 
@@ -17,12 +18,10 @@ class ChangePasswordUseCase:
     async def execute(self, account_id: UUID, change_password_data: ChangePasswordData):
         async with self.unit_of_work as uow:
             account = await uow.account.get_account_by_id(account_id)
-            if not account:
-                raise ValueError("Account not found")
 
             self.password_service.validate(change_password_data.new_password)
             if not self.password_service.verify(change_password_data.raw_password, account.password.value):
-                raise ValueError("Incorrect password")
+                raise PasswordMismatchError()
 
             new_hashed_password = self.password_service.hash(change_password_data.new_password)
             account.change_password(new_hashed_password)

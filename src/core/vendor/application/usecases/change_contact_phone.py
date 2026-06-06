@@ -1,5 +1,7 @@
 from uuid import UUID
 
+from loguru import logger
+
 from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormalizer
 from src.core.vendor.application.interfaces.uow import IVendorUnitOfWork
 from src.core.vendor.domain.entities import Vendor
@@ -19,3 +21,6 @@ class ChangeContactPhoneUseCase:
 
             await uow.vendor.save(vendor)
             await uow.commit()
+
+        logger.info("Vendor contact phone changed successfully | vendor_id={}", vendor.id)
+

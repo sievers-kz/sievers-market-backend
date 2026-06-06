@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from src.core.catalog.domain.enums import CatalogStatus
+from src.core.catalog.domain.exceptions import DuplicateAttributeError
 from src.core.catalog.domain.value_objects import Attribute
 from src.core.shared.domain.entities import AggregateRoot
 
@@ -45,12 +46,12 @@ class Subcategory(AggregateRoot):
     def replace_attributes(self, new_attributes: list[Attribute]) -> None:
         keys = [attr.key for attr in new_attributes]
         if len(keys) != len(set(keys)):
-            raise ValueError("Duplicate attribute keys")
+            raise DuplicateAttributeError()
         self.attributes = new_attributes
 
     def delete(self) -> None:
         if self.status == CatalogStatus.DELETED:
-            raise ValueError("Subcategory is already deleted")
+            return
         self.status = CatalogStatus.DELETED
 
     def validate_attributes(self, attributes: dict) -> dict:
@@ -99,7 +100,7 @@ class Category(AggregateRoot):
 
     def delete(self) -> None:
         if self.status == CatalogStatus.DELETED:
-            raise ValueError("Category is already deleted")
+            return
         self.status = CatalogStatus.DELETED
 
 
@@ -131,10 +132,10 @@ class Rubric(AggregateRoot):
     def replace_attributes(self, new_attributes: list[Attribute]) -> None:
         keys = [attr.key for attr in new_attributes]
         if len(keys) != len(set(keys)):
-            raise ValueError("Duplicate attribute keys")
+            raise DuplicateAttributeError()
         self.attributes = new_attributes
 
     def delete(self) -> None:
         if self.status == CatalogStatus.DELETED:
-            raise ValueError("Rubric is already deleted")
+            return
         self.status = CatalogStatus.DELETED

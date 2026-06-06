@@ -1,7 +1,8 @@
 import uuid
 from uuid import UUID
 
-from src.configuration.dependencies import media
+from loguru import logger
+
 from src.core.media.application.interfaces.storage import IObjectStorage
 from src.core.media.application.interfaces.uow import IMediaUnitOfWork
 from src.core.media.domain.entities import Media
@@ -48,11 +49,12 @@ class MediaService:
             await uow.media.save(media_list)
             await uow.commit()
 
-            return [
-                ConfirmUploadResponse(
-                    media_id=media.id,
-                    media_type=media.media_type,
-                    media_size=media.media_size.value,
-                )
-                for media in media_list
-            ]
+        logger.info("Confirming upload media | account_id={}", account_id)
+        return [
+            ConfirmUploadResponse(
+                media_id=media.id,
+                media_type=media.media_type,
+                media_size=media.media_size.value,
+            )
+            for media in media_list
+        ]

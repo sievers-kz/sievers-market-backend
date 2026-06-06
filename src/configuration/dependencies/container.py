@@ -23,6 +23,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         sendgrid_config=configurations.sendgrid,
         redis_config=configurations.redis,
         minio_config=configurations.minio_config,
+        sentry_config=configurations.sentry_config,
     )
 
     catalog = providers.Container(

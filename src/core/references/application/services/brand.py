@@ -1,5 +1,7 @@
 from uuid import UUID
 
+from loguru import logger
+
 from src.core.references.application.interfaces.abstract_uow import IReferenceUnitOfWork
 from src.core.references.presentation.dto.brand import UpdateBrandRequest, CreateBrandRequest, BrandResponse
 
@@ -26,6 +28,8 @@ class BrandService:
             await uow.brand.save(brand)
             await uow.commit()
 
+            logger.info("Created new brand | brand_id={}", brand.id)
+
     async def update_brand(self, brand_id: UUID, dto: UpdateBrandRequest) -> None:
         async with self.uow as uow:
             brand = await uow.brand.get_by_id(brand_id)
@@ -34,8 +38,13 @@ class BrandService:
             await uow.brand.save(brand)
             await uow.commit()
 
+            logger.info("Update brand | brand_id={}", brand.id)
+
     async def delete_brand(self, brand_id: UUID) -> None:
         async with self.uow as uow:
             await uow.brand.delete(brand_id)
             await uow.commit()
+
+            logger.info("Deleted brand | brand_id={}", brand_id)
+
 

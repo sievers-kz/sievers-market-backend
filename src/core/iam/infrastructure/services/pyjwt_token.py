@@ -3,9 +3,10 @@ from datetime import timedelta, datetime, timezone
 
 import jwt
 
+from src.core.iam.domain.exceptions import InvalidTokenTypeError, TokenExpiredError, InvalidTokenError
 from src.core.iam.presentation.dto import TokenData
 from src.core.iam.application.interfaces.token_service import ITokenService
-from src.core.iam.domain.enums import TokenType, UserRole
+from src.core.iam.domain.enums import TokenType
 
 
 class PyJWTTokenService(ITokenService):
@@ -47,11 +48,11 @@ class PyJWTTokenService(ITokenService):
 
             token_type = payload.get("token_type")
             if not token_type or token_type != expected_type.value:
-                raise ValueError(f"Invalid token type. Expected {expected_type.value}")
+                raise InvalidTokenTypeError()
             return payload
 
         except jwt.ExpiredSignatureError as exc:
-            raise ValueError("Token has expired")
+            raise TokenExpiredError()
 
         except jwt.DecodeError as exc:
-            raise ValueError("Invalid token signature or format")
+            raise InvalidTokenError()

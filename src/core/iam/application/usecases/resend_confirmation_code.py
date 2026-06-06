@@ -1,5 +1,7 @@
 import asyncio
 
+from loguru import logger
+
 from src.core.iam.application.services.otp import OTPService
 from src.core.iam.domain.enums import OTPType
 from src.core.iam.presentation.dto import ResendCodeRequest
@@ -19,6 +21,7 @@ class ResendConfirmationCodeUseCase:
         async with self.unit_of_work as uow:
             account = await uow.account.get_account_by_email(resend_data.email)
             if not account:
+                logger.info("Account not found | email={}", resend_data.email)
                 await asyncio.sleep(0.5)
                 return
 
