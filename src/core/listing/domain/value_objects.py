@@ -2,6 +2,9 @@ from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
 
+from src.core.listing.domain.exceptions import ListingGalleryTooManyImagesError, ListingGalleryEmptyError, \
+    ListingLargeImageSizeError
+
 
 @dataclass(frozen=True)
 class Image:
@@ -15,7 +18,7 @@ class Image:
         # 1. Проверить, что разрешение не меньше NxN и не больше N.
         # 3. Валидировать формат (допускать только jpeg, png, webp).
         if self.media_size > self.MAX_SIZE_BYTES:
-            raise ValueError("Изображение не может превышать 5 МБ")
+            raise ListingLargeImageSizeError()
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Image":
@@ -39,9 +42,9 @@ class Gallery:
 
     def __post_init__(self):
         if not self.images:
-            raise ValueError("Добавьте минимум одно изображение")
+            raise ListingGalleryEmptyError()
         if len(self.images) > 10:
-            raise ValueError("Вы можете добавить максимум 10 изображений")
+            raise ListingGalleryTooManyImagesError()
 
     @classmethod
     def from_dicts(cls, data: list[dict[str, Any]]) -> "Gallery":

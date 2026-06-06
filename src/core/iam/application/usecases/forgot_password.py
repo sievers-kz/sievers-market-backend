@@ -1,4 +1,5 @@
 import asyncio
+from loguru import logger
 
 from src.core.iam.domain.enums import OTPType
 from src.core.iam.presentation.dto import ForgotPasswordData
@@ -18,6 +19,7 @@ class ForgotPasswordUseCase:
         async with self.unit_of_work as uow:
             account = await uow.account.get_account_by_email(forgot_password_data.email)
             if not account:
+                logger.info("Account not found | email={}", forgot_password_data.email)
                 await asyncio.sleep(0.5)
                 return
 

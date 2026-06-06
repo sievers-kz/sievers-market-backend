@@ -3,6 +3,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from scalar_fastapi import get_scalar_api_reference, Theme, Layout
 
+from src.configuration.exception_handlers import setup_exception_handlers
+from src.configuration.logging import setup_logger
+from src.configuration.settings.settings import ApplicationSettings
 from src.core.catalog.presentation.routers.catalog import catalog_router
 from src.core.customer.presentation.routers import customer_router
 from src.core.iam.presentation.routers import iam
@@ -16,11 +19,19 @@ from src.core.vendor.presentation.router import vendor_router
 class ApplicationFactory:
     def __init__(self):
         self.container = ApplicationContainer()
+        self._configure_logging()
+        self.container.gateways.sentry.init()
+
         self.app = FastAPI(
             title="AGROW Marketplace",
             version="1.0.0",
             lifespan=self._lifespan(),
         )
+        setup_exception_handlers(self.app)
+
+    def _configure_logging(self):
+        settings = ApplicationSettings()
+        setup_logger(mode=settings.mode)
 
     def _lifespan(self):
         @asynccontextmanager
@@ -78,5 +89,7 @@ class ApplicationFactory:
 
 
 fastapi_app = ApplicationFactory().build()
+
+
 
 

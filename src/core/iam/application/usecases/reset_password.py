@@ -1,5 +1,8 @@
+from loguru import logger
+
 from src.core.iam.application.interfaces.password_service import IPasswordService
 from src.core.iam.application.services.otp import OTPService
+from src.core.iam.domain.exceptions import AccountNotFoundError
 from src.core.iam.presentation.dto import ResetPasswordData
 from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 from src.core.iam.domain.enums import OTPType
@@ -20,7 +23,7 @@ class ResetPasswordUseCase:
         async with self.unit_of_work as uow:
             account = await uow.account.get_account_by_email(reset_password_data.email)
             if not account:
-                raise ValueError("Пользователь не найден")
+                raise AccountNotFoundError()
 
             await self.otp_service.verify(
                 account_id=account.id,
@@ -35,3 +38,4 @@ class ResetPasswordUseCase:
             await uow.account.save(account)
             await uow.commit()
 
+        logger.info("Password successfully reseted | account_id={}", account.id)

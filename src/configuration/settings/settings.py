@@ -66,6 +66,13 @@ class ResendSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
+class SentryConfig(BaseSettings):
+    dsn: str = Field(alias="SENTRY_DSN")
+    mode: str = Field(alias="MODE")
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+
 class ApplicationSettings(BaseSettings):
     mode: str = Field(alias="MODE")
     database: PostgresSettings = Field(default_factory=PostgresSettings)
@@ -74,6 +81,7 @@ class ApplicationSettings(BaseSettings):
     minio_config: MinioConfig = Field(default_factory=MinioConfig)
     redis_config: RedisConfig = Field(default_factory=RedisConfig)
     resend_config: ResendSettings = Field(default_factory=ResendSettings)
+    sentry_config: SentryConfig = Field(default_factory=SentryConfig)
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", env_file_encoding="utf-8")
 

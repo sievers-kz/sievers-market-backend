@@ -1,7 +1,10 @@
 from uuid import UUID
 
+from loguru import logger
+
 from src.core.vendor.application.interfaces.uow import IVendorUnitOfWork
 from src.core.vendor.domain.entities import Vendor
+from src.core.vendor.domain.exceptions import VendorAlreadyExistsError
 from src.core.vendor.presentation.dto import CreateVendorRequest
 
 
@@ -13,7 +16,7 @@ class RegisterVendorUseCase:
         async with self.uow as uow:
             current_vendor = await uow.vendor.get_by_tax_id(dto.tax_id)
             if current_vendor:
-                raise ValueError("Такая компания уже зарегистрирована")
+                raise VendorAlreadyExistsError()
 
             new_vendor = Vendor.create(
                 account_id=account_id,
@@ -27,3 +30,5 @@ class RegisterVendorUseCase:
 
             await uow.vendor.save(new_vendor)
             await uow.commit()
+
+        logger.info("Vendor registered | vendor_id={}", new_vendor.id)

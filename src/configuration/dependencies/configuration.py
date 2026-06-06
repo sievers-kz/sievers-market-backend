@@ -11,3 +11,4 @@ class ConfigurationContainer(containers.DeclarativeContainer):
     minio_config = configuration.minio_config
     redis = configuration.redis_config
     resend_config = configuration.resend_config
+    sentry_config = configuration.sentry_config

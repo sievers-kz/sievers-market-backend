@@ -1,3 +1,5 @@
+from loguru import logger
+
 from src.core.iam.presentation.dto import RefreshData
 from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 
@@ -16,3 +18,5 @@ class LogoutUserUseCase:
 
             await uow.account.save(account)
             await uow.commit()
+
+        logger.info("Logged out user | account_id={}", account.id)

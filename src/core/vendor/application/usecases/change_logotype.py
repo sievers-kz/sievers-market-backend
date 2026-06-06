@@ -1,5 +1,7 @@
 from uuid import UUID
 
+from loguru import logger
+
 from src.core.vendor.application.interfaces.uow import IVendorUnitOfWork
 from src.core.vendor.domain.entities import Vendor
 from src.core.vendor.presentation.dto import ChangeLogotypeRequest
@@ -16,3 +18,5 @@ class ChangeLogotypeUseCase:
 
             await uow.vendor.save(vendor)
             await uow.commit()
+
+        logger.info("Vendor logotype changed successfully | vendor_id={}", vendor.id)

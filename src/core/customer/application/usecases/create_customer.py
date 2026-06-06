@@ -1,5 +1,7 @@
 from uuid import UUID
 
+from loguru import logger
+
 from src.core.customer.application.interfaces.uow import ICustomerUnitOfWork
 from src.core.customer.domain.entities import Customer
 from src.core.customer.presentation.dto import CreateCustomerRequest
@@ -19,3 +21,5 @@ class CreateCustomerUseCase:
 
             await uow.customer.save(new_customer)
             await uow.commit()
+
+        logger.info("Customer created | customer_id={}", new_customer.id)

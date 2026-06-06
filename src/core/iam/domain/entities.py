@@ -3,7 +3,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from uuid import UUID
 
-from src.core.iam.domain.enums import UserRole, TokenType
+from src.core.iam.domain.enums import TokenType
+from src.core.iam.domain.exceptions import AccountAlreadyConfirmedError, AccountNotConfirmedError
 from src.core.iam.domain.value_objects import Email, Password
 
 from src.core.shared.domain.entities import AggregateRoot, Entity
@@ -33,19 +34,19 @@ class Account(AggregateRoot):
 
     def confirm_account(self):
         if self.is_active:
-            raise ValueError("Account is already confirmed")
+            raise AccountAlreadyConfirmedError()
         self.is_active = True
 
     def resend_confirmation_code(self, token_value: str, expires_at: datetime):
         if self.is_active:
-            raise ValueError("Account is already confirmed")
+            raise AccountAlreadyConfirmedError()
 
         self.revoke_all_tokens_by_type(TokenType.EMAIL)
         self.add_new_token(TokenType.EMAIL, token_value, expires_at)
 
     def login(self):
         if not self.is_active:
-            raise ValueError("Account is not confirmed")
+            raise AccountNotConfirmedError()
 
     def logout(self, token_value: str):
         token = self._get_token_by_value(token_value)

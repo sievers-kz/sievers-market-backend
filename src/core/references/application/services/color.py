@@ -1,5 +1,7 @@
 from uuid import UUID
 
+from loguru import logger
+
 from src.core.references.application.interfaces.abstract_color_repository import IColorRepository
 from src.core.references.application.interfaces.abstract_uow import IReferenceUnitOfWork
 from src.core.references.domain.entities import Color
@@ -26,6 +28,8 @@ class ColorService:
             await uow.color.save(color)
             await uow.commit()
 
+        logger.info("Created new color | color_id={}", color.id)
+
     async def update_color(self, color_id: UUID, dto: UpdateColorRequest) -> None:
         async with self.uow as uow:
             color = await uow.color.get_by_id(color_id)
@@ -34,7 +38,11 @@ class ColorService:
             await uow.color.save(color)
             await uow.commit()
 
+        logger.info("Update color | color_id={}", color.id)
+
     async def delete_color(self, color_id: UUID) -> None:
         async with self.uow as uow:
             await uow.color.delete(color_id)
             await uow.commit()
+
+        logger.info("Delete color | color_id={}", color_id)

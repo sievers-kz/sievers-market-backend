@@ -8,7 +8,7 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from src.configuration.database.connection import get_database_session
-from src.configuration.dependencies.resources import init_bloom
+from src.configuration.dependencies.resources import init_bloom, init_sentry, init_engine
 from src.core.shared.infrastructure.services.email_sender import SendGridEmailSender
 
 
@@ -17,10 +17,12 @@ class GatewaysContainer(containers.DeclarativeContainer):
     sendgrid_config = providers.Configuration()
     redis_config = providers.Configuration()
     minio_config = providers.Configuration()
+    sentry_config = providers.Configuration()
 
-    async_engine = providers.Singleton(
-        create_async_engine,
+    async_engine = providers.Resource(
+        init_engine,
         url=database_config.database_url,
+        echo=False
     )
 
     session_factory = providers.Singleton(
@@ -72,4 +74,12 @@ class GatewaysContainer(containers.DeclarativeContainer):
         init_bloom,
         client=minio_client,
         bucket_name=minio_config.bucket_name,
+    )
+
+    sentry = providers.Resource(
+        init_sentry,
+        dsn=sentry_config.dsn,
+        environment=sentry_config.mode,
+        traces_sample_rate=sentry_config.traces_sample_rate,
+        profiles_sample_rate=sentry_config.profiles_sample_rate,
     )

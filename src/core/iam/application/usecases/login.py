@@ -1,4 +1,7 @@
+from loguru import logger
+
 from src.core.iam.application.interfaces.password_service import IPasswordService
+from src.core.iam.domain.exceptions import InvalidLoginCredentialsError
 from src.core.iam.presentation.dto import LoginAccount, LoginResponse
 from src.core.iam.domain.enums import TokenType
 from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
@@ -20,10 +23,10 @@ class LoginUserUseCase:
         async with self.unit_of_work as uow:
             account = await uow.account.get_account_by_email(login_data.email)
             if not account:
-                raise ValueError("Invalid email or password")
+                raise InvalidLoginCredentialsError()
 
             if not self.password_service.verify(login_data.raw_password, account.password.value):
-                raise ValueError("Invalid email or password")
+                raise InvalidLoginCredentialsError()
             account.login()
 
             access_token = self.token_service.create_token(account.id, TokenType.ACCESS)
@@ -32,4 +35,6 @@ class LoginUserUseCase:
 
             await uow.account.save(account)
             await uow.commit()
-            return LoginResponse(access_token=access_token.value, refresh_token=refresh_token.value)
+
+        logger.info("Account logged in | account_id={}", account.id)
+        return LoginResponse(access_token=access_token.value, refresh_token=refresh_token.value)

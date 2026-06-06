@@ -8,6 +8,3 @@ class PriceCurrency(str, Enum):
     EUR = "EUR"
 
 
-
-
-

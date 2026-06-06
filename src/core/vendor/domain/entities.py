@@ -4,6 +4,7 @@ from uuid import UUID
 
 from src.core.shared.domain.entities import AggregateRoot
 from src.core.vendor.domain.enums import LegalForm
+from src.core.vendor.domain.exceptions import VendorAlreadyVerifiedError
 from src.core.vendor.domain.value_objects import Logotype, ContactFullname, TaxID
 
 
@@ -45,7 +46,7 @@ class Vendor(AggregateRoot):
 
     def verify(self):
         if self.is_verified:
-            raise ValueError("Продавец уже подтвержден")
+            raise VendorAlreadyVerifiedError()
         self.is_verified = True
 
     def change_contact_fullname(

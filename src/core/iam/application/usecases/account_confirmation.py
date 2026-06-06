@@ -1,6 +1,9 @@
+from loguru import logger
+
 from src.core.iam.application.interfaces.token_service import ITokenService
 from src.core.iam.application.services.otp import OTPService
 from src.core.iam.domain.enums import OTPType, TokenType
+from src.core.iam.domain.exceptions import AccountNotFoundError
 from src.core.iam.presentation.dto import AccountConfirmation, LoginResponse
 from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 
@@ -20,7 +23,7 @@ class AccountConfirmationUseCase:
         async with self.unit_of_work as uow:
             account = await uow.account.get_account_by_id(confirmation_data.account_id)
             if not account:
-                raise ValueError("Invalid confirmation token")
+                raise AccountNotFoundError()
 
             await self.otp_service.verify(
                 account_id=account.id,
@@ -36,4 +39,5 @@ class AccountConfirmationUseCase:
             await uow.account.save(account)
             await uow.commit()
 
+            logger.info("ACCOUNT VERIFIED | account_id={}", account.id)
             return LoginResponse(access_token=access_token.value, refresh_token=refresh_token.value)

@@ -1,8 +1,10 @@
 from uuid import UUID
+from loguru import logger
 
 from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 from src.core.iam.application.services.otp import OTPService
 from src.core.iam.domain.enums import OTPType
+from src.core.iam.domain.exceptions import AccountAlreadyExistsError
 from src.core.iam.domain.value_objects import Email
 from src.core.iam.presentation.dto import ChangeEmailRequest
 from src.core.shared.application.interfaces.cache_service import ICacheService
@@ -22,13 +24,10 @@ class RequestEmailChangeUseCase:
     async def execute(self, account_id: UUID, dto: ChangeEmailRequest):
         email_vo = Email(dto.email)
         async with self.uow as uow:
-            account = await uow.account.get_account_by_id(account_id)
-            if not account:
-                raise ValueError(f"Account {account_id} not found!")
-
             existing = await uow.account.get_account_by_email(email_vo.value)
             if existing:
-                raise ValueError("Email already exists!")
+                logger.info("Email change attempt to existing email | account_id={}", existing.id)
+                raise AccountAlreadyExistsError()
 
         await self.cache_service.set(
             key=f"email_change:pending:{account_id}",
