@@ -6,13 +6,14 @@ from src.core.listing.infrastructure.uow import ListingUnitOfWork
 
 
 class ListingContainer(containers.DeclarativeContainer):
+    session_factory = providers.Dependency()
     database_session = providers.Dependency()
     customer_repository = providers.Dependency()
     subcategory_service = providers.Dependency()
 
     uow = providers.Factory(
         ListingUnitOfWork,
-        session=database_session,
+        session_factory=session_factory
     )
 
     create_listing_usecase = providers.Factory(

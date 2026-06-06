@@ -6,13 +6,14 @@ from src.core.media.infrastructure.uow import MediaUnitOfWork
 
 
 class MediaContainer(containers.DeclarativeContainer):
+    session_factory = providers.Dependency()
     database_session = providers.Dependency()
     minio_config = providers.Configuration()
     minio_client = providers.Dependency()
 
     uow = providers.Factory(
         MediaUnitOfWork,
-        session=database_session
+        session_factory=session_factory
     )
 
     minio_service = providers.Factory(

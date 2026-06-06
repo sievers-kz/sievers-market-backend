@@ -28,6 +28,7 @@ from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormal
 
 class IAMContainer(containers.DeclarativeContainer):
     auth_config = providers.Configuration()
+    session_factory = providers.Dependency()
     database_session = providers.Dependency()
     console_email_sender = providers.Dependency()
     redis_service = providers.Dependency()
@@ -46,7 +47,7 @@ class IAMContainer(containers.DeclarativeContainer):
 
     iam_unit_of_work = providers.Factory(
         IAMUnitOfWork,
-        session=database_session
+        session_factory=session_factory
     )
 
     phonenumber_normalizer = providers.Singleton(PhoneNormalizer)
