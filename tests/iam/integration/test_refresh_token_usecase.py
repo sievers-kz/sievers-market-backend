@@ -2,8 +2,10 @@ import uuid
 
 import pytest
 
+from src.core.iam.domain.exceptions import AccountNotFoundError, InvalidTokenTypeError
 from src.core.iam.presentation.dto import AccountConfirmation, LoginAccount, RefreshData
 from src.core.iam.domain.enums import TokenType, OTPType
+from src.core.shared.domain.exceptions import UnauthorizedError
 from tests.iam.conftest import get_token_by_type, get_token_by_value, create_user_request
 
 
@@ -50,9 +52,8 @@ class TestRefreshTokenUseCase:
     @pytest.mark.integration
     async def test_fails_with_invalid_refresh_token(self, refresh_token_usecase):
         invalid_token = RefreshData(refresh_token="invalid_refresh_token")
-        with pytest.raises(ValueError) as exc:
+        with pytest.raises(UnauthorizedError) as exc:
             await refresh_token_usecase.execute(invalid_token)
-        assert str(exc.value) == "Invalid refresh token"
 
     @pytest.mark.asyncio
     @pytest.mark.integration
@@ -65,10 +66,8 @@ class TestRefreshTokenUseCase:
         generated_ghost_refresh_token = token_service.create_token(fake_user_id, TokenType.REFRESH)
         ghost_refresh_token_dto = RefreshData(refresh_token=generated_ghost_refresh_token.value)
 
-        with pytest.raises(ValueError) as exc:
+        with pytest.raises(AccountNotFoundError) as exc:
             await refresh_token_usecase.execute(ghost_refresh_token_dto)
-
-        assert str(exc.value) == "Token not found"
 
     @pytest.mark.asyncio
     @pytest.mark.integration
@@ -77,10 +76,8 @@ class TestRefreshTokenUseCase:
         wrong_token = token_service.create_token(fake_user_id, TokenType.ACCESS)
         wrong_token_dto = RefreshData(refresh_token=wrong_token.value)
 
-        with pytest.raises(ValueError) as exc:
+        with pytest.raises(InvalidTokenTypeError) as exc:
             await refresh_token_usecase.execute(wrong_token_dto)
-
-        assert str(exc.value) == "Invalid refresh token"
 
     @pytest.mark.asyncio
     @pytest.mark.integration

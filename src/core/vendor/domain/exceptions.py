@@ -45,3 +45,8 @@ class InvalidLogotypeSizeError(ValidationError):
 class VendorAlreadyVerifiedError(RulesError):
     def __init__(self):
         super().__init__(message="Продавец уже верифицирован")
+
+
+class VendorCannotBeRestoredError(ValidationError):
+    def __init__(self):
+        super().__init__(message="Невозможно восстановить аккаунт продавца")

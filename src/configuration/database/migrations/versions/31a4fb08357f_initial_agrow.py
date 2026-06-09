@@ -1,8 +1,8 @@
 """initial_agrow
 
-Revision ID: 046e6fb45a8a
+Revision ID: 31a4fb08357f
 Revises: 
-Create Date: 2026-06-05 17:10:44.134840
+Create Date: 2026-06-07 15:14:29.115884
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '046e6fb45a8a'
+revision: str = '31a4fb08357f'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -125,7 +125,6 @@ def upgrade() -> None:
     )
     op.create_table('vendors',
     sa.Column('account_id', sa.UUID(), nullable=False),
-    sa.Column('is_verified', sa.Boolean(), nullable=False),
     sa.Column('contact_last_name', sa.String(), nullable=False),
     sa.Column('contact_first_name', sa.String(), nullable=False),
     sa.Column('contact_patronymic', sa.String(), nullable=True),
@@ -136,6 +135,9 @@ def upgrade() -> None:
     sa.Column('legal_form', sa.Enum('IE', 'LLP', 'JSC', 'FARM', name='legalform'), nullable=False),
     sa.Column('shop_name', sa.String(), nullable=True),
     sa.Column('logotype', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('is_verified', sa.Boolean(), nullable=False),
+    sa.Column('status', sa.Enum('ACTIVE', 'CLOSED', 'BANNED', name='vendorstatus'), nullable=False),
+    sa.Column('closed_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),

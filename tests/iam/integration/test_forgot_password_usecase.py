@@ -1,5 +1,6 @@
 import pytest
 
+from src.core.iam.domain.exceptions import OTPCooldownError
 from src.core.iam.presentation.dto import AccountConfirmation, LoginAccount, ForgotPasswordData
 from src.core.iam.domain.enums import TokenType, OTPType
 from tests.iam.conftest import create_user_request, get_token_by_type, account_confirmation_usecase
@@ -64,5 +65,5 @@ class TestForgotPasswordUsecase:
         forgot_password_data = ForgotPasswordData(email=dto.email)
         await forgot_password_usecase.execute(forgot_password_data)
 
-        with pytest.raises(ValueError, match="Подождите перед повторной отправкой"):
+        with pytest.raises(OTPCooldownError):
             await forgot_password_usecase.execute(forgot_password_data)

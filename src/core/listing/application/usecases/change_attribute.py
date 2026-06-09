@@ -13,7 +13,7 @@ class ChangeListingAttributeUseCase:
         self.uow = uow
         self.subcategory_service = subcategory_service
 
-    async def execute(self, listing_id: UUID, dto: ChangeListingAttributeRequest):
+    async def execute(self, vendor_id: UUID, listing_id: UUID, dto: ChangeListingAttributeRequest):
         validated_attributes = await self.subcategory_service.validate_attributes(dto.subcategory_id, dto.attributes)
 
         async with self.uow as uow:

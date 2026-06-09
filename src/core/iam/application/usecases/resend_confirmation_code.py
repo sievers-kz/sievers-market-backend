@@ -22,7 +22,6 @@ class ResendConfirmationCodeUseCase:
             account = await uow.account.get_account_by_email(resend_data.email)
             if not account:
                 logger.info("Account not found | email={}", resend_data.email)
-                await asyncio.sleep(0.5)
                 return
 
         await self.otp_service.send(

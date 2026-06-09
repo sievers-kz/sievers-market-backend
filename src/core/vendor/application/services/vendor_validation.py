@@ -1,18 +1,28 @@
 from typing import Optional
 
-from src.core.vendor.application.interfaces.vendor_fetcher import IVendorFetcher
+from src.core.shared.application.interfaces.cache_service import ICacheService
+from src.core.vendor.application.interfaces.taxpayer_gateway import ITaxpayerGateway
 from src.core.vendor.domain.exceptions import VendorNotFoundError, VendorOnLiquidationError
-from src.core.vendor.presentation.dto import VendorValidationResponse
+from src.core.vendor.presentation.dto import TaxpayerResponse
 
 
-class VendorValidationService:
-    def __init__(self, fetcher: IVendorFetcher):
-        self._fetcher = fetcher
+class TaxpayerValidationService:
+    def __init__(self, gateway: ITaxpayerGateway, cache_service: ICacheService):
+        self.gateway = gateway
+        self.cache_service = cache_service
 
-    async def verify(self, tax_id: str) -> Optional[VendorValidationResponse]:
-        vendor = await self._fetcher.fetch(tax_id)
-        if not vendor:
+    async def validate(self, tax_id: str) -> Optional[TaxpayerResponse]:
+        taxpayer = await self.gateway.fetch(tax_id)
+        if not taxpayer:
             raise VendorNotFoundError()
-        if vendor.is_liquidation:
+
+        if taxpayer.is_liquidation:
             raise VendorOnLiquidationError()
-        return vendor
+
+        await self.cache_service.set(
+            key=f"taxpayer:{tax_id}",
+            value=taxpayer.model_dump_json(),
+            ttl=300
+        )
+
+        return taxpayer

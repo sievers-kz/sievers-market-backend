@@ -24,8 +24,8 @@ class Customer(AggregateRoot):
             id=uuid.uuid4(),
             account_id=account_id,
             fullname=Fullname(
+                last_name=last_name,
                 first_name=first_name,
-                last_name=last_name
             ),
         )
 

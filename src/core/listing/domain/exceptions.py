@@ -1,4 +1,4 @@
-from src.core.shared.domain.exceptions import NotFoundError, ValidationError
+from src.core.shared.domain.exceptions import NotFoundError, ValidationError, RulesError
 
 
 class ListingNotFoundError(NotFoundError):
@@ -19,3 +19,13 @@ class ListingGalleryEmptyError(ValidationError):
 class ListingGalleryTooManyImagesError(ValidationError):
     def __init__(self):
         super().__init__(message="Можно добавить только до 10 изображений")
+
+
+class ListingActivationError(RulesError):
+    def __init__(self):
+        super().__init__(message="Невозможно активировать удаленное объявление")
+
+
+class ListingArchivingError(ValidationError):
+    def __init__(self):
+        super().__init__(message="Невозможно архивировать удаленное объявление")

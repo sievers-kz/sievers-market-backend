@@ -1,6 +1,7 @@
 import pytest
 
 from src.core.iam.domain.enums import OTPType
+from src.core.iam.domain.exceptions import OTPCooldownError
 from src.core.iam.presentation.dto import CreateAccountRequest, AccountConfirmation, ResendCodeRequest
 from tests.iam.conftest import create_user_request
 
@@ -44,7 +45,7 @@ class TestResendConfirmationCodeUsecase:
         await create_user_usecase.execute(dto)
 
         resend_dto = ResendCodeRequest(email=dto.email)
-        with pytest.raises(ValueError, match="Подождите перед повторной отправкой"):
+        with pytest.raises(OTPCooldownError):
             await resend_confirmation_code_usecase.execute(resend_dto)
 
     @pytest.mark.asyncio
@@ -52,6 +53,7 @@ class TestResendConfirmationCodeUsecase:
     async def test_silent_on_nonexistent_email(
         self,
         resend_confirmation_code_usecase,
+        account_repository,
     ):
         resend_dto = ResendCodeRequest(email="ghost@example.com")
         await resend_confirmation_code_usecase.execute(resend_dto)

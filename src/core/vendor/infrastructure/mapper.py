@@ -20,6 +20,8 @@ class VendorMapper:
             legal_form=domain_model.legal_form,
             shop_name=domain_model.shop_name,
             logotype=domain_model.logotype.to_dict() if domain_model.logotype else None,
+            status=domain_model.status,
+            closed_at=domain_model.closed_at,
         )
 
     @staticmethod
@@ -33,10 +35,13 @@ class VendorMapper:
                 contact_first_name=orm_model.contact_first_name,
                 contact_patronymic=orm_model.contact_patronymic
             ),
+            contact_phone=orm_model.contact_phone,
             legal_name=orm_model.legal_name,
             legal_address=orm_model.legal_address,
             tax_id=TaxID(orm_model.tax_id, orm_model.legal_form),
             legal_form=orm_model.legal_form,
             shop_name=orm_model.shop_name,
             logotype=Logotype.from_dict(orm_model.logotype) if orm_model.logotype else None,
+            status=orm_model.status,
+            closed_at=orm_model.closed_at,
         )

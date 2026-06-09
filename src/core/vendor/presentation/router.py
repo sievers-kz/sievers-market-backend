@@ -2,50 +2,51 @@ from typing import Annotated
 
 from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter
-from fastapi.params import Depends, Security
+from fastapi.params import Depends, Security, Query
 
 from src.configuration.dependencies.container import ApplicationContainer
-from src.core.shared.presentation.dto import CurrentUser, CurrentVendor
+from src.core.listing.domain.enums import ListingStatus
+from src.core.shared.presentation.dto import CurrentUser, CurrentVendor, PaginatedResponse
 from src.core.shared.presentation.security import get_current_user, get_current_vendor
 
-from src.core.vendor.application.services.vendor_validation import VendorValidationService
+from src.core.vendor.application.services.vendor_validation import TaxpayerValidationService
 from src.core.vendor.application.usecases import (
     RegisterVendorUseCase,
     ChangeContactFullnameUseCase,
     ChangeContactPhoneUseCase,
     ChangeShopNameUseCase,
-    ChangeLogotypeUseCase
+    ChangeLogotypeUseCase, CloseVendorUseCase, RestoreVendorUseCase
 )
-from src.core.vendor.infrastructure.query import VendorQueryService
+from src.core.vendor.infrastructure.query import VendorCabinetQueryService
 
 from src.core.vendor.presentation.dto import (
     CreateVendorRequest,
-    VendorValidationResponse,
+    TaxpayerResponse,
     ChangeContactFullnameRequest,
     ChangeContactPhoneRequest,
     ChangeShopNameRequest,
-    ChangeLogotypeRequest, VendorProfileResponse
+    ChangeLogotypeRequest, VendorProfileResponse, VendorListingCardsResponse
 )
 
 
 vendor_router = APIRouter(prefix="/vendor", tags=["Vendor"])
 
 
-@vendor_router.get("/verify/{tax_id}", response_model=VendorValidationResponse)
+@vendor_router.get("/taxpayer/{tax_id}", response_model=TaxpayerResponse)
 @inject
 async def verify_vendor(
     tax_id: str,
     service: Annotated[
-        VendorValidationService,
+        TaxpayerValidationService,
         Depends(
             Provide[
-                ApplicationContainer.vendor.vendor_validation_service
+                ApplicationContainer.vendor.taxpayer_validation_service
             ]
         )
     ],
     current_user: CurrentUser = Security(get_current_user),
 ):
-    return await service.verify(tax_id)
+    return await service.validate(tax_id)
 
 
 @vendor_router.post("/", summary="Create a new vendor")
@@ -56,7 +57,7 @@ async def create_vendor(
         RegisterVendorUseCase,
         Depends(
             Provide[
-                ApplicationContainer.vendor.create_vendor_usecase
+                ApplicationContainer.vendor.register_vendor_usecase
             ]
         )
     ],
@@ -142,13 +143,66 @@ async def change_logotype(
 @inject
 async def get_me(
     service: Annotated[
-        VendorQueryService,
+        VendorCabinetQueryService,
         Depends(
             Provide[
-                ApplicationContainer.vendor.query_service
+                ApplicationContainer.vendor.vendor_cabinet_query_service
             ]
         )
     ],
     current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
     return await service.get_me(current_vendor.id)
+
+
+@vendor_router.get("/me/listings/{status}", response_model=PaginatedResponse[VendorListingCardsResponse])
+@inject
+async def get_me_listings(
+    status: ListingStatus,
+    service: Annotated[
+        VendorCabinetQueryService,
+        Depends(
+            Provide[
+                ApplicationContainer.vendor.vendor_cabinet_query_service
+            ]
+        )
+    ],
+    current_vendor: CurrentVendor = Security(get_current_vendor),
+    page: int = Query(1, alias="page"),
+    limit: int = Query(10, alias="limit"),
+):
+    return await service.get_vendor_listing_cards_by_status(current_vendor.id, status, page, limit)
+
+
+@vendor_router.patch("/close", summary="Close vendor profile")
+@inject
+async def close_vendor(
+    usecase: Annotated[
+        CloseVendorUseCase,
+        Depends(
+            Provide[
+                ApplicationContainer.vendor.close_vendor_usecase
+            ]
+        )
+    ],
+    current_vendor: CurrentVendor = Security(get_current_vendor),
+):
+    await usecase.execute(current_vendor.id)
+    return {"message": "Аккаунт продавца закрыт"}
+
+
+@vendor_router.patch("/restore", summary="Restore vendor profile")
+@inject
+async def restore_vendor(
+    usecase: Annotated[
+        RestoreVendorUseCase,
+        Depends(
+            Provide[
+                ApplicationContainer.vendor.restore_vendor_usecase
+            ]
+        )
+    ],
+    current_user: CurrentUser = Security(get_current_user),
+):
+    await usecase.execute(current_user.id)
+    return {"message": "Аккаунт продавца восстановлен"}

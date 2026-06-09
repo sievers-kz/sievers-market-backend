@@ -42,6 +42,7 @@ class CreateListingUseCase:
             await uow.listing.save(listing)
             await uow.commit()
 
+        return listing.id
         logger.info("Listing created | listing_id={} owner_id={}", listing.id, owner_id)
 
 

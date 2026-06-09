@@ -28,7 +28,7 @@ class Attribute:
 
     def _validate_key_required(self, value: Any) -> None:
         if self.required and (value is None or value == ""):
-            raise AttributeRequiredError(field=value)
+            raise AttributeRequiredError(field=self.label)
 
     def _cast_type(self, value: Any) -> Any:
         try:
@@ -44,7 +44,7 @@ class Attribute:
                 return value
             return str(value)
         except (ValueError, TypeError):
-            raise AttributeTypeError(field=value)
+            raise AttributeTypeError(field=self.label)
 
     @classmethod
     def from_dict(cls, data: dict) -> "Attribute":
