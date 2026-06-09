@@ -1,6 +1,7 @@
 import pytest
 
 from src.core.iam.domain.enums import OTPType
+from src.core.iam.domain.exceptions import InvalidOTPCodeError
 from src.core.iam.presentation.dto import CreateAccountRequest, AccountConfirmation
 
 
@@ -47,6 +48,6 @@ class TestAccountConfirmationUsecase:
         account = await account_repository.get_account_by_email(dto.email)
         confirmation_dto = AccountConfirmation(account_id=account.id, confirm_code="123456")
 
-        with pytest.raises(ValueError, match="Неверный OTP код"):
+        with pytest.raises(InvalidOTPCodeError):
             await account_confirmation_usecase.execute(confirmation_dto)
 

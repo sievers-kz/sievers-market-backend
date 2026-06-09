@@ -1,24 +1,21 @@
 import yaml
 import logging
-from pathlib import Path
-from typing import Any, List, Dict
+from typing import Any
 
 from pydantic import TypeAdapter
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 
-from seeds.schemas import RubricSeed, ColorSeed, BrandSeed, RegionSeed, CountrySeed
-from src.configuration.settings.settings import PostgresSettings
+from scripts.seeds.schemas import RubricSeed, ColorSeed, BrandSeed, RegionSeed, CountrySeed
 from src.core.catalog.domain.enums import CatalogStatus
 
 from src.core.catalog.infrastructure.models import Rubric, Category, Subcategory
 from src.core.references.infrastructure.models import Brand, Country, Color, Region, City
 
-import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ENV_PATH = BASE_DIR / ".env"
 
 if ENV_PATH.exists():
@@ -164,7 +161,15 @@ class DataSeeder:
 
         logger.info("✅ Catalog hierarchy seeded with Pydantic validation")
 
+    async def is_already_seeded(self) -> bool:
+        result = await self.session.execute(select(func.count()).select_from(Rubric))
+        return result.scalar_one() > 0
+
     async def seed_all(self):
+        if await self.is_already_seeded():
+            print("⏭️ Database already seeded, skipping")
+            return
+
         try:
             await self.seed_brands()
             await self.seed_colors()

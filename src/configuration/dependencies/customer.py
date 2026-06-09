@@ -1,5 +1,6 @@
 from dependency_injector import containers, providers
 
+from src.core.customer.application.services.customer_service import CustomerService
 from src.core.customer.application.usecases import (
     ChangeCustomerFullnameUseCase,
 )
@@ -27,6 +28,11 @@ class CustomerContainer(containers.DeclarativeContainer):
     uow = providers.Factory(
         CustomerUnitOfWork,
         session_factory=session_factory
+    )
+
+    customer_service = providers.Factory(
+        CustomerService,
+        uow=uow
     )
 
     change_customer_fullname_usecase = providers.Factory(

@@ -8,7 +8,7 @@ from fastapi.params import Depends, Query
 from src.configuration.dependencies.container import ApplicationContainer
 from src.core.catalog.infrastructure.query import CatalogQueryService
 from src.core.catalog.presentation.dto.catalog import AttributeResponse, RubricResponse, ListingCardResponse, \
-    ListingDetailResponse, VendorCardResponse
+    ListingDetailResponse, VendorCardResponse, DetailVendorResponse
 from src.core.catalog.presentation.routers.subcategory import subcategory_router
 from src.core.shared.presentation.dto import PaginatedResponse
 
@@ -97,3 +97,19 @@ async def get_vendor_cards(
     limit: int = Query(20, alias="limit"),
 ):
     return await service.get_vendors_card(page, limit)
+
+
+@catalog_router.get("/vendor/{vendor_id}", response_model=DetailVendorResponse)
+@inject
+async def get_vendor_details(
+    vendor_id: UUID,
+    service: Annotated[
+        CatalogQueryService,
+        Depends(
+            Provide[
+                ApplicationContainer.catalog.query_service
+            ]
+        )
+    ]
+):
+    return await service.get_vendor_details(vendor_id)

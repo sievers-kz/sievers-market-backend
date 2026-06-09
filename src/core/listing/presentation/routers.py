@@ -7,7 +7,8 @@ from fastapi.params import Depends, Security
 
 from src.configuration.dependencies.container import ApplicationContainer
 from src.core.listing.application.usecases import CreateListingUseCase, ChangeListingAttributeUseCase, \
-    ChangeListingPriceUseCase, ChangeListingLocationUseCase, ChangeListingDescriptionUseCase
+    ChangeListingPriceUseCase, ChangeListingLocationUseCase, ChangeListingDescriptionUseCase, ActivateListingUseCase, \
+    DeactivateListingUseCase, ArchiveListingUseCase, DeleteListingUseCase
 from src.core.listing.presentation.dto import CreateListingRequest, ChangeListingAttributeRequest, \
     ChangeListingDescriptionRequest, ChangeListingLocationRequest, ChangeListingPriceRequest
 from src.core.shared.presentation.dto import CurrentVendor
@@ -30,8 +31,8 @@ async def create_listing(
     ],
     current_vendor: CurrentVendor = Security(get_current_vendor)
 ):
-    await usecase.execute(current_vendor.id, dto)
-    return {"message": "Listing created successfully"}
+    respone = await usecase.execute(current_vendor.id, dto)
+    return {"message": "Listing created successfully", "response": respone}
 
 
 @listing_router.patch("/{listing_id}/price")
@@ -110,3 +111,73 @@ async def change_listing_attribute(
     return {"message": "Listing attribute changed successfully"}
 
 
+@listing_router.patch("/{listing_id}/activate")
+@inject
+async def activate_listing(
+    listing_id: UUID,
+    usecase: Annotated[
+        ActivateListingUseCase,
+        Depends(
+            Provide[
+                ApplicationContainer.listing.activate_listing_usecase
+            ]
+        )
+    ],
+    current_vendor: CurrentVendor = Security(get_current_vendor),
+):
+    await usecase.execute(current_vendor.id, listing_id)
+    return {"message": "Объявление активировано"}
+
+
+@listing_router.patch("/{listing_id}/deactivate")
+@inject
+async def deactivate_listing(
+    listing_id: UUID,
+    usecase: Annotated[
+        DeactivateListingUseCase,
+        Depends(
+            Provide[
+                ApplicationContainer.listing.deactivate_listing_usecase
+            ]
+        )
+    ],
+    current_vendor: CurrentVendor = Security(get_current_vendor),
+):
+    await usecase.execute(current_vendor.id, listing_id)
+    return {"message": "Объявление деактивировано"}
+
+
+@listing_router.patch("/{listing_id}/archive")
+@inject
+async def archive_listing(
+    listing_id: UUID,
+    usecase: Annotated[
+        ArchiveListingUseCase,
+        Depends(
+            Provide[
+                ApplicationContainer.listing.archive_listing_usecase
+            ]
+        )
+    ],
+    current_vendor: CurrentVendor = Security(get_current_vendor),
+):
+    await usecase.execute(current_vendor.id, listing_id)
+    return {"message": "Объявление архивировано"}
+
+
+@listing_router.patch("/{listing_id}/delete")
+@inject
+async def delete_listing(
+    listing_id: UUID,
+    usecase: Annotated[
+        DeleteListingUseCase,
+        Depends(
+            Provide[
+                ApplicationContainer.listing.delete_listing_usecase
+            ]
+        )
+    ],
+    current_vendor: CurrentVendor = Security(get_current_vendor),
+):
+    await usecase.execute(current_vendor.id, listing_id)
+    return {"message": "Объявление удалено"}

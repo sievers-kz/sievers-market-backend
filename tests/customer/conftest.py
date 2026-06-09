@@ -1,5 +1,6 @@
 import uuid
 
+import pytest
 import pytest_asyncio
 
 from src.core.customer.domain.entities import Customer
@@ -25,9 +26,14 @@ async def create_customer(customer_repository, account_repository):
     return customer
 
 
-@pytest_asyncio.fixture
-async def change_customer_fullname_usecase(container):
-    return await container.customer.change_customer_fullname_usecase()
+@pytest.fixture
+def create_customer_usecase(container):
+    return container.customer.create_customer_usecase()
+
+
+@pytest.fixture
+def change_customer_fullname_usecase(container):
+    return container.customer.change_customer_fullname_usecase()
 
 
 @pytest_asyncio.fixture

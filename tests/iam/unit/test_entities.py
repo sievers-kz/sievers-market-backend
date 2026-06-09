@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from src.core.iam.domain.enums import TokenType
+from src.core.iam.domain.exceptions import AccountAlreadyConfirmedError, AccountNotConfirmedError
 from src.core.iam.domain.value_objects import Password
 from tests.iam.conftest import create_domain_account, get_token_by_type, get_token_by_value
 
@@ -16,7 +17,7 @@ def test_confirm_account_success():
 @pytest.mark.unit
 def test_confirm_account_fails_when_already_active():
     account = create_domain_account(is_active=True)
-    with pytest.raises(ValueError, match="Account is already confirmed"):
+    with pytest.raises(AccountAlreadyConfirmedError):
         account.confirm_account()
 
 
@@ -30,7 +31,7 @@ def test_login_success():
 @pytest.mark.unit
 def test_login_fails_when_user_inactive():
     account = create_domain_account(is_active=False)
-    with pytest.raises(ValueError, match="Account is not confirmed"):
+    with pytest.raises(AccountNotConfirmedError):
         account.login()
 
 

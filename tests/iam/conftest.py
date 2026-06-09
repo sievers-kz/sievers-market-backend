@@ -59,52 +59,52 @@ async def token_service(container):
     return container.iam.pyjwt_token_service()
 
 
-@pytest_asyncio.fixture
-async def create_user_usecase(container, mock_arq):
-    return await container.iam.create_user_usecase()
+@pytest.fixture
+def create_user_usecase(container, mock_arq):
+    return container.iam.create_account_usecase()
 
 
-@pytest_asyncio.fixture
-async def account_confirmation_usecase(container):
-    return await container.iam.account_confirmation_usecase()
+@pytest.fixture
+def account_confirmation_usecase(container):
+    return container.iam.account_confirmation_usecase()
 
 
-@pytest_asyncio.fixture
-async def resend_confirmation_code_usecase(container):
-    return await container.iam.resend_confirmation_code_usecase()
+@pytest.fixture
+def resend_confirmation_code_usecase(container, mock_arq):
+    return container.iam.resend_confirmation_code_usecase()
 
 
-@pytest_asyncio.fixture
-async def login_user_usecase(container):
-    return await container.iam.login_user_usecase()
+@pytest.fixture
+def login_user_usecase(container):
+    return container.iam.login_user_usecase()
 
 
-@pytest_asyncio.fixture
-async def logout_user_usecase(container):
-    return await container.iam.logout_user_usecase()
+@pytest.fixture
+def logout_user_usecase(container):
+    return container.iam.logout_user_usecase()
 
 
-@pytest_asyncio.fixture
-async def refresh_token_usecase(container):
-    return await container.iam.refresh_token_usecase()
+@pytest.fixture
+def refresh_token_usecase(container):
+    return container.iam.refresh_token_usecase()
 
 
-@pytest_asyncio.fixture
-async def forgot_password_usecase(container):
-    return await container.iam.forgot_password_usecase()
+@pytest.fixture
+def forgot_password_usecase(container, mock_arq):
+    return container.iam.forgot_password_usecase()
 
 
-@pytest_asyncio.fixture
-async def reset_password_usecase(container):
-    return await container.iam.reset_password_usecase()
+@pytest.fixture
+def reset_password_usecase(container):
+    return container.iam.reset_password_usecase()
 
 
-@pytest_asyncio.fixture
-async def change_password_usecase(container):
-    return await container.iam.change_password_usecase()
+@pytest.fixture
+def change_password_usecase(container):
+    return container.iam.change_password_usecase()
 
 
-@pytest_asyncio.fixture
+@pytest.fixture
 async def account_repository(container):
     return await container.iam.account_repository()
 

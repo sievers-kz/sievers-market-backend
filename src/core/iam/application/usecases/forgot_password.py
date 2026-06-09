@@ -20,7 +20,6 @@ class ForgotPasswordUseCase:
             account = await uow.account.get_account_by_email(forgot_password_data.email)
             if not account:
                 logger.info("Account not found | email={}", forgot_password_data.email)
-                await asyncio.sleep(0.5)
                 return
 
         await self.otp_service.send(

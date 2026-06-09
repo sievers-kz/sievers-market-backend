@@ -68,7 +68,6 @@ class ApplicationContainer(containers.DeclarativeContainer):
         ListingContainer,
         session_factory=gateways.session_factory,
         database_session=gateways.database_session,
-        customer_repository=customer.customer_repository,
         subcategory_service=catalog.subcategory_service,
     )
 
@@ -85,4 +84,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         session_factory=gateways.session_factory,
         database_session=gateways.database_session,
         phone_normalizer=shared.phone_normalizer,
+        customer_service=customer.customer_service,
+        redis_service=shared.redis_service,
     )
+

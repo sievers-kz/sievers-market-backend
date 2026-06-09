@@ -1,40 +1,45 @@
 import pytest
 
-from src.core.customer.presentation.dto import ChangeCustomerFullname
-from tests.customer.conftest import customer_repository
+from src.core.customer.domain.exceptions import InvalidFullnameFormatError
+from src.core.customer.presentation.dto import CreateCustomerRequest, ChangeCustomerFullname
+from src.core.iam.domain.enums import OTPType
+from src.core.iam.presentation.dto import AccountConfirmation
+from tests.iam.conftest import create_user_request
 
 
 class TestChangeCustomerFullnameUseCase:
     @pytest.mark.asyncio
     @pytest.mark.integration
-    async def test_change_customer_fullname_success(
+    async def test_success_fullname_change(
         self,
+        create_user_usecase,
+        account_confirmation_usecase,
+        create_customer_usecase,
         change_customer_fullname_usecase,
+        account_repository,
         customer_repository,
-        create_customer
+        redis_service,
     ):
-        created_customer = create_customer
-        fullname_dto = ChangeCustomerFullname(last_name="Testov", first_name="Testovov", patronymic="Testovich")
-        await change_customer_fullname_usecase.execute(created_customer.account_id, fullname_dto)
+        dto = create_user_request()
+        account_id = await create_user_usecase.execute(dto)
 
-        changed_customer = await customer_repository.get_by_account_id(created_customer.account_id)
-        assert changed_customer.fullname.last_name != created_customer.fullname.last_name
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{account_id}")
+        confirmation_dto = AccountConfirmation(account_id=account_id, confirm_code=otp_code)
+        await account_confirmation_usecase.execute(confirmation_dto)
 
-    @pytest.mark.asyncio
-    @pytest.mark.integration
-    async def test_change_customer_fullname_fails_with_invalid_last_name(
-        self,
-        change_customer_fullname_usecase,
-        create_customer,
-        customer_repository
-    ):
-        created_customer = create_customer
-        fullname_dto = ChangeCustomerFullname(
-            last_name="WrongLastName123",
-            first_name="Test",
-            patronymic="Test"
+        customer_dto = CreateCustomerRequest(last_name="Testov", first_name="Test")
+        await create_customer_usecase.execute(account_id, customer_dto)
+
+        customer = await customer_repository.get_by_account_id(account_id)
+        change_customer_fullname_dto = ChangeCustomerFullname(
+            last_name="Bissenov",
+            first_name="Meirzhan",
+            patronymic="Basqaryly"
         )
+        await change_customer_fullname_usecase.execute(customer.id, change_customer_fullname_dto)
 
-        with pytest.raises(ValueError, match="Invalid last name format"):
-            await change_customer_fullname_usecase.execute(created_customer.account_id, fullname_dto)
+        updated_customer = await customer_repository.get_by_id(customer.id)
+        assert updated_customer.fullname.last_name == "Bissenov"
+        assert updated_customer.fullname.first_name == "Meirzhan"
+        assert updated_customer.fullname.patronymic == "Basqaryly"
 

@@ -1,5 +1,6 @@
 import pytest
 
+from src.core.iam.domain.exceptions import InvalidOTPCodeError
 from src.core.iam.presentation.dto import ForgotPasswordData, ResetPasswordData, AccountConfirmation, LoginAccount
 from src.core.iam.domain.enums import TokenType, OTPType
 from tests.iam.conftest import create_user_request, get_token_by_type
@@ -81,7 +82,7 @@ class TestResetPasswordUsecase:
         )
         await reset_password_usecase.execute(reset_password_data)
 
-        with pytest.raises(ValueError, match="Неверный OTP код"):
+        with pytest.raises(InvalidOTPCodeError):
             await reset_password_usecase.execute(reset_password_data)
 
     @pytest.mark.asyncio
@@ -100,5 +101,5 @@ class TestResetPasswordUsecase:
             raw_password="supersecret",
             password_reset_otp="000000"
         )
-        with pytest.raises(ValueError, match="Неверный OTP код"):
+        with pytest.raises(InvalidOTPCodeError):
             await reset_password_usecase.execute(reset_password_data)

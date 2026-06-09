@@ -7,3 +7,8 @@ class LegalForm(str, Enum):
     JSC = "JSC" # Акционерное общество (АО)
     FARM = "FARM" # Крестьянское / Фермерское хозяйтсво
 
+
+class VendorStatus(str, Enum):
+    ACTIVE = "active"
+    CLOSED = "closed"
+    BANNED = "banned"

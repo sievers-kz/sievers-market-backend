@@ -1,33 +1,46 @@
 from dependency_injector import containers, providers
 
-from src.core.vendor.application.services.vendor_validation import VendorValidationService
+from src.core.vendor.application.services.vendor_validation import TaxpayerValidationService
 from src.core.vendor.application.usecases import RegisterVendorUseCase, ChangeContactFullnameUseCase, \
-    ChangeContactPhoneUseCase, ChangeLogotypeUseCase, ChangeShopNameUseCase
-from src.core.vendor.infrastructure.query import VendorQueryService
+    ChangeContactPhoneUseCase, ChangeLogotypeUseCase, ChangeShopNameUseCase, RestoreVendorUseCase
+from src.core.vendor.application.usecases.close_vendor import CloseVendorUseCase
+from src.core.vendor.infrastructure.query import VendorCabinetQueryService
+from src.core.vendor.infrastructure.repository import VendorRepository
 from src.core.vendor.infrastructure.uow import VendorUnitOfWork
-from src.core.vendor.infrastructure.vendor_fetchers import MockVendorFetcher
+from src.core.vendor.infrastructure.taxpayer_gateway import MockTaxpayerGateway, RealTaxpayerGateway
 
 
 class VendorContainer(containers.DeclarativeContainer):
     session_factory = providers.Dependency()
     database_session = providers.Dependency()
     phone_normalizer = providers.Dependency()
+    customer_service = providers.Dependency()
+    redis_service = providers.Dependency()
 
-    mock_vendor_fetcher = providers.Factory(MockVendorFetcher)
+    mock_taxpayer_gateway = providers.Factory(MockTaxpayerGateway)
+    real_taxpayer_gateway = providers.Factory(RealTaxpayerGateway)
 
     uow = providers.Factory(
         VendorUnitOfWork,
         session_factory=session_factory
     )
 
-    create_vendor_usecase = providers.Factory(
-        RegisterVendorUseCase,
-        uow=uow
+    vendor_repository = providers.Factory(
+        VendorRepository,
+        session=database_session,
     )
 
-    vendor_validation_service = providers.Factory(
-        VendorValidationService,
-        fetcher=mock_vendor_fetcher
+    taxpayer_validation_service = providers.Factory(
+        TaxpayerValidationService,
+        gateway=mock_taxpayer_gateway,
+        cache_service=redis_service,
+    )
+
+    register_vendor_usecase = providers.Factory(
+        RegisterVendorUseCase,
+        uow=uow,
+        cache_service=redis_service,
+        taxpayer_validation_service=taxpayer_validation_service
     )
 
     change_contact_fullname_usecase = providers.Factory(
@@ -51,7 +64,18 @@ class VendorContainer(containers.DeclarativeContainer):
         uow=uow,
     )
 
-    query_service = providers.Factory(
-        VendorQueryService,
+    vendor_cabinet_query_service = providers.Factory(
+        VendorCabinetQueryService,
         session=database_session,
+    )
+
+    close_vendor_usecase = providers.Factory(
+        CloseVendorUseCase,
+        uow=uow,
+        customer_service=customer_service,
+    )
+
+    restore_vendor_usecase = providers.Factory(
+        RestoreVendorUseCase,
+        uow=uow,
     )

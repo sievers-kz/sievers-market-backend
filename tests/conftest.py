@@ -2,10 +2,11 @@ from unittest.mock import MagicMock
 
 import pytest
 import pytest_asyncio
+from loguru import logger
 from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
-from seeds.seed import DataSeeder
+from scripts.seeds.seed import DataSeeder
 from src.configuration.database.connection import Base
 from src.configuration.dependencies.container import ApplicationContainer
 from src.configuration.settings.settings import ApplicationSettings
@@ -14,6 +15,9 @@ from src.configuration.settings.settings import ApplicationSettings
 pytest_plugins = [
     "tests.iam.conftest",
     "tests.customer.conftest",
+    "tests.vendor.conftest",
+    "tests.listing.conftest",
+    "tests.catalog.conftest",
 ]
 
 
@@ -82,6 +86,12 @@ def mock_bloom():
     bloom = MagicMock()
     bloom.__contains__ = MagicMock(return_value=False)
     return bloom
+
+
+@pytest.fixture(scope="session" ,autouse=True)
+def mute_logger():
+    logger.remove()
+    yield
 
 
 @pytest_asyncio.fixture(scope="function")

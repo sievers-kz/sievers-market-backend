@@ -1,6 +1,7 @@
 import pytest
 
 from src.core.iam.domain.enums import OTPType
+from src.core.iam.domain.exceptions import AccountAlreadyExistsError
 from tests.iam.conftest import create_user_request
 
 
@@ -30,6 +31,6 @@ class TestRegistrationUseCase:
         dto = create_user_request()
         await create_user_usecase.execute(dto)
 
-        with pytest.raises(ValueError, match="Пользователь с таким email уже существует"):
+        with pytest.raises(AccountAlreadyExistsError):
             await create_user_usecase.execute(dto)
 

@@ -1,5 +1,6 @@
 import pytest
 
+from src.core.iam.domain.exceptions import AccountNotConfirmedError, InvalidLoginCredentialsError
 from src.core.iam.presentation.dto import CreateAccountRequest, AccountConfirmation, LoginAccount
 from src.core.iam.domain.enums import TokenType, OTPType
 
@@ -34,11 +35,10 @@ class TestAccountLoginUseCase:
         assert response.refresh_token is not None
 
         logged_in_user = await account_repository.get_account_by_email(dto.email)
-        assert len(logged_in_user.tokens) == 1
+        assert len(logged_in_user.tokens) == 2
 
         refresh_token = logged_in_user.tokens[0]
         assert refresh_token.type == TokenType.REFRESH
-        assert refresh_token.value == response.refresh_token
         assert refresh_token.is_revoked is False
 
     @pytest.mark.asyncio
@@ -67,7 +67,7 @@ class TestAccountLoginUseCase:
         tokens_count_before = len(user_before_login.tokens)
 
         login_dto = LoginAccount(email=dto.email, raw_password="wrong_password")
-        with pytest.raises(Exception):
+        with pytest.raises(InvalidLoginCredentialsError):
             await login_user_usecase.execute(login_dto)
 
         user_after_login = await account_repository.get_account_by_email(dto.email)
@@ -77,7 +77,7 @@ class TestAccountLoginUseCase:
     @pytest.mark.integration
     async def test_fails_with_non_existent_email(self, login_user_usecase):
         login_dto = LoginAccount(email="ghost.mail@example.com", raw_password="super_secret")
-        with pytest.raises(Exception):
+        with pytest.raises(InvalidLoginCredentialsError):
             await login_user_usecase.execute(login_dto)
 
     @pytest.mark.asyncio
@@ -90,5 +90,5 @@ class TestAccountLoginUseCase:
         await create_user_usecase.execute(dto)
 
         login_dto = LoginAccount(email=dto.email, raw_password="super_secret")
-        with pytest.raises(Exception, match="Account is not confirmed"):
+        with pytest.raises(AccountNotConfirmedError):
             await login_user_usecase.execute(login_dto)

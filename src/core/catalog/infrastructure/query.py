@@ -11,12 +11,14 @@ from src.core.catalog.application.interfaces.query_service import ICatalogQueryS
 from src.core.catalog.domain.enums import CatalogStatus
 from src.core.catalog.infrastructure.models import Subcategory, Rubric, Category
 from src.core.catalog.presentation.dto.catalog import AttributeResponse, RubricResponse, ListingCardResponse, \
-    ListingDetailResponse, VendorCardResponse
+    ListingDetailResponse, VendorCardResponse, DetailVendorResponse
 from src.core.catalog.presentation.dto.subcategory import Attribute
+from src.core.iam.domain.entities import Account
 from src.core.listing.domain.enums import ListingStatus
 from src.core.listing.infrastructure.models import Listing
 from src.core.references.infrastructure.models import City
 from src.core.shared.infrastructure.services.query_service import QueryService
+from src.core.vendor.domain.enums import VendorStatus
 from src.core.vendor.infrastructure.models import Vendor
 
 
@@ -160,3 +162,29 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
             limit=limit,
         )
 
+    async def get_vendor_details(self, vendor_id: UUID):
+        statement = (
+            select(
+                Vendor.id,
+                Vendor.contact_phone,
+                Vendor.legal_name,
+                Vendor.legal_address,
+                Vendor.tax_id,
+                Vendor.legal_form,
+                Vendor.shop_name,
+                Vendor.logotype,
+                Vendor.is_verified,
+            ).select_from(Vendor)
+            .where(
+                Vendor.id == vendor_id,
+                Vendor.is_verified == True,
+                Vendor.status == VendorStatus.ACTIVE
+            )
+        )
+
+        result = (await self._session.execute(statement)).mappings().one_or_none()
+
+        if not result:
+            return None
+
+        return DetailVendorResponse.model_validate(result)

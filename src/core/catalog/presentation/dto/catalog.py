@@ -6,6 +6,7 @@ from pydantic import field_validator
 
 from src.core.shared.domain.enums import PriceCurrency
 from src.core.shared.presentation.dto import DTO
+from src.core.vendor.domain.enums import LegalForm
 
 
 class AttributeResponse(DTO):
@@ -46,8 +47,7 @@ class ListingCardResponse(DTO):
 class ListingDetailResponse(DTO):
     id: UUID
     owner_id: UUID
-    email: str
-    phone: str | None
+    contact_phone: str | None
     display_owner_name: str
     subcategory: str
     title: str
@@ -69,3 +69,16 @@ class VendorCardResponse(DTO):
     is_verified: bool
     display_name: str
     logotype: dict | None
+
+
+class DetailVendorResponse(DTO):
+    id: UUID
+    contact_phone: str | None
+    legal_name: str
+    legal_address: str
+    tax_id: str
+    legal_form: LegalForm
+    shop_name: str | None
+    logotype: dict | None
+    is_verified: bool
+

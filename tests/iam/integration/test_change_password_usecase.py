@@ -1,5 +1,6 @@
 import pytest
 
+from src.core.iam.domain.exceptions import PasswordMismatchError
 from src.core.iam.presentation.dto import AccountConfirmation, LoginAccount, ChangePasswordData
 from src.core.iam.domain.enums import TokenType, OTPType
 from tests.iam.conftest import create_user_request, get_token_by_type
@@ -70,10 +71,8 @@ class TestChangePasswordUseCase:
             new_password="new_super_secret"
         )
 
-        with pytest.raises(Exception) as exc:
+        with pytest.raises(PasswordMismatchError) as exc:
             await change_password_usecase.execute(user.id, change_password_dto)
-
-        assert str(exc.value) == "Incorrect password"
 
     @pytest.mark.asyncio
     @pytest.mark.integration
