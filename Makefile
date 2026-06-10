@@ -1,35 +1,48 @@
+MODE ?= dev
+
+ifeq ($(MODE), prod)
+    COMPOSE = docker-compose -f docker-compose.yml -f docker-compose.prod.yml
+else
+    COMPOSE = docker-compose -f docker-compose.yml -f docker-compose.dev.yml
+endif
+
+COMPOSE_TEST = docker compose --env-file .env.test -f docker-compose.yml -f docker-compose.test.yml
+
+.PHONY: up down clean logs restart shell db test coverage coverage-html
+
 up:
-	docker-compose up -d --build
+	$(COMPOSE) up -d --build
 
 down:
-	docker-compose down
-
-logs:
-	docker-compose logs -f app
-
-restart:
-	docker-compose restart app
-
-shell:
-	docker-compose exec app /bin/bash
-
-db:
-	docker-compose exec db sh -c 'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_NAME"'
-
-test:
-	docker-compose exec app pytest -v
-
-coverage:
-	docker-compose exec app pytest --cov=src --cov-report=term-missing
-
-coverage-html:
-	docker-compose exec app pytest --cov=src --cov-report=html
-
-seed:
-	docker-compose exec app python -m fixtures.seed
-
-clean-seed:
-	docker-compose exec app python -m fixtures.clean
+	$(COMPOSE) down
 
 clean:
-	docker-compose down -v
+	$(COMPOSE) down -v
+
+logs:
+	$(COMPOSE) logs -f app
+
+restart:
+	$(COMPOSE) restart app
+
+shell:
+	$(COMPOSE) exec app /bin/bash
+
+db:
+	$(COMPOSE) exec db sh -c 'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_NAME"'
+
+test:
+	$(COMPOSE) exec app pytest -v
+
+coverage:
+	$(COMPOSE) exec app pytest --cov=src --cov-report=term-missing
+
+coverage-html:
+	$(COMPOSE) exec app pytest --cov=src --cov-report=html
+
+ci:
+	@echo "=== Running CI Test pipeline ==="
+	$(COMPOSE_TEST) down -v
+	$(COMPOSE_TEST) up --build --abort-on-container-exit --exit-code-from sut 2>&1 | tee ci.log
+	@echo "=== [CI] Cleaning up test environment ==="
+	$(COMPOSE_TEST) down -v

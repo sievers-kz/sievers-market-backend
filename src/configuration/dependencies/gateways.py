@@ -48,6 +48,7 @@ class GatewaysContainer(containers.DeclarativeContainer):
         host=redis_config.host,
         port=redis_config.port,
         db=redis_config.db,
+        password=redis_config.password,
         decode_responses=True,
     )
 
@@ -55,6 +56,8 @@ class GatewaysContainer(containers.DeclarativeContainer):
         RedisSettings,
         host=redis_config.host,
         port=redis_config.port,
+        database=redis_config.database,
+        password=redis_config.password,
     )
 
     arq_pool = providers.Singleton(
