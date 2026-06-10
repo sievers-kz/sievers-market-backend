@@ -43,6 +43,6 @@ coverage-html:
 ci:
 	@echo "=== Running CI Test pipeline ==="
 	$(COMPOSE_TEST) down -v
-	$(COMPOSE_TEST) up --build --abort-on-container-exit --exit-code-from sut 2>&1 | tee ci.log
+	$(COMPOSE_TEST) up --build --abort-on-container-exit --exit-code-from sut
 	@echo "=== [CI] Cleaning up test environment ==="
 	$(COMPOSE_TEST) down -v
