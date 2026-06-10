@@ -76,7 +76,7 @@ class BloomGenerator:
             )
             return True
         except S3Error as e:
-            if e.code == "NoSuchKey":
+            if e.code in ("NoSuchKey", "NoSuchBucket"):
                 return False
             raise
 

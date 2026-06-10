@@ -16,8 +16,6 @@ class PyJWTTokenService(ITokenService):
         algorithm: str,
         access_token_lifetime: timedelta,
         refresh_token_lifetime: timedelta,
-        email_token_lifetime: timedelta,
-        password_reset_token_lifetime: timedelta
     ):
         self._secret_key = secret_key
         self._algorithm = algorithm
@@ -25,8 +23,6 @@ class PyJWTTokenService(ITokenService):
         self._lifetimes = {
             TokenType.ACCESS: access_token_lifetime,
             TokenType.REFRESH: refresh_token_lifetime,
-            TokenType.EMAIL: email_token_lifetime,
-            TokenType.PASSWORD: password_reset_token_lifetime
         }
 
     def create_token(self, user_id: uuid.UUID, token_type):

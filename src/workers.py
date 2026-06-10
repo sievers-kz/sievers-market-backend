@@ -1,6 +1,7 @@
 from arq.connections import RedisSettings
 
 from src.configuration.dependencies.container import ApplicationContainer
+from src.configuration.settings.settings import RedisConfig
 
 
 async def startup(ctx):
@@ -44,6 +45,9 @@ async def send_otp_change_phone(ctx, to: str, code: str):
     )
 
 
+_redis_config = RedisConfig()
+
+
 class WorkerSettings:
     functions = [
         send_otp_email,
@@ -54,4 +58,10 @@ class WorkerSettings:
 
     on_startup = startup
     max_retries = 5
-    redis_settings = RedisSettings(host="localhost", port=6379)
+
+    redis_settings = RedisSettings(
+        host=_redis_config.host,
+        port=_redis_config.port,
+        database=_redis_config.db,
+        password=_redis_config.password,
+    )

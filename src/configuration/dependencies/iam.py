@@ -65,14 +65,6 @@ class IAMContainer(containers.DeclarativeContainer):
             timedelta,
             days=auth_config.refresh_token_lifetime.as_int()
         ),
-        email_token_lifetime=providers.Factory(
-            timedelta,
-            hours=auth_config.email_token_lifetime.as_int()
-        ),
-        password_reset_token_lifetime=providers.Factory(
-            timedelta,
-            hours=auth_config.password_reset_token_lifetime.as_int()
-        )
     )
 
     otp_service = providers.Factory(

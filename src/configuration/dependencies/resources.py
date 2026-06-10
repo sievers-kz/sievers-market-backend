@@ -29,21 +29,22 @@ def init_sentry(
     traces_sample_rate: float = 0.1,
     profiles_sample_rate: float = 0.1,
 ):
-    init = sentry_sdk.init(
-        dsn=dsn,
-        environment=environment,
-        traces_sample_rate=traces_sample_rate,
-        profiles_sample_rate=profiles_sample_rate,
-        integrations=[
-            FastApiIntegration(),
-            SqlalchemyIntegration(),
-        ]
-    )
+    if dsn:
+        sentry_sdk.init(
+            dsn=dsn,
+            environment=environment,
+            traces_sample_rate=traces_sample_rate,
+            profiles_sample_rate=profiles_sample_rate,
+            integrations=[
+                FastApiIntegration(),
+                SqlalchemyIntegration(),
+            ]
+        )
 
-    yield init
+    yield
 
-    client = sentry_sdk.Hub.current.client
-    client.close()
+    if dsn:
+        sentry_sdk.flush()
 
 
 async def init_engine(url: str, echo: bool = False) -> AsyncGenerator[AsyncEngine, None]:
