@@ -1,0 +1,32 @@
+services:
+  db:
+    restart: "no"
+    environment:
+      - POSTGRES_DB=${POSTGRES_NAME}
+    volumes: []
+
+  redis:
+    restart: "no"
+
+  minio:
+    restart: "no"
+    volumes: []
+
+  sut:
+    build: .
+    entrypoint: ["/app/entrypoint.test.sh"]
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    env_file:
+      - .env.test
+    environment:
+      - MODE=test
+      - POSTGRES_HOST=db
+      - REDIS_HOST=redis
+

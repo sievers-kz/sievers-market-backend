@@ -1,0 +1,560 @@
+- name: Техника
+  attributes:
+    - key: price
+      label: Цена
+      type: integer
+      required: true
+      filterable: true
+      unit: null
+      position: 0
+
+    - key: currency
+      label: Валюта
+      type: enumerate
+      required: true
+      filterable: false
+      unit: null
+      options:
+        - {key: KZT, label: KZT}
+        - {key: RUB, label: RUB}
+        - {key: USD, label: USD}
+        - {key: EUR, label: EUR}
+      position: 1
+
+    - key: city
+      label: Город
+      type: reference
+      required: true
+      filterable: true
+      unit: null
+      source: cities
+      position: 2
+
+    - key: description
+      label: Описание
+      type: string
+      required: false
+      filterable: false
+      unit: null
+      position: 3
+
+    - key: brand
+      label: Марка
+      type: reference
+      required: true
+      filterable: true
+      unit: null
+      source: brands
+      position: 4
+
+    - key: model
+      label: Модель
+      type: string
+      required: false
+      filterable: false
+      unit: null
+      position: 5
+
+    - key: year_of_issue
+      label: Год выпуска
+      type: integer
+      required: true
+      filterable: true
+      unit: null
+      position: 6
+
+    - key: condition
+      label: Состояние
+      type: enumerate
+      required: true
+      filterable: true
+      unit: null
+      options:
+        - {key: new, label: Новый}
+        - {key: used, label: Б/У}
+      position: 7
+
+    - key: color
+      label: Цвет
+      type: reference
+      required: false
+      filterable: false
+      unit: null
+      source: colors
+      position: 8
+
+    - key: country
+      label: Страна производства
+      type: reference
+      required: false
+      filterable: false
+      unit: null
+      source: countries
+      position: 9
+
+  categories:
+    - name: Тракторы
+      subcategories:
+        - name: Колесные тракторы
+          attributes:
+            - key: engine_power
+              label: Мощность двигателя
+              type: integer
+              required: true
+              filterable: true
+              unit: {key: hp, label: л.с}
+              options: null
+              position: 0
+
+            - key: fuel_type
+              label: Тип топлива
+              type: enumerate
+              required: false
+              filterable: false
+              unit: null
+              options:
+                - {key: gasoline, label: Бензин}
+                - {key: diesel, label: Дизель}
+                - {key: gas, label: Газ}
+                - {key: hybrid, label: Гибрид}
+              position: 1
+
+            - key: transmission_type
+              label: Тип КПП
+              type: enumerate
+              required: false
+              filterable: false
+              unit: null
+              options:
+                - {key: manual, label: Механика}
+                - {key: automatic, label: Автомат}
+              position: 2
+
+            - key: drive_type
+              label: Тип привода
+              type: enumerate
+              required: false
+              filterable: false
+              unit: null
+              options:
+                - {key: front, label: Передний привод}
+                - {key: rear, label: Задний привод}
+                - {key: full, label: Полный привод}
+              position: 3
+
+            - key: torque
+              label: Крутящий момент
+              type: integer
+              required: false
+              filterable: false
+              unit: {key: nm, label: Нм}
+              options: null
+              position: 4
+
+            - key: engine_volume
+              label: Объём двигателя
+              type: float
+              required: false
+              filterable: false
+              unit: {key: l, label: л}
+              options: null
+              position: 5
+
+            - key: max_speed
+              label: Максимальная скорость
+              type: integer
+              required: false
+              filterable: false
+              unit: { key: kmh, label: км/ч }
+              options: null
+              position: 6
+
+        - name: Гусеничные тракторы
+          attributes:
+            - key: engine_power
+              label: Мощность двигателя
+              type: integer
+              required: true
+              filterable: true
+              unit: { key: hp, label: л.с }
+              options: null
+              position: 0
+
+            - key: fuel_type
+              label: Тип топлива
+              type: enumerate
+              required: false
+              filterable: false
+              unit: null
+              options:
+                - { key: gasoline, label: Бензин }
+                - { key: diesel, label: Дизель }
+                - { key: gas, label: Газ }
+                - { key: hybrid, label: Гибрид }
+              position: 1
+
+            - key: transmission_type
+              label: Тип КПП
+              type: enumerate
+              required: false
+              filterable: false
+              unit: null
+              options:
+                - { key: manual, label: Механика }
+                - { key: automatic, label: Автомат }
+              position: 2
+
+            - key: torque
+              label: Крутящий момент
+              type: integer
+              required: false
+              filterable: false
+              unit: { key: nm, label: Нм }
+              options: null
+              position: 3
+
+            - key: engine_volume
+              label: Объём двигателя
+              type: float
+              required: false
+              filterable: false
+              unit: { key: l, label: л }
+              options: null
+              position: 4
+
+            - key: track_type
+              label: Тип гусениц
+              type: enumerate
+              required: false
+              filterable: false
+              unit: null
+              options:
+                - {key: metall, label: Металлические}
+                - {key: rubber, label: Резиновые}
+                - {key: polymer, label: Полимерные}
+              position: 5
+
+    - name: Комбайны
+      subcategories:
+        - name: Зерноуборочные комбайны
+          attributes:
+            - key: capture_width
+              label: Ширина захвата
+              type: float
+              required: true
+              filterable: true
+              unit: { key: m, label: м }
+              options: null
+              position: 0
+
+            - key: header_type
+              label: Тип жатки
+              type: enumerate
+              required: false
+              filterable: true
+              unit: null
+              options:
+                - { key: grain, label: Зерновая }
+                - { key: corn, label: Кукурузная }
+                - { key: sunflower, label: Подсолнечниковая }
+                - { key: rapeseed, label: Рапсовая }
+              position: 1
+
+            - key: row_spacing
+              label: Ширина междурядий
+              type: integer
+              required: false
+              filterable: false
+              unit: { key: mm, label: мм }
+              options: null
+              position: 2
+
+            - key: row_count
+              label: Количество рядов
+              type: integer
+              required: false
+              filterable: false
+              unit: null
+              options: null
+              position: 3
+
+            - key: bunker_volume
+              label: Объём бункера
+              type: float
+              required: true
+              filterable: true
+              unit: { key: m3, label: м³ }
+              options: null
+              position: 4
+
+            - key: drum_width
+              label: Ширина барабана
+              type: float
+              required: false
+              filterable: false
+              unit: { key: m, label: м }
+              options: null
+              position: 5
+
+            - key: drum_diameter
+              label: Диаметр барабана
+              type: float
+              required: false
+              filterable: false
+              unit: { key: m, label: м }
+              options: null
+              position: 6
+
+            - key: productivity
+              label: Производительность
+              type: float
+              required: false
+              filterable: false
+              unit: { key: ha_h, label: га/ч }
+              options: null
+              position: 7
+
+            - key: drum_hours
+              label: Моточасы барабана
+              type: integer
+              required: false
+              filterable: false
+              unit: { key: h, label: ч }
+              options: null
+              position: 8
+
+            - key: engine_hours
+              label: Моточасы
+              type: integer
+              required: false
+              filterable: true
+              unit: { key: h, label: ч }
+              options: null
+              position: 9
+
+        - name: Кормоуборочные комбайны
+          attributes:
+            - key: capture_width
+              label: Ширина захвата
+              type: float
+              required: true
+              filterable: true
+              unit: { key: m, label: м }
+              options: null
+              position: 0
+
+            - key: knife_count
+              label: Количество ножей
+              type: integer
+              required: true
+              filterable: false
+              unit: null
+              options: null
+              position: 1
+
+            - key: chopper_type
+              label: Тип измельчителя
+              type: enumerate
+              required: false
+              filterable: false
+              unit: null
+              options:
+                - { key: drum, label: Барабанный }
+                - { key: disc, label: Дисковый }
+                - { key: flywheel, label: Маховичный }
+              position: 2
+
+            - key: chopper_drum_width
+              label: Ширина измельчающего барабана
+              type: float
+              required: false
+              filterable: false
+              unit: { key: m, label: м }
+              options: null
+              position: 3
+
+            - key: chopper_drum_diameter
+              label: Диаметр измельчающего барабана
+              type: float
+              required: false
+              filterable: false
+              unit: { key: m, label: м }
+              options: null
+              position: 4
+
+            - key: header_type
+              label: Тип жатки
+              type: enumerate
+              required: false
+              filterable: false
+              unit: null
+              options:
+                - { key: grass, label: Травяная }
+                - { key: corn, label: Кукурузная }
+                - { key: pickup, label: Подборщик }
+              position: 5
+
+            - key: productivity
+              label: Производительность
+              type: float
+              required: false
+              filterable: false
+              unit: { key: ha_h, label: га/ч }
+              options: null
+              position: 6
+
+            - key: drum_hours
+              label: Моточасы барабана
+              type: integer
+              required: false
+              filterable: false
+              unit: { key: h, label: ч }
+              options: null
+              position: 7
+
+            - key: engine_hours
+              label: Моточасы
+              type: integer
+              required: false
+              filterable: true
+              unit: { key: h, label: ч }
+              options: null
+              position: 8
+
+    - name: Погрузочная техника
+      subcategories:
+        - name: Фронтальные погрузчики
+          attributes:
+            - key: mileage
+              label: Пробег
+              type: integer
+              required: false
+              filterable: false
+              unit: { key: km, label: км }
+              options: null
+              position: 0
+
+            - key: load_capacity
+              label: Грузоподъёмность
+              type: integer
+              required: false
+              filterable: true
+              unit: { key: kg, label: кг }
+              options: null
+              position: 1
+
+            - key: bucket_volume
+              label: Объём ковша
+              type: float
+              required: false
+              filterable: false
+              unit: { key: m3, label: м³ }
+              options: null
+              position: 2
+
+            - key: bucket_width
+              label: Ширина ковша
+              type: integer
+              required: false
+              filterable: false
+              unit: { key: mm, label: мм }
+              options: null
+              position: 3
+
+            - key: control_type
+              label: Тип управления
+              type: enumerate
+              required: false
+              filterable: false
+              unit: null
+              options:
+                - { key: mechanical, label: Механическое }
+                - { key: hydraulic, label: Гидравлическое }
+                - { key: joystick, label: Джойстик }
+              position: 4
+
+            - key: productivity
+              label: Производительность
+              type: float
+              required: false
+              filterable: false
+              unit: { key: m3_h, label: м³/ч }
+              options: null
+              position: 5
+
+        - name: Телескопические погрузчики
+          attributes:
+            - key: mileage
+              label: Пробег
+              type: integer
+              required: false
+              filterable: false
+              unit: { key: km, label: км }
+              options: null
+              position: 0
+
+            - key: lift_height
+              label: Высота подъёма
+              type: float
+              required: false
+              filterable: true
+              unit: { key: m, label: м }
+              options: null
+              position: 1
+
+            - key: boom_reach
+              label: Вылет стрелы
+              type: float
+              required: false
+              filterable: false
+              unit: { key: m, label: м }
+              options: null
+              position: 2
+
+            - key: load_capacity
+              label: Грузоподъёмность
+              type: integer
+              required: false
+              filterable: true
+              unit: { key: kg, label: кг }
+              options: null
+              position: 3
+
+            - key: bucket_volume
+              label: Объём ковша
+              type: float
+              required: false
+              filterable: false
+              unit: { key: m3, label: м³ }
+              options: null
+              position: 4
+
+            - key: bucket_width
+              label: Ширина ковша
+              type: integer
+              required: false
+              filterable: false
+              unit: { key: mm, label: мм }
+              options: null
+              position: 5
+
+            - key: control_type
+              label: Тип управления
+              type: enumerate
+              required: false
+              filterable: false
+              unit: null
+              options:
+                - { key: mechanical, label: Механическое }
+                - { key: hydraulic, label: Гидравлическое }
+                - { key: joystick, label: Джойстик }
+              position: 6
+
+            - key: productivity
+              label: Производительность
+              type: float
+              required: false
+              filterable: false
+              unit: { key: m3_h, label: м³/ч }
+              options: null
+              position: 7
