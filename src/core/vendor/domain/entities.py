@@ -1,12 +1,15 @@
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
 from src.core.shared.domain.entities import AggregateRoot
 from src.core.vendor.domain.enums import LegalForm, VendorStatus
-from src.core.vendor.domain.exceptions import VendorAlreadyVerifiedError, VendorCannotBeRestoredError
-from src.core.vendor.domain.value_objects import Logotype, ContactFullname, TaxID
+from src.core.vendor.domain.exceptions import (
+    VendorAlreadyVerifiedError,
+    VendorCannotBeRestoredError,
+)
+from src.core.vendor.domain.value_objects import ContactFullname, Logotype, TaxID
 
 
 @dataclass(frozen=False)
@@ -48,7 +51,7 @@ class Vendor(AggregateRoot):
             tax_id=TaxID(tax_id, legal_form),
             legal_form=legal_form,
             is_verified=False,
-            status=VendorStatus.ACTIVE
+            status=VendorStatus.ACTIVE,
         )
 
     def verify(self):
@@ -77,15 +80,12 @@ class Vendor(AggregateRoot):
         self.status = VendorStatus.BANNED
 
     def change_contact_fullname(
-        self,
-        contact_last_name: str,
-        contact_first_name: str,
-        contact_patronymic: str
+        self, contact_last_name: str, contact_first_name: str, contact_patronymic: str
     ):
         self.contact_fullname = ContactFullname(
             contact_last_name=contact_last_name,
             contact_first_name=contact_first_name,
-            contact_patronymic=contact_patronymic
+            contact_patronymic=contact_patronymic,
         )
 
     def change_contact_phone(self, raw_contact_phone: str):
@@ -96,4 +96,3 @@ class Vendor(AggregateRoot):
 
     def change_logotype(self, raw_logotype: dict):
         self.logotype = Logotype.from_dict(raw_logotype)
-

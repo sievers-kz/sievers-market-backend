@@ -1,9 +1,12 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
 from src.core.vendor.domain.enums import VendorStatus
-from src.core.vendor.domain.exceptions import VendorAlreadyVerifiedError, VendorCannotBeRestoredError
+from src.core.vendor.domain.exceptions import (
+    VendorAlreadyVerifiedError,
+    VendorCannotBeRestoredError,
+)
 from tests.vendor.conftest import create_domain_vendor
 
 

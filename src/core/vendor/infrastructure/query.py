@@ -1,8 +1,8 @@
 from uuid import UUID
 
-from sqlalchemy import select, cast, desc
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import cast, desc, select
 from sqlalchemy.dialects.postgresql import UUID as PsqlUUID
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.catalog.infrastructure.models import Subcategory
 from src.core.iam.infrastructure.models import Account
@@ -11,7 +11,10 @@ from src.core.listing.infrastructure.models import Listing
 from src.core.references.infrastructure.models import City
 from src.core.shared.infrastructure.services.query_service import QueryService
 from src.core.vendor.infrastructure.models import Vendor
-from src.core.vendor.presentation.dto import VendorProfileResponse, VendorListingCardsResponse
+from src.core.vendor.presentation.dto import (
+    VendorListingCardsResponse,
+    VendorProfileResponse,
+)
 
 
 class VendorCabinetQueryService(QueryService):
@@ -34,7 +37,7 @@ class VendorCabinetQueryService(QueryService):
                 Vendor.tax_id,
                 Vendor.legal_form,
                 Vendor.shop_name,
-                Vendor.logotype
+                Vendor.logotype,
             )
             .join(Account, Vendor.account_id == Account.id)
             .where(Vendor.id == vendor_id)
@@ -61,15 +64,14 @@ class VendorCabinetQueryService(QueryService):
                 Listing.currency,
                 Listing.updated_at,
                 City.name.label("city"),
-                cast(Listing.gallery[0]["media_id"].as_string(), PsqlUUID).label("preview_image")
+                cast(Listing.gallery[0]["media_id"].as_string(), PsqlUUID).label(
+                    "preview_image"
+                ),
             )
             .select_from(Listing)
             .join(Subcategory, Listing.subcategory_id == Subcategory.id)
             .join(City, Listing.city_id == City.id)
-            .where(
-                Listing.owner_id == vendor_id,
-                Listing.status == status
-            )
+            .where(Listing.owner_id == vendor_id, Listing.status == status)
             .order_by(desc(Listing.updated_at))
         )
 

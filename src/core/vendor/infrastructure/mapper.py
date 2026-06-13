@@ -1,6 +1,6 @@
-from src.core.vendor.domain.value_objects import Logotype, TaxID, ContactFullname
-from src.core.vendor.infrastructure.models import Vendor as ORMVendor
 from src.core.vendor.domain.entities import Vendor as DomainVendor
+from src.core.vendor.domain.value_objects import ContactFullname, Logotype, TaxID
+from src.core.vendor.infrastructure.models import Vendor as ORMVendor
 
 
 class VendorMapper:
@@ -33,7 +33,7 @@ class VendorMapper:
             contact_fullname=ContactFullname(
                 contact_last_name=orm_model.contact_last_name,
                 contact_first_name=orm_model.contact_first_name,
-                contact_patronymic=orm_model.contact_patronymic
+                contact_patronymic=orm_model.contact_patronymic,
             ),
             contact_phone=orm_model.contact_phone,
             legal_name=orm_model.legal_name,
@@ -41,7 +41,9 @@ class VendorMapper:
             tax_id=TaxID(orm_model.tax_id, orm_model.legal_form),
             legal_form=orm_model.legal_form,
             shop_name=orm_model.shop_name,
-            logotype=Logotype.from_dict(orm_model.logotype) if orm_model.logotype else None,
+            logotype=(
+                Logotype.from_dict(orm_model.logotype) if orm_model.logotype else None
+            ),
             status=orm_model.status,
             closed_at=orm_model.closed_at,
         )

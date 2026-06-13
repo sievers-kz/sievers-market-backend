@@ -1,9 +1,9 @@
 from src.core.shared.domain.exceptions import (
-    NotFoundError,
     AlreadyExistsError,
+    NotFoundError,
+    RulesError,
     UnauthorizedError,
     ValidationError,
-    RulesError,
 )
 
 

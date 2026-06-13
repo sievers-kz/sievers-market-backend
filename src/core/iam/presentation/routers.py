@@ -1,42 +1,38 @@
 from typing import Annotated
 
-from dependency_injector.wiring import inject, Provide
+from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends
 from fastapi.params import Security
 
-from src.core.iam.presentation.dto import (
-    AccountConfirmation,
-    LoginResponse,
-    RefreshData,
-    ForgotPasswordData,
-    ResetPasswordData,
-    ChangePasswordData,
-    LoginAccount,
-    ResendCodeRequest,
-    CreateAccountRequest,
-    ChangeEmailRequest,
-    ConfirmEmailChangeRequest,
-)
-
-from src.core.shared.presentation.dto import CurrentUser
-from src.core.shared.presentation.security import get_current_user
-
 from src.configuration.dependencies.container import ApplicationContainer
-
 from src.core.iam.application.usecases import (
     AccountConfirmationUseCase,
-    LoginUserUseCase,
-    RefreshTokenUseCase,
-    LogoutUserUseCase,
-    ForgotPasswordUseCase,
-    ResetPasswordUseCase,
     ChangePasswordUseCase,
-    ResendConfirmationCodeUseCase,
-    CreateAccountUseCase,
     ConfirmEmailChangeUseCase,
+    CreateAccountUseCase,
+    ForgotPasswordUseCase,
+    LoginUserUseCase,
+    LogoutUserUseCase,
+    RefreshTokenUseCase,
     RequestEmailChangeUseCase,
+    ResendConfirmationCodeUseCase,
+    ResetPasswordUseCase,
 )
-
+from src.core.iam.presentation.dto import (
+    AccountConfirmation,
+    ChangeEmailRequest,
+    ChangePasswordData,
+    ConfirmEmailChangeRequest,
+    CreateAccountRequest,
+    ForgotPasswordData,
+    LoginAccount,
+    LoginResponse,
+    RefreshData,
+    ResendCodeRequest,
+    ResetPasswordData,
+)
+from src.core.shared.presentation.dto import CurrentUser
+from src.core.shared.presentation.security import get_current_user
 
 iam = APIRouter(prefix="/api/v1/iam", tags=["IAM"])
 
@@ -47,17 +43,14 @@ async def create_new_user(
     dto: CreateAccountRequest,
     usecase: Annotated[
         CreateAccountUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.iam.create_account_usecase
-            ]
-        )
-    ]
+        Depends(Provide[ApplicationContainer.iam.create_account_usecase]),
+    ],
 ):
     response = await usecase.execute(dto)
     return {
         "response": response,
-        "message": "Регистрация успешно пройдена. Пожалуйста, подтвердите свою почту для завершения"
+        "message": "Регистрация успешно пройдена. "
+        "Пожалуйста, подтвердите свою почту для завершения",
     }
 
 
@@ -67,12 +60,8 @@ async def confirm_email(
     dto: AccountConfirmation,
     usecase: Annotated[
         AccountConfirmationUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.iam.account_confirmation_usecase
-            ]
-        )
-    ]
+        Depends(Provide[ApplicationContainer.iam.account_confirmation_usecase]),
+    ],
 ):
     response = await usecase.execute(dto)
     return {
@@ -87,15 +76,13 @@ async def resend_confirmation_code(
     dto: ResendCodeRequest,
     usecase: Annotated[
         ResendConfirmationCodeUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.iam.resend_confirmation_code_usecase
-            ]
-        )
-    ]
+        Depends(Provide[ApplicationContainer.iam.resend_confirmation_code_usecase]),
+    ],
 ):
     await usecase.execute(dto)
-    return {"message": "Код подтверждения отправлен на указанный адрес электронной почты"}
+    return {
+        "message": "Код подтверждения отправлен на указанный адрес электронной почты"
+    }
 
 
 @iam.post("/login")
@@ -103,13 +90,8 @@ async def resend_confirmation_code(
 async def login_user(
     dto: LoginAccount,
     usecase: Annotated[
-        LoginUserUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.iam.login_user_usecase
-            ]
-        )
-    ]
+        LoginUserUseCase, Depends(Provide[ApplicationContainer.iam.login_user_usecase])
+    ],
 ):
     return await usecase.execute(dto)
 
@@ -120,12 +102,8 @@ async def refresh_token(
     dto: RefreshData,
     usecase: Annotated[
         RefreshTokenUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.iam.refresh_token_usecase
-            ]
-        )
-    ]
+        Depends(Provide[ApplicationContainer.iam.refresh_token_usecase]),
+    ],
 ):
     return await usecase.execute(dto)
 
@@ -136,12 +114,8 @@ async def logout_user(
     dto: RefreshData,
     usecase: Annotated[
         LogoutUserUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.iam.logout_user_usecase
-            ]
-        )
-    ]
+        Depends(Provide[ApplicationContainer.iam.logout_user_usecase]),
+    ],
 ):
     await usecase.execute(dto)
     return {"message": "Вы вышли из системы"}
@@ -153,15 +127,14 @@ async def request_forgot_password(
     dto: ForgotPasswordData,
     usecase: Annotated[
         ForgotPasswordUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.iam.forgot_password_usecase
-            ]
-        )
-    ]
+        Depends(Provide[ApplicationContainer.iam.forgot_password_usecase]),
+    ],
 ):
     await usecase.execute(dto)
-    return {"message": "Если указанная вами почта существует, мы отправили письмо с подтверждением"}
+    return {
+        "message": "Если указанная вами почта существует, "
+        "мы отправили письмо с подтверждением"
+    }
 
 
 @iam.post("/reset-password")
@@ -170,15 +143,14 @@ async def reset_user_password(
     dto: ResetPasswordData,
     usecase: Annotated[
         ResetPasswordUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.iam.reset_password_usecase
-            ]
-        )
-    ]
+        Depends(Provide[ApplicationContainer.iam.reset_password_usecase]),
+    ],
 ):
     await usecase.execute(dto)
-    return {"message": "Пароль успешно изменён! Пожалуйста, войдите систему с новым паролем."}
+    return {
+        "message": "Пароль успешно изменён! Пожалуйста, "
+        "войдите систему с новым паролем."
+    }
 
 
 @iam.post("/change-password")
@@ -187,16 +159,15 @@ async def change_password(
     dto: ChangePasswordData,
     usecase: Annotated[
         ChangePasswordUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.iam.change_password_usecase
-            ]
-        )
+        Depends(Provide[ApplicationContainer.iam.change_password_usecase]),
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_user: CurrentUser = Security(get_current_user),
 ):
     await usecase.execute(current_user.id, dto)
-    return {"message": "Пароль успешно изменён! Пожалуйста, войдите систему с новым паролем."}
+    return {
+        "message": "Пароль успешно изменён! Пожалуйста, "
+        "войдите систему с новым паролем."
+    }
 
 
 @iam.patch("/email/change")
@@ -205,16 +176,15 @@ async def request_email_change(
     dto: ChangeEmailRequest,
     usecase: Annotated[
         RequestEmailChangeUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.iam.request_email_change_usecase
-            ]
-        )
+        Depends(Provide[ApplicationContainer.iam.request_email_change_usecase]),
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_user: CurrentUser = Security(get_current_user),
 ):
     await usecase.execute(current_user.id, dto)
-    return {"message": "Мы отправили код на вашу почту. Подтвердите вашу новую электронную почту"}
+    return {
+        "message": "Мы отправили код на вашу почту. "
+        "Подтвердите вашу новую электронную почту"
+    }
 
 
 @iam.patch("/email/confirm")
@@ -223,15 +193,9 @@ async def confirm_email_change(
     dto: ConfirmEmailChangeRequest,
     usecase: Annotated[
         ConfirmEmailChangeUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.iam.confirm_email_change_usecase
-            ]
-        )
+        Depends(Provide[ApplicationContainer.iam.confirm_email_change_usecase]),
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_user: CurrentUser = Security(get_current_user),
 ):
     await usecase.execute(current_user.id, dto)
     return {"message": "Ваша электронная почта успешно подтверждена!"}
-
-

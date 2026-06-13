@@ -1,8 +1,15 @@
 import pytest
 
-from src.core.iam.domain.exceptions import AccountNotConfirmedError, InvalidLoginCredentialsError
-from src.core.iam.presentation.dto import CreateAccountRequest, AccountConfirmation, LoginAccount
-from src.core.iam.domain.enums import TokenType, OTPType
+from src.core.iam.domain.enums import OTPType, TokenType
+from src.core.iam.domain.exceptions import (
+    AccountNotConfirmedError,
+    InvalidLoginCredentialsError,
+)
+from src.core.iam.presentation.dto import (
+    AccountConfirmation,
+    CreateAccountRequest,
+    LoginAccount,
+)
 
 
 class TestAccountLoginUseCase:
@@ -23,9 +30,13 @@ class TestAccountLoginUseCase:
         await create_user_usecase.execute(dto)
 
         user = await account_repository.get_account_by_email(dto.email)
-        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user.id}")
+        otp_code = await redis_service.get(
+            f"otp:{OTPType.CONFIRMATION.value}:{user.id}"
+        )
 
-        confirmation_dto = AccountConfirmation(account_id=user.id, confirm_code=otp_code)
+        confirmation_dto = AccountConfirmation(
+            account_id=user.id, confirm_code=otp_code
+        )
         await account_confirmation_usecase.execute(confirmation_dto)
 
         login_dto = LoginAccount(email=dto.email, raw_password=dto.raw_password)
@@ -58,9 +69,13 @@ class TestAccountLoginUseCase:
         await create_user_usecase.execute(dto)
 
         user = await account_repository.get_account_by_email(dto.email)
-        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user.id}")
+        otp_code = await redis_service.get(
+            f"otp:{OTPType.CONFIRMATION.value}:{user.id}"
+        )
 
-        confirmation_dto = AccountConfirmation(account_id=user.id, confirm_code=otp_code)
+        confirmation_dto = AccountConfirmation(
+            account_id=user.id, confirm_code=otp_code
+        )
         await account_confirmation_usecase.execute(confirmation_dto)
 
         user_before_login = await account_repository.get_account_by_email(dto.email)
@@ -76,13 +91,17 @@ class TestAccountLoginUseCase:
     @pytest.mark.asyncio
     @pytest.mark.integration
     async def test_fails_with_non_existent_email(self, login_user_usecase):
-        login_dto = LoginAccount(email="ghost.mail@example.com", raw_password="super_secret")
+        login_dto = LoginAccount(
+            email="ghost.mail@example.com", raw_password="super_secret"
+        )
         with pytest.raises(InvalidLoginCredentialsError):
             await login_user_usecase.execute(login_dto)
 
     @pytest.mark.asyncio
     @pytest.mark.integration
-    async def test_fails_with_unconfirmed_account(self, create_user_usecase, login_user_usecase):
+    async def test_fails_with_unconfirmed_account(
+        self, create_user_usecase, login_user_usecase
+    ):
         dto = CreateAccountRequest(
             email="test@example.com",
             raw_password="super_secret",

@@ -1,10 +1,8 @@
-from uuid import UUID
-
 from typing import Any
+from uuid import UUID
 
 from pydantic import field_validator
 
-from src.core.shared.domain.enums import PriceCurrency
 from src.core.shared.presentation.dto import DTO
 from src.core.vendor.domain.enums import LegalForm
 
@@ -81,4 +79,3 @@ class DetailVendorResponse(DTO):
     shop_name: str | None
     logotype: dict | None
     is_verified: bool
-

@@ -9,16 +9,10 @@ class CustomerNotFoundError(NotFoundError):
 class FullnameRequiredError(ValidationError):
     def __init__(self, field: str):
         super().__init__(
-            message="Обязательное поле не заполнено",
-            details={"field": field}
+            message="Обязательное поле не заполнено", details={"field": field}
         )
 
 
 class InvalidFullnameFormatError(ValidationError):
     def __init__(self, field: str):
-        super().__init__(
-            message="Неверный формат поля",
-            details={"field": field}
-        )
-
-
+        super().__init__(message="Неверный формат поля", details={"field": field})

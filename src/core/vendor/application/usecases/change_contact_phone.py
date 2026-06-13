@@ -22,5 +22,6 @@ class ChangeContactPhoneUseCase:
             await uow.vendor.save(vendor)
             await uow.commit()
 
-        logger.info("Vendor contact phone changed successfully | vendor_id={}", vendor.id)
-
+        logger.info(
+            "Vendor contact phone changed successfully | vendor_id={}", vendor.id
+        )

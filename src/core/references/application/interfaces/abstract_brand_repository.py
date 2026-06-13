@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
 from src.core.references.domain.entities import Brand
 
@@ -16,4 +15,3 @@ class IBrandRepository(ABC):
     @abstractmethod
     async def save(self, brand: Brand) -> None:
         raise NotImplementedError
-

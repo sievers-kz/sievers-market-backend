@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from src.core.catalog.presentation.dto.subcategory import Attribute
 from src.core.shared.presentation.dto import DTO
 

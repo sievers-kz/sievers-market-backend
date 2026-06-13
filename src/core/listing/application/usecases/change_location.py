@@ -11,7 +11,9 @@ class ChangeListingLocationUseCase:
     def __init__(self, uow: IListingUnitOfWork):
         self.uow = uow
 
-    async def execute(self, vendor_id: UUID, listing_id: UUID, dto: ChangeListingLocationRequest):
+    async def execute(
+        self, vendor_id: UUID, listing_id: UUID, dto: ChangeListingLocationRequest
+    ):
         async with self.uow as uow:
             listing = await uow.listing.get_by_id(listing_id)
             if not listing:
@@ -21,4 +23,8 @@ class ChangeListingLocationUseCase:
             await uow.listing.save(listing)
             await uow.commit()
 
-        logger.info("Listing location changed | listing_id={} new_location={}", listing.id, listing.city_id)
+        logger.info(
+            "Listing location changed | listing_id={} new_location={}",
+            listing.id,
+            listing.city_id,
+        )

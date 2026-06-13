@@ -5,8 +5,12 @@ from typing import Any
 from uuid import UUID
 
 from src.core.vendor.domain.enums import LegalForm
-from src.core.vendor.domain.exceptions import ContactFullnameRequiredError, ContactFullnameFormatError, \
-    InvalidTaxNumberError, InvalidLogotypeSizeError
+from src.core.vendor.domain.exceptions import (
+    ContactFullnameFormatError,
+    ContactFullnameRequiredError,
+    InvalidLogotypeSizeError,
+    InvalidTaxNumberError,
+)
 
 
 @dataclass(frozen=True)
@@ -31,7 +35,9 @@ class ContactFullname:
             raise ContactFullnameFormatError(field="Фамилия")
         if not re.match(fullname_format, self.contact_first_name):
             raise ContactFullnameFormatError(field="Имя")
-        if self.contact_patronymic and not re.match(fullname_format, self.contact_patronymic):
+        if self.contact_patronymic and not re.match(
+            fullname_format, self.contact_patronymic
+        ):
             raise ContactFullnameFormatError(field="Отчество")
 
 

@@ -1,4 +1,5 @@
 import sys
+
 from loguru import logger
 
 
@@ -33,5 +34,3 @@ def setup_logger(mode: str = "development") -> None:
         compression="zip",
         colorize=True,
     )
-
-

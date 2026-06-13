@@ -41,9 +41,9 @@ class ChangeLogotypeRequest(DTO):
             "example": {
                 "media_id": "uuid-1",
                 "media_type": "image/png",
-                "media_size": 1
+                "media_size": 1,
             }
-        }
+        },
     )
 
 

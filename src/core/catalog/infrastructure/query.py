@@ -1,19 +1,24 @@
 from uuid import UUID
 
 from pydantic import TypeAdapter
-from sqlalchemy import select, cast
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import load_only, joinedload
+from sqlalchemy import cast, select
 from sqlalchemy.dialects.postgresql import UUID as PsqlUUID
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload, load_only
 from sqlalchemy.sql.functions import coalesce
 
 from src.core.catalog.application.interfaces.query_service import ICatalogQueryService
 from src.core.catalog.domain.enums import CatalogStatus
-from src.core.catalog.infrastructure.models import Subcategory, Rubric, Category
-from src.core.catalog.presentation.dto.catalog import AttributeResponse, RubricResponse, ListingCardResponse, \
-    ListingDetailResponse, VendorCardResponse, DetailVendorResponse
+from src.core.catalog.infrastructure.models import Category, Rubric, Subcategory
+from src.core.catalog.presentation.dto.catalog import (
+    AttributeResponse,
+    DetailVendorResponse,
+    ListingCardResponse,
+    ListingDetailResponse,
+    RubricResponse,
+    VendorCardResponse,
+)
 from src.core.catalog.presentation.dto.subcategory import Attribute
-from src.core.iam.domain.entities import Account
 from src.core.listing.domain.enums import ListingStatus
 from src.core.listing.infrastructure.models import Listing
 from src.core.references.infrastructure.models import City
@@ -34,7 +39,8 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
             .options(
                 load_only(Subcategory.attributes),
                 load_only(Rubric.attributes),
-            ).where(Subcategory.id == subcategory_id)
+            )
+            .where(Subcategory.id == subcategory_id)
         )
 
         query_result = await self._session.execute(statement)
@@ -54,10 +60,13 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
                 joinedload(Rubric.categories).options(
                     load_only(Category.id, Category.rubric_id, Category.name),
                     joinedload(Category.subcategories).options(
-                        load_only(Subcategory.id, Subcategory.category_id, Subcategory.name),
-                    )
-                )
-            ).where(Rubric.status == CatalogStatus.ACTIVE)
+                        load_only(
+                            Subcategory.id, Subcategory.category_id, Subcategory.name
+                        ),
+                    ),
+                ),
+            )
+            .where(Rubric.status == CatalogStatus.ACTIVE)
         )
 
         query_result = await self._session.execute(statement)
@@ -74,23 +83,24 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
         statement = (
             select(
                 Listing.id,
-                coalesce(
-                    Vendor.shop_name,
-                    Vendor.legal_name
-                ).label("display_owner_name"),
+                coalesce(Vendor.shop_name, Vendor.legal_name).label(
+                    "display_owner_name"
+                ),
                 Subcategory.name.label("subcategory"),
                 Listing.title,
                 Listing.price,
                 Listing.currency,
                 City.name.label("city"),
-                cast(Listing.gallery[0]["media_id"].as_string(), PsqlUUID).label("preview_image")
+                cast(Listing.gallery[0]["media_id"].as_string(), PsqlUUID).label(
+                    "preview_image"
+                ),
             )
             .join(Vendor, Listing.owner_id == Vendor.id)
             .join(Subcategory, Listing.subcategory_id == Subcategory.id)
             .join(City, Listing.city_id == City.id)
             .where(
                 Listing.category_id == category_id,
-                Listing.status == ListingStatus.ACTIVE
+                Listing.status == ListingStatus.ACTIVE,
             )
         )
 
@@ -109,10 +119,9 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
             select(
                 Listing.id,
                 Listing.owner_id,
-                coalesce(
-                    Vendor.shop_name,
-                    Vendor.legal_name
-                ).label("display_owner_name"),
+                coalesce(Vendor.shop_name, Vendor.legal_name).label(
+                    "display_owner_name"
+                ),
                 Vendor.contact_phone,
                 Vendor.legal_address,
                 Vendor.logotype,
@@ -128,10 +137,7 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
             .join(Vendor, Listing.owner_id == Vendor.id)
             .join(Subcategory, Listing.subcategory_id == Subcategory.id)
             .join(City, Listing.city_id == City.id)
-            .where(
-                Listing.id == listing_id,
-                Listing.status == ListingStatus.ACTIVE
-            )
+            .where(Listing.id == listing_id, Listing.status == ListingStatus.ACTIVE)
         )
 
         query_result = await self._session.execute(statement)
@@ -142,17 +148,16 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
 
         return ListingDetailResponse.model_validate(result)
 
-    async def get_vendors_card(self, page: int = 1, limit: int = 20) -> list[VendorCardResponse]:
-        statement = (
-            select(
-                Vendor.id.label("vendor_id"),
-                Vendor.is_verified,
-                coalesce(
-                    Vendor.shop_name,
-                    Vendor.legal_name
-                ).label("display_name"),
-                Vendor.logotype
-            ).where(Vendor.is_verified == True)
+    async def get_vendors_card(
+        self, page: int = 1, limit: int = 20
+    ) -> list[VendorCardResponse]:
+        statement = select(
+            Vendor.id.label("vendor_id"),
+            Vendor.is_verified,
+            coalesce(Vendor.shop_name, Vendor.legal_name).label("display_name"),
+            Vendor.logotype,
+        ).where(
+            Vendor.is_verified == True  # noqa: E712
         )
 
         return await self.paginate(
@@ -174,11 +179,12 @@ class CatalogQueryService(QueryService, ICatalogQueryService):
                 Vendor.shop_name,
                 Vendor.logotype,
                 Vendor.is_verified,
-            ).select_from(Vendor)
+            )
+            .select_from(Vendor)
             .where(
                 Vendor.id == vendor_id,
-                Vendor.is_verified == True,
-                Vendor.status == VendorStatus.ACTIVE
+                Vendor.is_verified == True,  # noqa: E712
+                Vendor.status == VendorStatus.ACTIVE,
             )
         )
 

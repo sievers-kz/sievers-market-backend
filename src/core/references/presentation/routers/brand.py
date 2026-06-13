@@ -1,14 +1,17 @@
 from typing import Annotated
 from uuid import UUID
 
-from dependency_injector.wiring import inject, Provide
+from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter
 from fastapi.params import Depends
 
 from src.configuration.dependencies.container import ApplicationContainer
 from src.core.references.application.services import BrandService
-from src.core.references.presentation.dto.brand import BrandResponse, CreateBrandRequest, UpdateBrandRequest
-
+from src.core.references.presentation.dto.brand import (
+    BrandResponse,
+    CreateBrandRequest,
+    UpdateBrandRequest,
+)
 
 brand_router = APIRouter(prefix="/brand")
 
@@ -18,13 +21,8 @@ brand_router = APIRouter(prefix="/brand")
 async def get_brand(
     brand_id: UUID,
     service: Annotated[
-        BrandService,
-        Depends(
-            Provide[
-                ApplicationContainer.reference.brand_service
-            ]
-        )
-    ]
+        BrandService, Depends(Provide[ApplicationContainer.reference.brand_service])
+    ],
 ):
     return await service.get_brand_by_id(brand_id)
 
@@ -33,12 +31,7 @@ async def get_brand(
 @inject
 async def get_brand_list(
     service: Annotated[
-        BrandService,
-        Depends(
-            Provide[
-                ApplicationContainer.reference.brand_service
-            ]
-        )
+        BrandService, Depends(Provide[ApplicationContainer.reference.brand_service])
     ],
 ):
     return await service.get_brand_list()
@@ -49,13 +42,8 @@ async def get_brand_list(
 async def create_brand(
     dto: CreateBrandRequest,
     service: Annotated[
-        BrandService,
-        Depends(
-            Provide[
-                ApplicationContainer.reference.brand_service
-            ]
-        )
-    ]
+        BrandService, Depends(Provide[ApplicationContainer.reference.brand_service])
+    ],
 ):
     await service.create_brand(dto)
 
@@ -66,13 +54,8 @@ async def update_brand(
     brand_id: UUID,
     dto: UpdateBrandRequest,
     service: Annotated[
-        BrandService,
-        Depends(
-            Provide[
-                ApplicationContainer.reference.brand_service
-            ]
-        )
-    ]
+        BrandService, Depends(Provide[ApplicationContainer.reference.brand_service])
+    ],
 ):
     await service.update_brand(brand_id, dto)
 
@@ -82,12 +65,7 @@ async def update_brand(
 async def delete_brand(
     brand_id: UUID,
     service: Annotated[
-        BrandService,
-        Depends(
-            Provide[
-                ApplicationContainer.reference.brand_service
-            ]
-        )
-    ]
+        BrandService, Depends(Provide[ApplicationContainer.reference.brand_service])
+    ],
 ):
     await service.delete_brand(brand_id)

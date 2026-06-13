@@ -23,8 +23,12 @@ class TestChangeContactFullnameUseCase:
         create_account_dto = create_user_request()
         account_id = await create_user_usecase.execute(create_account_dto)
 
-        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{account_id}")
-        account_confirmation_dto = AccountConfirmation(account_id=account_id, confirm_code=otp_code)
+        otp_code = await redis_service.get(
+            f"otp:{OTPType.CONFIRMATION.value}:{account_id}"
+        )
+        account_confirmation_dto = AccountConfirmation(
+            account_id=account_id, confirm_code=otp_code
+        )
         await account_confirmation_usecase.execute(account_confirmation_dto)
 
         create_vendor_dto = create_vendor_request()
@@ -36,7 +40,12 @@ class TestChangeContactFullnameUseCase:
             contact_first_name="Meirzhan",
         )
 
-        await change_contact_fullname_usecase.execute(vendor_before.id, change_contact_fullname_dto)
+        await change_contact_fullname_usecase.execute(
+            vendor_before.id, change_contact_fullname_dto
+        )
         vendor_after = await vendor_repository.get_by_account_id(account_id)
 
-        assert vendor_after.contact_fullname.contact_last_name != vendor_before.contact_fullname.contact_last_name
+        assert (
+            vendor_after.contact_fullname.contact_last_name
+            != vendor_before.contact_fullname.contact_last_name
+        )

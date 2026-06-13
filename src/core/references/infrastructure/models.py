@@ -1,7 +1,7 @@
 from uuid import UUID
 
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.shared.infrastructure.base_model import BaseModel
 
@@ -19,13 +19,17 @@ class Country(BaseModel):
 class Region(BaseModel):
     __tablename__ = "regions"
     name: Mapped[str] = mapped_column(String(50), nullable=False)
-    cities: Mapped[list["City"]] = relationship(back_populates="region", cascade="all, delete-orphan")
+    cities: Mapped[list["City"]] = relationship(
+        back_populates="region", cascade="all, delete-orphan"
+    )
 
 
 class City(BaseModel):
     __tablename__ = "cities"
     name: Mapped[str] = mapped_column(String(50), nullable=False)
-    region_id: Mapped[UUID] = mapped_column(ForeignKey("regions.id", ondelete="CASCADE"), nullable=False)
+    region_id: Mapped[UUID] = mapped_column(
+        ForeignKey("regions.id", ondelete="CASCADE"), nullable=False
+    )
     region: Mapped["Region"] = relationship(back_populates="cities")
 
     def __str__(self):

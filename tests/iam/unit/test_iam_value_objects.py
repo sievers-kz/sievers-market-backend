@@ -1,6 +1,10 @@
 import pytest
 
-from src.core.iam.domain.exceptions import EmailRequiredError, InvalidEmailFormatError, PasswordRequiredError
+from src.core.iam.domain.exceptions import (
+    EmailRequiredError,
+    InvalidEmailFormatError,
+    PasswordRequiredError,
+)
 from src.core.iam.domain.value_objects import Email, Password
 
 

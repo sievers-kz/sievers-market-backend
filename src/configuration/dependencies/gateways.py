@@ -1,14 +1,16 @@
-import json
-
-from arq import ArqRedis, create_pool
+from arq import create_pool
 from arq.connections import RedisSettings
 from dependency_injector import containers, providers
 from minio import Minio
 from redis.asyncio import Redis
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from src.configuration.database.connection import get_database_session
-from src.configuration.dependencies.resources import init_bloom, init_sentry, init_engine
+from src.configuration.dependencies.resources import (
+    init_bloom,
+    init_engine,
+    init_sentry,
+)
 from src.core.shared.infrastructure.services.email_sender import SendGridEmailSender
 
 
@@ -20,21 +22,15 @@ class GatewaysContainer(containers.DeclarativeContainer):
     sentry_config = providers.Configuration()
 
     async_engine = providers.Resource(
-        init_engine,
-        url=database_config.database_url,
-        echo=False
+        init_engine, url=database_config.database_url, echo=False
     )
 
     session_factory = providers.Singleton(
-        async_sessionmaker,
-        bind=async_engine,
-        expire_on_commit=False,
-        autoflush=False
+        async_sessionmaker, bind=async_engine, expire_on_commit=False, autoflush=False
     )
 
     database_session = providers.Resource(
-        get_database_session,
-        session_factory=session_factory
+        get_database_session, session_factory=session_factory
     )
 
     sendgrid_sender = providers.Singleton(
@@ -70,7 +66,7 @@ class GatewaysContainer(containers.DeclarativeContainer):
         endpoint=minio_config.endpoint,
         access_key=minio_config.access_key,
         secret_key=minio_config.secret_key,
-        secure=minio_config.secure_config
+        secure=minio_config.secure_config,
     )
 
     bloom_filter = providers.Resource(

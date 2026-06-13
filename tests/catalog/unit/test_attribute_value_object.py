@@ -1,11 +1,12 @@
 import pytest
-from src.core.catalog.domain.value_objects import Attribute
+
 from src.core.catalog.domain.enums import AttributeType
 from src.core.catalog.domain.exceptions import (
+    AttributeOptionError,
     AttributeRequiredError,
     AttributeTypeError,
-    AttributeOptionError
 )
+from src.core.catalog.domain.value_objects import Attribute
 
 
 @pytest.mark.parametrize(
@@ -33,7 +34,7 @@ def test_attribute_enumerate_success():
         key="color",
         label="Цвет",
         type=AttributeType.ENUMERATE,
-        options=["Синий", "Красный", "Зеленый"]
+        options=["Синий", "Красный", "Зеленый"],
     )
     assert attr.validate_value("Синий") == "Синий"
 
@@ -43,7 +44,7 @@ def test_attribute_enumerate_invalid_option_raises_error():
         key="color",
         label="Цвет",
         type=AttributeType.ENUMERATE,
-        options=["Синий", "Красный"]
+        options=["Синий", "Красный"],
     )
     with pytest.raises(AttributeOptionError):
         attr.validate_value("Зеленый")  # Такого цвета нет в списке
@@ -51,13 +52,17 @@ def test_attribute_enumerate_invalid_option_raises_error():
 
 @pytest.mark.parametrize("invalid_value", [None, ""])
 def test_required_attribute_raises_error_on_empty(invalid_value):
-    attr = Attribute(key="power", label="Мощность", type=AttributeType.INTEGER, required=True)
+    attr = Attribute(
+        key="power", label="Мощность", type=AttributeType.INTEGER, required=True
+    )
     with pytest.raises(AttributeRequiredError):
         attr.validate_value(invalid_value)
 
 
 def test_not_required_attribute_returns_none_on_empty():
-    attr = Attribute(key="power", label="Мощность", type=AttributeType.INTEGER, required=False)
+    attr = Attribute(
+        key="power", label="Мощность", type=AttributeType.INTEGER, required=False
+    )
     assert attr.validate_value(None) is None
 
 

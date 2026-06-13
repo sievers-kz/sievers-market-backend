@@ -7,4 +7,3 @@ alembic upgrade head
 
 echo "🌱 Running tests ..."
 pytest -v -s
-

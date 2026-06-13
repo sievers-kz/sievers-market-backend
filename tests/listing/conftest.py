@@ -13,7 +13,12 @@ from tests.iam.conftest import create_domain_account
 from tests.vendor.conftest import create_domain_vendor
 
 
-def create_domain_listing(owner_id: uuid.UUID, city_id: uuid.UUID, category_id: uuid.UUID, subcategory_id: uuid.UUID) -> Listing:
+def create_domain_listing(
+    owner_id: uuid.UUID,
+    city_id: uuid.UUID,
+    category_id: uuid.UUID,
+    subcategory_id: uuid.UUID,
+) -> Listing:
     return Listing(
         id=uuid.uuid4(),
         owner_id=owner_id,
@@ -25,22 +30,30 @@ def create_domain_listing(owner_id: uuid.UUID, city_id: uuid.UUID, category_id: 
         city_id=city_id,
         description="Тестовое описание",
         attributes={"engine_power": 300},
-        gallery=Gallery(images=(
-            Image(
-                media_id=uuid.uuid4(),
-                media_type="image/jpeg",
-                media_size=1 * 1024 * 1024,
-            ),
-        )),
+        gallery=Gallery(
+            images=(
+                Image(
+                    media_id=uuid.uuid4(),
+                    media_type="image/jpeg",
+                    media_size=1 * 1024 * 1024,
+                ),
+            )
+        ),
         status=ListingStatus.ACTIVE,
     )
 
 
 @pytest_asyncio.fixture
 async def create_listing_request(database_session):
-    city_id = (await database_session.execute(text("SELECT id FROM cities LIMIT 1"))).scalar_one()
-    category_id = (await database_session.execute(text("SELECT id FROM categories LIMIT 1"))).scalar_one()
-    subcategory_id = (await database_session.execute(text("SELECT id FROM subcategories LIMIT 1"))).scalar_one()
+    city_id = (
+        await database_session.execute(text("SELECT id FROM cities LIMIT 1"))
+    ).scalar_one()
+    category_id = (
+        await database_session.execute(text("SELECT id FROM categories LIMIT 1"))
+    ).scalar_one()
+    subcategory_id = (
+        await database_session.execute(text("SELECT id FROM subcategories LIMIT 1"))
+    ).scalar_one()
 
     return CreateListingRequest(
         category_id=category_id,
@@ -50,11 +63,13 @@ async def create_listing_request(database_session):
         currency=PriceCurrency.KZT,
         city_id=city_id,
         description="Тестовое описание",
-        gallery=[ListingImage(
-            media_id=uuid.uuid4(),
-            media_type="image/jpeg",
-            media_size=1 * 1024 * 1024,
-        )],
+        gallery=[
+            ListingImage(
+                media_id=uuid.uuid4(),
+                media_type="image/jpeg",
+                media_size=1 * 1024 * 1024,
+            )
+        ],
         attributes={
             "engine_power": 300,
         },
@@ -112,7 +127,9 @@ async def listing_repository(container):
 
 
 @pytest_asyncio.fixture
-async def create_listing(listing_repository, account_repository, vendor_repository, database_session):
+async def create_listing(
+    listing_repository, account_repository, vendor_repository, database_session
+):
     account = create_domain_account(is_active=True)
     await account_repository.save(account)
 
@@ -120,9 +137,16 @@ async def create_listing(listing_repository, account_repository, vendor_reposito
     await vendor_repository.save(vendor)
 
     from sqlalchemy import text
-    city_id = (await database_session.execute(text("SELECT id FROM cities LIMIT 1"))).scalar_one()
-    category_id = (await database_session.execute(text("SELECT id FROM categories LIMIT 1"))).scalar_one()
-    subcategory_id = (await database_session.execute(text("SELECT id FROM subcategories LIMIT 1"))).scalar_one()
+
+    city_id = (
+        await database_session.execute(text("SELECT id FROM cities LIMIT 1"))
+    ).scalar_one()
+    category_id = (
+        await database_session.execute(text("SELECT id FROM categories LIMIT 1"))
+    ).scalar_one()
+    subcategory_id = (
+        await database_session.execute(text("SELECT id FROM subcategories LIMIT 1"))
+    ).scalar_one()
 
     listing = create_domain_listing(
         owner_id=vendor.id,

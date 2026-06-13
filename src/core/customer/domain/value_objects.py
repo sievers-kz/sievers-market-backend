@@ -1,7 +1,10 @@
 import re
 from dataclasses import dataclass
 
-from src.core.customer.domain.exceptions import FullnameRequiredError, InvalidFullnameFormatError
+from src.core.customer.domain.exceptions import (
+    FullnameRequiredError,
+    InvalidFullnameFormatError,
+)
 
 
 @dataclass(frozen=True)
@@ -28,6 +31,3 @@ class Fullname:
             raise InvalidFullnameFormatError(field="Фамилия")
         if self.patronymic and not re.match(fullname_format, self.patronymic):
             raise InvalidFullnameFormatError(field="Отчество")
-
-
-

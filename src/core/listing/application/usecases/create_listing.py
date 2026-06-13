@@ -6,9 +6,9 @@ from loguru import logger
 from src.core.catalog.application.services.subcategory import SubcategoryService
 from src.core.listing.application.interfaces.uow import IListingUnitOfWork
 from src.core.listing.domain.entities import Listing
+from src.core.listing.domain.enums import ListingStatus
 from src.core.listing.domain.value_objects import Gallery
 from src.core.listing.presentation.dto import CreateListingRequest
-from src.core.listing.domain.enums import ListingStatus
 
 
 class CreateListingUseCase:
@@ -21,7 +21,9 @@ class CreateListingUseCase:
         self.subcategory_service = subcategory_service
 
     async def execute(self, owner_id: UUID, dto: CreateListingRequest):
-        validated_attributes = await self.subcategory_service.validate_attributes(dto.subcategory_id, dto.attributes)
+        validated_attributes = await self.subcategory_service.validate_attributes(
+            dto.subcategory_id, dto.attributes
+        )
 
         async with self.uow as uow:
             listing = Listing(
@@ -44,5 +46,3 @@ class CreateListingUseCase:
 
         return listing.id
         logger.info("Listing created | listing_id={} owner_id={}", listing.id, owner_id)
-
-

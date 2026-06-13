@@ -1,10 +1,5 @@
-from src.core.catalog.infrastructure.models import (
-    Category as ORMCategory,
-)
-
-from src.core.catalog.domain.entities import (
-    Category as DomainCategory,
-)
+from src.core.catalog.domain.entities import Category as DomainCategory
+from src.core.catalog.infrastructure.models import Category as ORMCategory
 
 
 class CategoryMapper:
@@ -14,7 +9,7 @@ class CategoryMapper:
             id=domain_model.id,
             rubric_id=domain_model.rubric_id,
             name=domain_model.name,
-            status=domain_model.status
+            status=domain_model.status,
         )
 
     @staticmethod
@@ -23,5 +18,5 @@ class CategoryMapper:
             id=orm_model.id,
             rubric_id=orm_model.rubric_id,
             name=orm_model.name,
-            status=orm_model.status
+            status=orm_model.status,
         )

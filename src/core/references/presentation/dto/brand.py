@@ -14,5 +14,3 @@ class CreateBrandRequest(DTO):
 
 class UpdateBrandRequest(DTO):
     name: str
-
-

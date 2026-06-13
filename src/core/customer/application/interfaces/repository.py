@@ -12,4 +12,3 @@ class ICustomerRepository(ABC):
     @abstractmethod
     async def get_by_account_id(self, account_id: UUID) -> Customer:
         raise NotImplementedError
-

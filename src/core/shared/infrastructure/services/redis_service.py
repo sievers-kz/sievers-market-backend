@@ -17,4 +17,3 @@ class RedisService(ICacheService):
 
     async def delete(self, key: str) -> None:
         await self.client.delete(key)
-

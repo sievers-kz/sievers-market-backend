@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 
-from src.core.media.domain.exceptions import MediaImageTooLargeError, InvalidMediaSizeError
+from src.core.media.domain.exceptions import (
+    InvalidMediaSizeError,
+    MediaImageTooLargeError,
+)
 
 
 @dataclass(frozen=True)

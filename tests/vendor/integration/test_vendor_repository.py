@@ -1,4 +1,5 @@
 import uuid
+
 import pytest
 
 from src.core.vendor.domain.entities import Vendor

@@ -1,20 +1,19 @@
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock
 
 import pytest
 import pytest_asyncio
 
-from src.core.iam.presentation.dto import CreateAccountRequest
-from src.core.iam.domain.entities import Account, Token
+from src.core.iam.domain.entities import Account
 from src.core.iam.domain.enums import TokenType
 from src.core.iam.domain.value_objects import Email, Password
+from src.core.iam.presentation.dto import CreateAccountRequest
 from src.core.shared.application.interfaces.queue_service import IQueueService
 
 
 def create_domain_account(
-    is_active: bool | None = False,
-    tokens: list | None = None
+    is_active: bool | None = False, tokens: list | None = None
 ) -> Account:
     return Account(
         id=uuid.uuid4(),
@@ -23,7 +22,7 @@ def create_domain_account(
         is_active=is_active,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
-        tokens=tokens if tokens is not None else []
+        tokens=tokens if tokens is not None else [],
     )
 
 

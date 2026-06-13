@@ -1,7 +1,11 @@
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 
-from src.core.iam.domain.exceptions import EmailRequiredError, InvalidEmailFormatError, PasswordRequiredError
+from src.core.iam.domain.exceptions import (
+    EmailRequiredError,
+    InvalidEmailFormatError,
+    PasswordRequiredError,
+)
 
 
 @dataclass(frozen=True)
@@ -32,6 +36,3 @@ class Password:
     def validate_required(self):
         if not self.value:
             raise PasswordRequiredError()
-
-
-
