@@ -8,8 +8,3 @@ class ITaxpayerGateway(ABC):
     @abstractmethod
     async def fetch(self, tax_id: str) -> Optional[TaxpayerResponse]:
         raise NotImplementedError
-
-
-
-
-

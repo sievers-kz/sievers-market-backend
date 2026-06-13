@@ -5,9 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.core.iam.application.interfaces.repository import IAccountRepository
-from src.core.iam.infrastructure.mapper import AccountMapper
-from src.core.iam.infrastructure.models import Account as ORMAccount, Token as ORMToken
 from src.core.iam.domain.entities import Account as DomainAccount
+from src.core.iam.infrastructure.mapper import AccountMapper
+from src.core.iam.infrastructure.models import Account as ORMAccount
+from src.core.iam.infrastructure.models import Token as ORMToken
 
 
 class AccountRepository(IAccountRepository):
@@ -41,9 +42,7 @@ class AccountRepository(IAccountRepository):
             select(self._model)
             .join(self._token_model, self._model.id == self._token_model.account_id)
             .where(self._token_model.value == token_value)
-            .options(
-                selectinload(self._model.tokens)
-            )
+            .options(selectinload(self._model.tokens))
         )
 
         query_result = await self._session.execute(statement)

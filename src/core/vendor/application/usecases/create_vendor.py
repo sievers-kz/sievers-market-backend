@@ -1,11 +1,12 @@
-import json
 from uuid import UUID
 
 from loguru import logger
 
 from src.core.shared.application.interfaces.cache_service import ICacheService
 from src.core.vendor.application.interfaces.uow import IVendorUnitOfWork
-from src.core.vendor.application.services.vendor_validation import TaxpayerValidationService
+from src.core.vendor.application.services.vendor_validation import (
+    TaxpayerValidationService,
+)
 from src.core.vendor.domain.entities import Vendor
 from src.core.vendor.domain.exceptions import VendorAlreadyExistsError
 from src.core.vendor.presentation.dto import CreateVendorRequest, TaxpayerResponse
@@ -16,7 +17,7 @@ class RegisterVendorUseCase:
         self,
         uow: IVendorUnitOfWork,
         cache_service: ICacheService,
-        taxpayer_validation_service: TaxpayerValidationService
+        taxpayer_validation_service: TaxpayerValidationService,
     ):
         self.uow = uow
         self.cache_service = cache_service

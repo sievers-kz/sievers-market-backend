@@ -2,8 +2,11 @@ from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
 
-from src.core.listing.domain.exceptions import ListingGalleryTooManyImagesError, ListingGalleryEmptyError, \
-    ListingLargeImageSizeError
+from src.core.listing.domain.exceptions import (
+    ListingGalleryEmptyError,
+    ListingGalleryTooManyImagesError,
+    ListingLargeImageSizeError,
+)
 
 
 @dataclass(frozen=True)

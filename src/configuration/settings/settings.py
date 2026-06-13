@@ -1,14 +1,16 @@
-from typing import Type, Tuple
+from typing import Tuple, Type
 
-from pydantic import computed_field, Field, BaseModel
-from pydantic_settings import BaseSettings, SettingsConfigDict, PydanticBaseSettingsSource
+from pydantic import Field, computed_field
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+)
 
 
 class BaseConfig(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore"
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
 
     @classmethod
@@ -82,11 +84,11 @@ class SentryConfig(BaseConfig):
 class ApplicationSettings(BaseConfig):
     mode: str = Field(alias="MODE")
     database: PostgresSettings = Field(default_factory=PostgresSettings)
-    authentication: AuthenticationSettings = Field(default_factory=AuthenticationSettings)
+    authentication: AuthenticationSettings = Field(
+        default_factory=AuthenticationSettings
+    )
     sendgrid: SendGridSettings = Field(default_factory=SendGridSettings)
     minio_config: MinioConfig = Field(default_factory=MinioConfig)
     redis_config: RedisConfig = Field(default_factory=RedisConfig)
     resend_config: ResendSettings = Field(default_factory=ResendSettings)
     sentry_config: SentryConfig = Field(default_factory=SentryConfig)
-
-

@@ -2,7 +2,11 @@ from typing import Callable
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.catalog.infrastructure.repositories import RubricRepository, CategoryRepository, SubcategoryRepository
+from src.core.catalog.infrastructure.repositories import (
+    CategoryRepository,
+    RubricRepository,
+    SubcategoryRepository,
+)
 from src.core.shared.infrastructure.sql_alchemy_uow import SQLAlchemyUnitOfWork
 
 

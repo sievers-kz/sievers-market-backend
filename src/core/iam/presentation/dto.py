@@ -62,5 +62,3 @@ class ChangeEmailRequest(DTO):
 
 class ConfirmEmailChangeRequest(DTO):
     otp_code: str
-
-

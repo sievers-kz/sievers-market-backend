@@ -13,13 +13,14 @@ class MinioService(IObjectStorage):
 
     def generate_upload_url(self, object_name: str, expiration: int = 3600) -> str:
         if not self._client.bucket_exists(self._bucket_name):
-            logger.warning("Не удалось найти бакет. Запущено автоматическое создание бакета")
+            logger.warning(
+                "Не удалось найти бакет. Запущено автоматическое создание бакета"
+            )
             self._client.make_bucket(self._bucket_name)
 
         return self._client.get_presigned_url(
             method="PUT",
             bucket_name=self._bucket_name,
             object_name=object_name,
-            expires=timedelta(seconds=expiration)
+            expires=timedelta(seconds=expiration),
         )
-

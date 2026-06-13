@@ -1,11 +1,11 @@
 from loguru import logger
 
 from src.core.iam.application.interfaces.token_service import ITokenService
+from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 from src.core.iam.application.services.otp import OTPService
 from src.core.iam.domain.enums import OTPType, TokenType
 from src.core.iam.domain.exceptions import AccountNotFoundError
 from src.core.iam.presentation.dto import AccountConfirmation, LoginResponse
-from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 
 
 class AccountConfirmationUseCase:
@@ -13,7 +13,7 @@ class AccountConfirmationUseCase:
         self,
         unit_of_work: IIAMUnitOfWork,
         otp_service: OTPService,
-        token_service: ITokenService
+        token_service: ITokenService,
     ):
         self.unit_of_work = unit_of_work
         self.otp_service = otp_service
@@ -32,12 +32,18 @@ class AccountConfirmationUseCase:
             )
 
             access_token = self.token_service.create_token(account.id, TokenType.ACCESS)
-            refresh_token = self.token_service.create_token(account.id, TokenType.REFRESH)
-            account.add_new_token(refresh_token.type, refresh_token.value, refresh_token.expires_at)
+            refresh_token = self.token_service.create_token(
+                account.id, TokenType.REFRESH
+            )
+            account.add_new_token(
+                refresh_token.type, refresh_token.value, refresh_token.expires_at
+            )
 
             account.confirm_account()
             await uow.account.save(account)
             await uow.commit()
 
             logger.info("ACCOUNT VERIFIED | account_id={}", account.id)
-            return LoginResponse(access_token=access_token.value, refresh_token=refresh_token.value)
+            return LoginResponse(
+                access_token=access_token.value, refresh_token=refresh_token.value
+            )

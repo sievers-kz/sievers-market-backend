@@ -12,4 +12,3 @@ class IListingRepository(ABC):
     @abstractmethod
     async def get_by_id(self, listing_id: UUID) -> Listing:
         raise NotImplementedError
-

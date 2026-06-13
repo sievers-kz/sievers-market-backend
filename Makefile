@@ -8,15 +8,21 @@ endif
 
 COMPOSE_TEST = docker compose --env-file .env.test -f docker-compose.yml -f docker-compose.test.yml
 
-.PHONY: up down clean logs restart shell db test coverage coverage-html
+.PHONY: up build start stop destroy logs restart shell db cache test coverage coverage-html ci
 
 up:
 	$(COMPOSE) up -d --build
 
-down:
+build:
+	$(COMPOSE) build
+
+start:
+	$(COMPOSE) up -d
+
+stop:
 	$(COMPOSE) down
 
-clean:
+destroy:
 	$(COMPOSE) down -v
 
 logs:
@@ -31,6 +37,9 @@ shell:
 db:
 	$(COMPOSE) exec db sh -c 'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_NAME"'
 
+cache:
+	$(COMPOSE) exec redis redis-cli
+
 test:
 	$(COMPOSE) exec app pytest -v
 
@@ -43,6 +52,10 @@ coverage-html:
 ci:
 	@echo "=== Running CI Test pipeline ==="
 	$(COMPOSE_TEST) down -v
-	$(COMPOSE_TEST) up --build --abort-on-container-exit --exit-code-from sut
-	@echo "=== [CI] Cleaning up test environment ==="
-	$(COMPOSE_TEST) down -v
+
+	$(COMPOSE_TEST) up --build --abort-on-container-exit --exit-code-from sut; \
+	EXIT_CODE=$$?; \
+
+	echo "=== [CI] Cleaning up test environment ==="; \
+	$(COMPOSE_TEST) down -v; \
+	exit $$EXIT_CODE

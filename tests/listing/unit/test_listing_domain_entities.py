@@ -1,9 +1,13 @@
 import uuid
+
 import pytest
 
 from src.core.listing.domain.entities import Listing
 from src.core.listing.domain.enums import ListingStatus
-from src.core.listing.domain.exceptions import ListingActivationError, ListingArchivingError
+from src.core.listing.domain.exceptions import (
+    ListingActivationError,
+    ListingArchivingError,
+)
 from src.core.listing.domain.value_objects import Gallery, Image
 from src.core.shared.domain.enums import PriceCurrency
 
@@ -20,13 +24,15 @@ def create_listing(status=ListingStatus.ACTIVE) -> Listing:
         city_id=uuid.uuid4(),
         description="Описание",
         attributes={},
-        gallery=Gallery(images=(
-            Image(
-                media_id=uuid.uuid4(),
-                media_type="image/jpeg",
-                media_size=1 * 1024 * 1024,
-            ),
-        )),
+        gallery=Gallery(
+            images=(
+                Image(
+                    media_id=uuid.uuid4(),
+                    media_type="image/jpeg",
+                    media_size=1 * 1024 * 1024,
+                ),
+            )
+        ),
         status=status,
     )
 

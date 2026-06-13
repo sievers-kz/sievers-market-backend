@@ -6,5 +6,3 @@ class PriceCurrency(str, Enum):
     RUB = "RUB"
     USD = "USD"
     EUR = "EUR"
-
-

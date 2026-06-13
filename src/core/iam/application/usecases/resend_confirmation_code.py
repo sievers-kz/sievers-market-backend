@@ -1,11 +1,9 @@
-import asyncio
-
 from loguru import logger
 
+from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 from src.core.iam.application.services.otp import OTPService
 from src.core.iam.domain.enums import OTPType
 from src.core.iam.presentation.dto import ResendCodeRequest
-from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 
 
 class ResendConfirmationCodeUseCase:
@@ -27,5 +25,5 @@ class ResendConfirmationCodeUseCase:
         await self.otp_service.send(
             account_id=account.id,
             email=account.email.value,
-            otp_type=OTPType.CONFIRMATION
+            otp_type=OTPType.CONFIRMATION,
         )

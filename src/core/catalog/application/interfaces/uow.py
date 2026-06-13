@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
 
-from src.core.catalog.application.interfaces import IRubricRepository, ICategoryRepository, ISubcategoryRepository
+from src.core.catalog.application.interfaces import (
+    ICategoryRepository,
+    IRubricRepository,
+    ISubcategoryRepository,
+)
 
 
 class ICatalogUnitOfWork(ABC):

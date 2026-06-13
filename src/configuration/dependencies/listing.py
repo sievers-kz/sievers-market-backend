@@ -1,8 +1,16 @@
 from dependency_injector import containers, providers
 
-from src.core.listing.application.usecases import CreateListingUseCase, ChangeListingAttributeUseCase, \
-    ChangeListingPriceUseCase, ChangeListingLocationUseCase, ChangeListingDescriptionUseCase, ActivateListingUseCase, \
-    DeactivateListingUseCase, ArchiveListingUseCase, DeleteListingUseCase
+from src.core.listing.application.usecases import (
+    ActivateListingUseCase,
+    ArchiveListingUseCase,
+    ChangeListingAttributeUseCase,
+    ChangeListingDescriptionUseCase,
+    ChangeListingLocationUseCase,
+    ChangeListingPriceUseCase,
+    CreateListingUseCase,
+    DeactivateListingUseCase,
+    DeleteListingUseCase,
+)
 from src.core.listing.infrastructure.repository import ListingRepository
 from src.core.listing.infrastructure.uow import ListingUnitOfWork
 
@@ -12,10 +20,7 @@ class ListingContainer(containers.DeclarativeContainer):
     database_session = providers.Dependency()
     subcategory_service = providers.Dependency()
 
-    uow = providers.Factory(
-        ListingUnitOfWork,
-        session_factory=session_factory
-    )
+    uow = providers.Factory(ListingUnitOfWork, session_factory=session_factory)
 
     listing_repository = providers.Factory(
         ListingRepository,

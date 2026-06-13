@@ -2,7 +2,7 @@ import pytest
 
 from src.core.iam.domain.enums import OTPType
 from src.core.iam.domain.exceptions import OTPCooldownError
-from src.core.iam.presentation.dto import CreateAccountRequest, AccountConfirmation, ResendCodeRequest
+from src.core.iam.presentation.dto import CreateAccountRequest, ResendCodeRequest
 from tests.iam.conftest import create_user_request
 
 
@@ -24,7 +24,9 @@ class TestResendConfirmationCodeUsecase:
         await create_user_usecase.execute(dto)
 
         user = await account_repository.get_account_by_email(dto.email)
-        await redis_service.delete(f"otp:cooldown:{OTPType.CONFIRMATION.value}:{user.id}")
+        await redis_service.delete(
+            f"otp:cooldown:{OTPType.CONFIRMATION.value}:{user.id}"
+        )
 
         resend_dto = ResendCodeRequest(email=dto.email)
         await resend_confirmation_code_usecase.execute(resend_dto)

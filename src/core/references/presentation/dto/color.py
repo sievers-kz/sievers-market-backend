@@ -17,4 +17,3 @@ class CreateColorRequest(DTO):
 class UpdateColorRequest(DTO):
     name: str | None
     hex: str | None
-

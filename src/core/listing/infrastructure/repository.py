@@ -1,13 +1,12 @@
 from uuid import UUID
 
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.listing.application.interfaces.repository import IListingRepository
-from src.core.listing.infrastructure.models import Listing as ORMListing
 from src.core.listing.domain.entities import Listing as DomainListing
 from src.core.listing.infrastructure.mapper import ListingMapper
-from src.core.listing.domain.enums import ListingStatus
+from src.core.listing.infrastructure.models import Listing as ORMListing
 
 
 class ListingRepository(IListingRepository):
@@ -28,4 +27,3 @@ class ListingRepository(IListingRepository):
         if result is None:
             return None
         return ListingMapper.to_domain(result)
-

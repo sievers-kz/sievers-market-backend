@@ -4,25 +4,22 @@ from dependency_injector import containers, providers
 
 from src.core.iam.application.services.otp import OTPService
 from src.core.iam.application.usecases import (
-    CreateAccountUseCase,
     AccountConfirmationUseCase,
-    LoginUserUseCase,
-    RefreshTokenUseCase,
-    LogoutUserUseCase,
-    ForgotPasswordUseCase,
-    ResetPasswordUseCase,
     ChangePasswordUseCase,
-    ResendConfirmationCodeUseCase,
-    RequestEmailChangeUseCase,
     ConfirmEmailChangeUseCase,
+    CreateAccountUseCase,
+    ForgotPasswordUseCase,
+    LoginUserUseCase,
+    LogoutUserUseCase,
+    RefreshTokenUseCase,
+    RequestEmailChangeUseCase,
+    ResendConfirmationCodeUseCase,
+    ResetPasswordUseCase,
 )
-
-
-from src.core.iam.infrastructure.uow import IAMUnitOfWork
 from src.core.iam.infrastructure.repository import AccountRepository
 from src.core.iam.infrastructure.services.password_service import PasswordService
-
 from src.core.iam.infrastructure.services.pyjwt_token import PyJWTTokenService
+from src.core.iam.infrastructure.uow import IAMUnitOfWork
 from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormalizer
 
 
@@ -40,15 +37,9 @@ class IAMContainer(containers.DeclarativeContainer):
         bloom=bloom_filter,
     )
 
-    account_repository = providers.Factory(
-        AccountRepository,
-        session=database_session
-    )
+    account_repository = providers.Factory(AccountRepository, session=database_session)
 
-    iam_unit_of_work = providers.Factory(
-        IAMUnitOfWork,
-        session_factory=session_factory
-    )
+    iam_unit_of_work = providers.Factory(IAMUnitOfWork, session_factory=session_factory)
 
     phonenumber_normalizer = providers.Singleton(PhoneNormalizer)
 
@@ -56,14 +47,11 @@ class IAMContainer(containers.DeclarativeContainer):
         PyJWTTokenService,
         secret_key=auth_config.secret_key,
         algorithm=auth_config.algorithm,
-
         access_token_lifetime=providers.Factory(
-            timedelta,
-            minutes=auth_config.access_token_lifetime.as_int()
+            timedelta, minutes=auth_config.access_token_lifetime.as_int()
         ),
         refresh_token_lifetime=providers.Factory(
-            timedelta,
-            days=auth_config.refresh_token_lifetime.as_int()
+            timedelta, days=auth_config.refresh_token_lifetime.as_int()
         ),
     )
 
@@ -77,14 +65,14 @@ class IAMContainer(containers.DeclarativeContainer):
         CreateAccountUseCase,
         uow=iam_unit_of_work,
         otp_service=otp_service,
-        password_service=password_service
+        password_service=password_service,
     )
 
     account_confirmation_usecase = providers.Factory(
         AccountConfirmationUseCase,
         unit_of_work=iam_unit_of_work,
         otp_service=otp_service,
-        token_service=pyjwt_token_service
+        token_service=pyjwt_token_service,
     )
 
     resend_confirmation_code_usecase = providers.Factory(
@@ -97,13 +85,13 @@ class IAMContainer(containers.DeclarativeContainer):
         LoginUserUseCase,
         unit_of_work=iam_unit_of_work,
         token_service=pyjwt_token_service,
-        password_service=password_service
+        password_service=password_service,
     )
 
     refresh_token_usecase = providers.Factory(
         RefreshTokenUseCase,
         unit_of_work=iam_unit_of_work,
-        token_service=pyjwt_token_service
+        token_service=pyjwt_token_service,
     )
 
     logout_user_usecase = providers.Factory(
@@ -127,7 +115,7 @@ class IAMContainer(containers.DeclarativeContainer):
     change_password_usecase = providers.Factory(
         ChangePasswordUseCase,
         unit_of_work=iam_unit_of_work,
-        password_service=password_service
+        password_service=password_service,
     )
 
     request_email_change_usecase = providers.Factory(
@@ -143,4 +131,3 @@ class IAMContainer(containers.DeclarativeContainer):
         otp_service=otp_service,
         cache_service=redis_service,
     )
-

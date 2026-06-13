@@ -11,4 +11,3 @@ class IReferenceUnitOfWork(ABC):
     @abstractmethod
     def color(self):
         raise NotImplementedError
-

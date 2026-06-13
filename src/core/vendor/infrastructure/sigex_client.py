@@ -27,17 +27,10 @@ class SigexClient:
                     "nameRu": "Подтверждение БИН компании в AGROW",
                     "nameKz": "AGROW жүйесінде БСН растау",
                     "nameEn": "AGROW Business Verification",
-                    "meta": [
-                        {"name": "Проверяемый БИН/ИИН", "value": tax_id}
-                    ],
-                    "document": {
-                        "file": {
-                            "mime": "text/plain",
-                            "data": tax_id
-                        }
-                    }
+                    "meta": [{"name": "Проверяемый БИН/ИИН", "value": tax_id}],
+                    "document": {"file": {"mime": "text/plain", "data": tax_id}},
                 }
-            ]
+            ],
         }
 
         timeout = httpx.Timeout(120.0, connect=10.0)
@@ -57,11 +50,14 @@ class SigexClient:
 
             try:
                 signer_info = data["signers"]
-                confirmed_tax_id = signer_info.get("bin") or signer_info.get("egov") or signer_info.get("iin")
+                confirmed_tax_id = (
+                    signer_info.get("bin")
+                    or signer_info.get("egov")
+                    or signer_info.get("iin")
+                )
                 if not confirmed_tax_id:
                     raise ValueError("Идентификатор отсутствует в ЭЦП")
                 return confirmed_tax_id
 
             except (KeyError, IndexError):
                 raise ValueError("Не удалось распарсить структуру подписи eGov")
-

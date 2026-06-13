@@ -4,9 +4,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.customer.application.interfaces.repository import ICustomerRepository
+from src.core.customer.domain.entities import Customer as DomainCustomer
 from src.core.customer.infrastructure.mapper import CustomerMapper
 from src.core.customer.infrastructure.models import Customer as ORMCustomer
-from src.core.customer.domain.entities import Customer as DomainCustomer
 
 
 class CustomerRepository(ICustomerRepository):
@@ -20,10 +20,7 @@ class CustomerRepository(ICustomerRepository):
         await self._session.flush()
 
     async def get_by_id(self, customer_id: UUID) -> DomainCustomer:
-        statement = (
-            select(self._model)
-            .where(self._model.id == customer_id)
-        )
+        statement = select(self._model).where(self._model.id == customer_id)
 
         result = (await self._session.execute(statement)).scalar_one_or_none()
         if result is None:
@@ -31,10 +28,7 @@ class CustomerRepository(ICustomerRepository):
         return CustomerMapper.to_domain(result)
 
     async def get_by_account_id(self, account_id: UUID) -> DomainCustomer:
-        statement = (
-            select(self._model)
-            .where(self._model.account_id == account_id)
-        )
+        statement = select(self._model).where(self._model.account_id == account_id)
 
         query_result = await self._session.execute(statement)
         orm_model = query_result.scalar_one_or_none()

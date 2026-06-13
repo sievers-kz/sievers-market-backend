@@ -23,4 +23,3 @@ class CustomerProfileResponse(DTO):
     patronymic: str | None
     email: str
     avatar_url: str | None
-

@@ -1,19 +1,30 @@
-import yaml
 import logging
+from pathlib import Path
 from typing import Any
 
-from pydantic import TypeAdapter
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-
-from scripts.seeds.schemas import RubricSeed, ColorSeed, BrandSeed, RegionSeed, CountrySeed
-from src.core.catalog.domain.enums import CatalogStatus
-
-from src.core.catalog.infrastructure.models import Rubric, Category, Subcategory
-from src.core.references.infrastructure.models import Brand, Country, Color, Region, City
-
-from pathlib import Path
+import yaml
 from dotenv import load_dotenv
+from pydantic import TypeAdapter
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from scripts.seeds.schemas import (
+    BrandSeed,
+    ColorSeed,
+    CountrySeed,
+    RegionSeed,
+    RubricSeed,
+)
+from src.configuration.settings.settings import PostgresSettings
+from src.core.catalog.domain.enums import CatalogStatus
+from src.core.catalog.infrastructure.models import Category, Rubric, Subcategory
+from src.core.references.infrastructure.models import (
+    Brand,
+    City,
+    Color,
+    Country,
+    Region,
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ENV_PATH = BASE_DIR / ".env"
@@ -23,8 +34,6 @@ if ENV_PATH.exists():
     print(f"✅ .env loaded from {ENV_PATH}")
 else:
     print(f"❌ .env NOT FOUND at {ENV_PATH}")
-
-from src.configuration.settings.settings import PostgresSettings
 
 
 logger = logging.getLogger(__name__)
@@ -113,10 +122,7 @@ class DataSeeder:
                 await self.session.flush()
 
                 for city_name in r_dto.cities:
-                    city = City(
-                        name=city_name,
-                        region_id=region.id
-                    )
+                    city = City(name=city_name, region_id=region.id)
                     self.session.add(city)
 
             logger.info("✅ Regions and Cities seeded")
@@ -136,16 +142,14 @@ class DataSeeder:
             rubric = Rubric(
                 name=r_dto.name,
                 attributes=[a.model_dump() for a in r_dto.attributes],
-                status=CatalogStatus.ACTIVE
+                status=CatalogStatus.ACTIVE,
             )
             self.session.add(rubric)
             await self.session.flush()
 
             for c_dto in r_dto.categories:
                 category = Category(
-                    rubric_id=rubric.id,
-                    name=c_dto.name,
-                    status=CatalogStatus.ACTIVE
+                    rubric_id=rubric.id, name=c_dto.name, status=CatalogStatus.ACTIVE
                 )
                 self.session.add(category)
                 await self.session.flush()
@@ -155,7 +159,7 @@ class DataSeeder:
                         category_id=category.id,
                         name=s_dto.name,
                         attributes=[a.model_dump() for a in s_dto.attributes],
-                        status=CatalogStatus.ACTIVE
+                        status=CatalogStatus.ACTIVE,
                     )
                     self.session.add(subcategory)
 
@@ -188,7 +192,9 @@ class DataSeeder:
 async def main():
     db_settings = PostgresSettings()
     engine = create_async_engine(url=db_settings.database_url, echo=False)
-    session_factory = async_sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+    session_factory = async_sessionmaker(
+        bind=engine, autoflush=False, expire_on_commit=False
+    )
 
     async with session_factory() as session:
         seeder = DataSeeder(session)

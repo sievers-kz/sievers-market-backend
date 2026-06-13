@@ -1,19 +1,19 @@
-from dependency_injector.wiring import inject, Provide
+from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter
 from fastapi.params import Depends, Security
 from typing_extensions import Annotated
 
+from src.configuration.dependencies.container import ApplicationContainer
+from src.core.customer.application.usecases import ChangeCustomerFullnameUseCase
 from src.core.customer.application.usecases.create_customer import CreateCustomerUseCase
 from src.core.customer.infrastructure.query import CustomerQueryService
-from src.core.customer.presentation.dto import ChangeCustomerFullname, CreateCustomerRequest, CustomerProfileResponse
-from src.core.shared.presentation.dto import CurrentUser, CurrentCustomer
-from src.core.shared.presentation.security import get_current_user, get_current_customer
-from src.configuration.dependencies.container import ApplicationContainer
-
-from src.core.customer.application.usecases import (
-    ChangeCustomerFullnameUseCase,
+from src.core.customer.presentation.dto import (
+    ChangeCustomerFullname,
+    CreateCustomerRequest,
+    CustomerProfileResponse,
 )
-
+from src.core.shared.presentation.dto import CurrentCustomer, CurrentUser
+from src.core.shared.presentation.security import get_current_customer, get_current_user
 
 customer_router = APIRouter(prefix="/api/v1/customer", tags=["Customer"])
 
@@ -24,13 +24,9 @@ async def create_customer(
     dto: CreateCustomerRequest,
     usecase: Annotated[
         CreateCustomerUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.customer.create_customer_usecase
-            ]
-        )
+        Depends(Provide[ApplicationContainer.customer.create_customer_usecase]),
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_user: CurrentUser = Security(get_current_user),
 ):
     await usecase.execute(current_user.id, dto)
     return {"message": "Customer successfully created!"}
@@ -43,12 +39,10 @@ async def change_customer_fullname(
     usecase: Annotated[
         ChangeCustomerFullnameUseCase,
         Depends(
-            Provide[
-                ApplicationContainer.customer.change_customer_fullname_usecase
-            ]
-        )
+            Provide[ApplicationContainer.customer.change_customer_fullname_usecase]
+        ),
     ],
-    current_customer: CurrentCustomer = Security(get_current_customer)
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
     await usecase.execute(current_customer.id, dto)
     return {"message": "Ваши данные успешно изменены!"}
@@ -59,11 +53,7 @@ async def change_customer_fullname(
 async def get_me(
     service: Annotated[
         CustomerQueryService,
-        Depends(
-            Provide[
-                ApplicationContainer.customer.query_service
-            ]
-        )
+        Depends(Provide[ApplicationContainer.customer.query_service]),
     ],
     current_customer: CurrentCustomer = Security(get_current_customer),
 ):

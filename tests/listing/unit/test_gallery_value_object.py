@@ -1,12 +1,13 @@
 import uuid
+
 import pytest
 
-from src.core.listing.domain.value_objects import Image, Gallery
 from src.core.listing.domain.exceptions import (
-    ListingLargeImageSizeError,
     ListingGalleryEmptyError,
     ListingGalleryTooManyImagesError,
+    ListingLargeImageSizeError,
 )
+from src.core.listing.domain.value_objects import Gallery, Image
 
 
 def create_image(media_size=1 * 1024 * 1024) -> Image:

@@ -1,6 +1,7 @@
 from uuid import UUID
 
-from sqlalchemy import Integer, String, Enum, UUID as ORMUUID
+from sqlalchemy import UUID as ORMUUID
+from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core.media.domain.enums import MediaType

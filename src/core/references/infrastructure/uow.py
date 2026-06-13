@@ -6,7 +6,6 @@ from src.core.references.infrastructure.repositories import (
     BrandRepository,
     ColorRepository,
 )
-
 from src.core.shared.infrastructure.sql_alchemy_uow import SQLAlchemyUnitOfWork
 
 
@@ -21,4 +20,3 @@ class ReferenceUnitOfWork(SQLAlchemyUnitOfWork):
     @property
     def color(self):
         return ColorRepository(self._session)
-

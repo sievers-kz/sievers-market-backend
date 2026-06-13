@@ -1,4 +1,4 @@
-from datetime import timezone, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -38,7 +38,9 @@ class TestAccountRepository:
 
     @pytest.mark.asyncio
     @pytest.mark.integration
-    async def test_find_by_token_value_returns_none_for_invalid_token(self, account_repository):
+    async def test_find_by_token_value_returns_none_for_invalid_token(
+        self, account_repository
+    ):
         fake_token = "fake_token_value"
         found_account = await account_repository.find_by_token_value(fake_token)
         assert found_account is None
@@ -59,7 +61,7 @@ class TestAccountRepository:
         domain_account.add_new_token(
             type=TokenType.REFRESH,
             value="merged_refresh_token_123",
-            expires_at=datetime.now(timezone.utc) + timedelta(days=7)
+            expires_at=datetime.now(timezone.utc) + timedelta(days=7),
         )
         await account_repository.save(domain_account)
 
@@ -67,4 +69,6 @@ class TestAccountRepository:
 
         assert updated_account.is_active is False
         assert len(updated_account.tokens) == 2
-        assert any(t.value == "merged_refresh_token_123" for t in updated_account.tokens)
+        assert any(
+            t.value == "merged_refresh_token_123" for t in updated_account.tokens
+        )

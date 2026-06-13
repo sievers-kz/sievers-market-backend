@@ -2,10 +2,13 @@ from uuid import UUID
 
 from loguru import logger
 
-from src.core.references.application.interfaces.abstract_color_repository import IColorRepository
 from src.core.references.application.interfaces.abstract_uow import IReferenceUnitOfWork
 from src.core.references.domain.entities import Color
-from src.core.references.presentation.dto.color import ColorResponse, CreateColorRequest, UpdateColorRequest
+from src.core.references.presentation.dto.color import (
+    ColorResponse,
+    CreateColorRequest,
+    UpdateColorRequest,
+)
 
 
 class ColorService:

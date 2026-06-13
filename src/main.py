@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from scalar_fastapi import get_scalar_api_reference, Theme, Layout
+from scalar_fastapi import Layout, Theme, get_scalar_api_reference
 
+from src.configuration.dependencies.container import ApplicationContainer
 from src.configuration.exception_handlers import setup_exception_handlers
 from src.configuration.logging import setup_logger
 from src.configuration.settings.settings import ApplicationSettings
@@ -10,9 +11,8 @@ from src.core.catalog.presentation.routers.catalog import catalog_router
 from src.core.customer.presentation.routers import customer_router
 from src.core.iam.presentation.routers import iam
 from src.core.listing.presentation.routers import listing_router
-from src.core.references.presentation.routers.reference import reference_router
 from src.core.media.presentation.routers import media_router
-from src.configuration.dependencies.container import ApplicationContainer
+from src.core.references.presentation.routers.reference import reference_router
 from src.core.vendor.presentation.router import vendor_router
 
 
@@ -39,6 +39,7 @@ class ApplicationFactory:
             await self.container.init_resources()
             yield
             await self.container.shutdown_resources()
+
         return lifespan
 
     def _wire_dependency(self):
@@ -54,7 +55,7 @@ class ApplicationFactory:
             packages=[
                 "src.core.catalog.presentation.routers",
                 "src.core.references.presentation.routers",
-            ]
+            ],
         )
         self.app.container = self.container
 
@@ -78,7 +79,7 @@ class ApplicationFactory:
                 openapi_url=self.app.openapi_url,
                 title=self.app.title,
                 theme=Theme.MARS,
-                layout=Layout.MODERN
+                layout=Layout.MODERN,
             )
 
     def build(self) -> FastAPI:
@@ -89,7 +90,3 @@ class ApplicationFactory:
 
 
 fastapi_app = ApplicationFactory().build()
-
-
-
-

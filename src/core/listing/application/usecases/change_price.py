@@ -11,7 +11,9 @@ class ChangeListingPriceUseCase:
     def __init__(self, uow: IListingUnitOfWork):
         self.uow = uow
 
-    async def execute(self, vendor_id: UUID, listing_id: UUID, dto: ChangeListingPriceRequest):
+    async def execute(
+        self, vendor_id: UUID, listing_id: UUID, dto: ChangeListingPriceRequest
+    ):
         async with self.uow as uow:
             listing = await uow.listing.get_by_id(listing_id)
             if not listing:
@@ -21,5 +23,8 @@ class ChangeListingPriceUseCase:
             await uow.listing.save(listing)
             await uow.commit()
 
-        logger.info("Listing price changed | listing_id={} new_price={}", listing.id, listing.price)
-
+        logger.info(
+            "Listing price changed | listing_id={} new_price={}",
+            listing.id,
+            listing.price,
+        )

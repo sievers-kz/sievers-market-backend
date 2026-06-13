@@ -24,8 +24,12 @@ class TestCloseVendorUsecase:
         create_account_dto = create_user_request()
         account_id = await create_user_usecase.execute(create_account_dto)
 
-        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{account_id}")
-        account_confirmation_dto = AccountConfirmation(account_id=account_id, confirm_code=otp_code)
+        otp_code = await redis_service.get(
+            f"otp:{OTPType.CONFIRMATION.value}:{account_id}"
+        )
+        account_confirmation_dto = AccountConfirmation(
+            account_id=account_id, confirm_code=otp_code
+        )
         await account_confirmation_usecase.execute(account_confirmation_dto)
 
         create_vendor_dto = create_vendor_request()
@@ -39,4 +43,7 @@ class TestCloseVendorUsecase:
 
         customer = await customer_repository.get_by_account_id(vendor_before.account_id)
         assert customer is not None
-        assert customer.fullname.last_name == vendor_before.contact_fullname.contact_last_name
+        assert (
+            customer.fullname.last_name
+            == vendor_before.contact_fullname.contact_last_name
+        )
