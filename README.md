@@ -20,7 +20,6 @@ RESTful B2B агромаркетплейс для автоматизации т�
 с применением принципов Domain-Driven Design и Clean Architecture.
 
 ## Целевая архитектурная схема
-<hr>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/architecture-schema-dark.png" width="688">
   <img src="docs/assets/architecture-schema-light.png" alt="Architecture" width="688">
@@ -35,7 +34,6 @@ RESTful B2B агромаркетплейс для автоматизации т�
 Медиафайлы хранятся в MinIO, персистентные данные - в PostgreSQL.
 
 ## Быстрый старт
-<hr>
 Для удобства управления Docker-окружением проект использует Makefile, который абстрагирует типовые docker-compose
 команды в короткие алиасы. Команды Make представлены в таблице ниже.
 
@@ -91,7 +89,6 @@ RESTful B2B агромаркетплейс для автоматизации т�
 ```
 
 ## Тестирование
-<hr>
 
 Проект покрыт интеграционными и юнит-тестами с использованием `pytest` и `pytest-asyncio`. Все тесты выполняются
 в изолированном тестовом контейнере `sut` с использованием выделенной базы данных из конфигурации `.env.test`.
