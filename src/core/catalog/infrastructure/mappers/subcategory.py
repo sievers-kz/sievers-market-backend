@@ -1,11 +1,6 @@
+from src.core.catalog.domain.entities import Subcategory as DomainSubcategory
 from src.core.catalog.domain.value_objects import Attribute
-from src.core.catalog.infrastructure.models import (
-    Subcategory as ORMSubcategory
-)
-
-from src.core.catalog.domain.entities import (
-    Subcategory as DomainSubcategory
-)
+from src.core.catalog.infrastructure.models import Subcategory as ORMSubcategory
 
 
 class SubcategoryMapper:
@@ -16,7 +11,7 @@ class SubcategoryMapper:
             category_id=domain_model.category_id,
             name=domain_model.name,
             attributes=[attr.to_dict() for attr in domain_model.attributes],
-            status=domain_model.status
+            status=domain_model.status,
         )
 
     @staticmethod
@@ -26,5 +21,5 @@ class SubcategoryMapper:
             category_id=orm_model.category_id,
             name=orm_model.name,
             attributes=[Attribute.from_dict(attr) for attr in orm_model.attributes],
-            status=orm_model.status
+            status=orm_model.status,
         )

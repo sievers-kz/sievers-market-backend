@@ -4,15 +4,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.catalog.application.interfaces import ICategoryRepository
+from src.core.catalog.domain.entities import Category as DomainCategory
 from src.core.catalog.infrastructure.mappers import CategoryMapper
-
-from src.core.catalog.infrastructure.models import (
-    Category as ORMCategory
-)
-
-from src.core.catalog.domain.entities import (
-    Category as DomainCategory
-)
+from src.core.catalog.infrastructure.models import Category as ORMCategory
 
 
 class CategoryRepository(ICategoryRepository):

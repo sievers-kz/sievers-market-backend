@@ -1,7 +1,7 @@
 from loguru import logger
 
-from src.core.iam.presentation.dto import RefreshData
 from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
+from src.core.iam.presentation.dto import RefreshData
 
 
 class LogoutUserUseCase:

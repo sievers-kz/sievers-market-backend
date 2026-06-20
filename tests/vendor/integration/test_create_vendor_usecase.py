@@ -4,7 +4,6 @@ from src.core.iam.domain.enums import OTPType
 from src.core.iam.presentation.dto import AccountConfirmation
 from src.core.vendor.domain.enums import LegalForm
 from src.core.vendor.domain.exceptions import VendorAlreadyExistsError
-from src.core.vendor.presentation.dto import CreateVendorRequest
 from tests.iam.conftest import create_user_request
 from tests.vendor.conftest import create_vendor_request
 
@@ -24,8 +23,12 @@ class TestCreateVendorUsecase:
         create_account_dto = create_user_request()
         account_id = await create_user_usecase.execute(create_account_dto)
 
-        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{account_id}")
-        account_confirmation_dto = AccountConfirmation(account_id=account_id, confirm_code=otp_code)
+        otp_code = await redis_service.get(
+            f"otp:{OTPType.CONFIRMATION.value}:{account_id}"
+        )
+        account_confirmation_dto = AccountConfirmation(
+            account_id=account_id, confirm_code=otp_code
+        )
         await account_confirmation_usecase.execute(account_confirmation_dto)
 
         create_vendor_dto = create_vendor_request()
@@ -49,8 +52,12 @@ class TestCreateVendorUsecase:
         create_account_dto = create_user_request()
         account_id = await create_user_usecase.execute(create_account_dto)
 
-        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{account_id}")
-        account_confirmation_dto = AccountConfirmation(account_id=account_id, confirm_code=otp_code)
+        otp_code = await redis_service.get(
+            f"otp:{OTPType.CONFIRMATION.value}:{account_id}"
+        )
+        account_confirmation_dto = AccountConfirmation(
+            account_id=account_id, confirm_code=otp_code
+        )
         await account_confirmation_usecase.execute(account_confirmation_dto)
 
         create_vendor_dto = create_vendor_request()
@@ -58,4 +65,3 @@ class TestCreateVendorUsecase:
 
         with pytest.raises(VendorAlreadyExistsError):
             await register_vendor_usecase.execute(account_id, create_vendor_dto)
-

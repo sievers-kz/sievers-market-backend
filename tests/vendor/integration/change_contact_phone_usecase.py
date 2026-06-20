@@ -24,16 +24,24 @@ class TestChangeContactPhoneUseCase:
         create_account_dto = create_user_request()
         account_id = await create_user_usecase.execute(create_account_dto)
 
-        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{account_id}")
-        account_confirmation_dto = AccountConfirmation(account_id=account_id, confirm_code=otp_code)
+        otp_code = await redis_service.get(
+            f"otp:{OTPType.CONFIRMATION.value}:{account_id}"
+        )
+        account_confirmation_dto = AccountConfirmation(
+            account_id=account_id, confirm_code=otp_code
+        )
         await account_confirmation_usecase.execute(account_confirmation_dto)
 
         create_vendor_dto = create_vendor_request()
         await register_vendor_usecase.execute(account_id, create_vendor_dto)
 
         vendor_before = await vendor_repository.get_by_account_id(account_id)
-        change_contact_phone_dto = ChangeContactPhoneRequest(contact_phone="+77472006243")
-        await change_contact_phone_usecase.execute(vendor_before.id, change_contact_phone_dto)
+        change_contact_phone_dto = ChangeContactPhoneRequest(
+            contact_phone="+77472006243"
+        )
+        await change_contact_phone_usecase.execute(
+            vendor_before.id, change_contact_phone_dto
+        )
 
         vendor_after = await vendor_repository.get_by_account_id(account_id)
         assert vendor_after.contact_phone is not None
@@ -54,8 +62,12 @@ class TestChangeContactPhoneUseCase:
         create_account_dto = create_user_request()
         account_id = await create_user_usecase.execute(create_account_dto)
 
-        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{account_id}")
-        account_confirmation_dto = AccountConfirmation(account_id=account_id, confirm_code=otp_code)
+        otp_code = await redis_service.get(
+            f"otp:{OTPType.CONFIRMATION.value}:{account_id}"
+        )
+        account_confirmation_dto = AccountConfirmation(
+            account_id=account_id, confirm_code=otp_code
+        )
         await account_confirmation_usecase.execute(account_confirmation_dto)
 
         create_vendor_dto = create_vendor_request()
@@ -65,5 +77,6 @@ class TestChangeContactPhoneUseCase:
         change_contact_phone_dto = ChangeContactPhoneRequest(contact_phone="+123456789")
 
         with pytest.raises(InvalidPhoneFormatError):
-            await change_contact_phone_usecase.execute(vendor.id, change_contact_phone_dto)
-
+            await change_contact_phone_usecase.execute(
+                vendor.id, change_contact_phone_dto
+            )

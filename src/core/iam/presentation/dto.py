@@ -33,7 +33,7 @@ class ResetPasswordData(BaseModel):
 
 
 class RefreshData(BaseModel):
-    refresh_token: str
+    refresh_token: str | None = None
 
 
 class LoginAccount(BaseModel):
@@ -62,5 +62,3 @@ class ChangeEmailRequest(DTO):
 
 class ConfirmEmailChangeRequest(DTO):
     otp_code: str
-
-

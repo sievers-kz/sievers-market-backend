@@ -19,4 +19,8 @@ class ChangeShopNameUseCase:
             await uow.vendor.save(vendor)
             await uow.commit()
 
-        logger.info("Vendor shop name changed successfully | vendor_id={} shop_name={}", vendor.id, vendor.shop_name)
+        logger.info(
+            "Vendor shop name changed successfully | vendor_id={} shop_name={}",
+            vendor.id,
+            vendor.shop_name,
+        )

@@ -1,10 +1,18 @@
 from datetime import datetime, timedelta, timezone
+
 import pytest
 
 from src.core.iam.domain.enums import TokenType
-from src.core.iam.domain.exceptions import AccountAlreadyConfirmedError, AccountNotConfirmedError
+from src.core.iam.domain.exceptions import (
+    AccountAlreadyConfirmedError,
+    AccountNotConfirmedError,
+)
 from src.core.iam.domain.value_objects import Password
-from tests.iam.conftest import create_domain_account, get_token_by_type, get_token_by_value
+from tests.iam.conftest import (
+    create_domain_account,
+    get_token_by_type,
+    get_token_by_value,
+)
 
 
 @pytest.mark.unit
@@ -92,7 +100,8 @@ def test_reset_password_success():
     new_hashed_password = "new_hashed_password"
     account.reset_password(new_hashed_password)
 
-    revoked_refresh_tokens = [token for token in account.tokens if token.type == TokenType.REFRESH]
+    revoked_refresh_tokens = [
+        token for token in account.tokens if token.type == TokenType.REFRESH
+    ]
     for token in revoked_refresh_tokens:
         assert token.is_revoked is True
-

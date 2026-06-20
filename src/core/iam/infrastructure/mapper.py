@@ -1,6 +1,8 @@
-from src.core.iam.domain.entities import Account as DomainAccount, Token as DomainToken
+from src.core.iam.domain.entities import Account as DomainAccount
+from src.core.iam.domain.entities import Token as DomainToken
 from src.core.iam.domain.value_objects import Email, Password
-from src.core.iam.infrastructure.models import Account as ORMAccount, Token as ORMToken
+from src.core.iam.infrastructure.models import Account as ORMAccount
+from src.core.iam.infrastructure.models import Token as ORMToken
 
 
 class AccountMapper:
@@ -14,7 +16,7 @@ class AccountMapper:
             is_active=account.is_active,
             created_at=account.created_at,
             updated_at=account.updated_at,
-            tokens=tokens
+            tokens=tokens,
         )
 
     @staticmethod
@@ -27,7 +29,7 @@ class AccountMapper:
             is_active=account.is_active,
             created_at=account.created_at,
             updated_at=account.updated_at,
-            tokens=tokens
+            tokens=tokens,
         )
 
 
@@ -41,8 +43,9 @@ class TokenMapper:
                 type=token.type,
                 value=token.value,
                 is_revoked=token.is_revoked,
-                expires_at=token.expires_at
-            ) for token in tokens
+                expires_at=token.expires_at,
+            )
+            for token in tokens
         ]
 
     @staticmethod
@@ -54,6 +57,7 @@ class TokenMapper:
                 type=token.type,
                 value=token.value,
                 is_revoked=token.is_revoked,
-                expires_at=token.expires_at
-            ) for token in tokens
+                expires_at=token.expires_at,
+            )
+            for token in tokens
         ]

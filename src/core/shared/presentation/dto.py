@@ -1,9 +1,7 @@
-from typing import TypeVar, Generic
+from typing import Generic, TypeVar
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
-
-from src.core.iam.domain.enums import UserRole
 
 
 class DTO(BaseModel):

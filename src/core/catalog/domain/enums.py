@@ -22,4 +22,3 @@ class WidgetType(str, Enum):
 class CatalogStatus(str, Enum):
     ACTIVE = "active"
     DELETED = "deleted"
-

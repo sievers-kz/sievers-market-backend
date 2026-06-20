@@ -21,7 +21,7 @@ class CustomerQueryService(QueryService):
                 Customer.first_name,
                 Customer.patronymic,
                 Customer.avatar_url,
-                Account.email
+                Account.email,
             )
             .join(Account, Customer.account_id == Account.id)
             .where(Customer.id == customer_id)

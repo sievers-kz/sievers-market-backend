@@ -18,17 +18,14 @@ class Subcategory(AggregateRoot):
 
     @classmethod
     def create(
-        cls,
-        category_id: UUID,
-        name: str,
-        attributes: list[Attribute]
+        cls, category_id: UUID, name: str, attributes: list[Attribute]
     ) -> "Subcategory":
         return cls(
             id=uuid.uuid4(),
             category_id=category_id,
             name=name,
             attributes=attributes,
-            status=CatalogStatus.ACTIVE
+            status=CatalogStatus.ACTIVE,
         )
 
     def change_parent(self, parent_id: UUID) -> None:
@@ -82,10 +79,7 @@ class Category(AggregateRoot):
         name: str,
     ) -> "Category":
         return cls(
-            id=uuid.uuid4(),
-            rubric_id=rubric_id,
-            name=name,
-            status=CatalogStatus.ACTIVE
+            id=uuid.uuid4(), rubric_id=rubric_id, name=name, status=CatalogStatus.ACTIVE
         )
 
     def change_parent(self, parent_id: UUID) -> None:
@@ -121,7 +115,7 @@ class Rubric(AggregateRoot):
             id=uuid.uuid4(),
             name=name,
             attributes=attributes,
-            status=CatalogStatus.ACTIVE
+            status=CatalogStatus.ACTIVE,
         )
 
     def change_name(self, name: str) -> None:

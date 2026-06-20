@@ -8,4 +8,3 @@ class IListingUnitOfWork(ABC):
     @abstractmethod
     def listing(self) -> IListingRepository:
         raise NotImplementedError
-

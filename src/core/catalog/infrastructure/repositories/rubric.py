@@ -4,15 +4,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.catalog.application.interfaces import IRubricRepository
+from src.core.catalog.domain.entities import Rubric as DomainRubric
 from src.core.catalog.infrastructure.mappers import RubricMapper
-
-from src.core.catalog.infrastructure.models import (
-    Rubric as ORMRubric,
-)
-
-from src.core.catalog.domain.entities import (
-    Rubric as DomainRubric,
-)
+from src.core.catalog.infrastructure.models import Rubric as ORMRubric
 
 
 class RubricRepository(IRubricRepository):

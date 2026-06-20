@@ -15,4 +15,3 @@ class IAMUnitOfWork(SQLAlchemyUnitOfWork):
         if self._session is None:
             raise RuntimeError("UoW not initialized!")
         return AccountRepository(self._session)
-

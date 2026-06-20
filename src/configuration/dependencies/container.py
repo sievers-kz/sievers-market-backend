@@ -1,8 +1,8 @@
 from dependency_injector import containers, providers
 
 from src.configuration.dependencies.catalog import CatalogContainer
-from src.configuration.dependencies.customer import CustomerContainer
 from src.configuration.dependencies.configuration import ConfigurationContainer
+from src.configuration.dependencies.customer import CustomerContainer
 from src.configuration.dependencies.gateways import GatewaysContainer
 from src.configuration.dependencies.iam import IAMContainer
 from src.configuration.dependencies.listing import ListingContainer
@@ -13,9 +13,7 @@ from src.configuration.dependencies.vendor import VendorContainer
 
 
 class ApplicationContainer(containers.DeclarativeContainer):
-    configurations = providers.Container(
-        ConfigurationContainer
-    )
+    configurations = providers.Container(ConfigurationContainer)
 
     gateways = providers.Container(
         GatewaysContainer,
@@ -39,12 +37,13 @@ class ApplicationContainer(containers.DeclarativeContainer):
         redis_client=gateways.redis_client,
         arq_pool=gateways.arq_pool,
         resend_config=configurations.resend_config,
+        application_settings=configurations.configuration,
     )
 
     reference = providers.Container(
         ReferenceContainer,
         session_factory=gateways.session_factory,
-        database_session=gateways.database_session
+        database_session=gateways.database_session,
     )
 
     customer = providers.Container(
@@ -61,7 +60,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         console_email_sender=shared.console_email_sender,
         redis_service=shared.redis_service,
         arq_service=shared.arq_service,
-        bloom_filter=gateways.bloom_filter
+        bloom_filter=gateways.bloom_filter,
     )
 
     listing = providers.Container(
@@ -87,4 +86,3 @@ class ApplicationContainer(containers.DeclarativeContainer):
         customer_service=customer.customer_service,
         redis_service=shared.redis_service,
     )
-

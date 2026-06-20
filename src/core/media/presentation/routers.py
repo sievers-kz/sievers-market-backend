@@ -1,16 +1,19 @@
 from typing import Annotated
 
-from dependency_injector.wiring import inject, Provide
+from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter
 from fastapi.params import Depends, Security
 
 from src.configuration.dependencies.container import ApplicationContainer
 from src.core.media.application.services.media_service import MediaService
-from src.core.media.presentation.dto import UploadUrlResponse, GenerateUploadUrlRequest, ConfirmUploadResponse, \
-    ConfirmUploadRequest
+from src.core.media.presentation.dto import (
+    ConfirmUploadRequest,
+    ConfirmUploadResponse,
+    GenerateUploadUrlRequest,
+    UploadUrlResponse,
+)
 from src.core.shared.presentation.dto import CurrentUser
 from src.core.shared.presentation.security import get_current_user
-
 
 media_router = APIRouter(prefix="/api/v1/media", tags=["Media"])
 
@@ -20,14 +23,9 @@ media_router = APIRouter(prefix="/api/v1/media", tags=["Media"])
 async def generate_upload_url(
     dto: GenerateUploadUrlRequest,
     service: Annotated[
-        MediaService,
-        Depends(
-            Provide[
-                ApplicationContainer.media.media_service
-            ]
-        )
+        MediaService, Depends(Provide[ApplicationContainer.media.media_service])
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_user: CurrentUser = Security(get_current_user),
 ):
     return await service.generate_upload_url(dto)
 
@@ -37,15 +35,9 @@ async def generate_upload_url(
 async def confirm_upload(
     dto: ConfirmUploadRequest,
     service: Annotated[
-        MediaService,
-        Depends(
-            Provide[
-                ApplicationContainer.media.media_service
-            ]
-        )
+        MediaService, Depends(Provide[ApplicationContainer.media.media_service])
     ],
-    current_user: CurrentUser = Security(get_current_user)
+    current_user: CurrentUser = Security(get_current_user),
 ):
     media_response = await service.confirm_upload(current_user.id, dto)
     return media_response
-

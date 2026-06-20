@@ -18,9 +18,12 @@ class TestChangeListingPriceUsecase:
         listing_id = await create_listing_usecase.execute(create_vendor.id, dto)
 
         listing = await listing_repository.get_by_id(listing_id)
-        change_description_dto = ChangeListingDescriptionRequest(description="Новое описание")
-        await change_listing_description_usecase.execute(create_vendor.id, listing_id, change_description_dto)
+        change_description_dto = ChangeListingDescriptionRequest(
+            description="Новое описание"
+        )
+        await change_listing_description_usecase.execute(
+            create_vendor.id, listing_id, change_description_dto
+        )
 
         listing_after = await listing_repository.get_by_id(listing_id)
         assert listing_after.description != listing.description
-

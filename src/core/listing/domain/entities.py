@@ -2,11 +2,14 @@ from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
 
-from src.core.listing.domain.exceptions import ListingActivationError, ListingArchivingError
+from src.core.listing.domain.enums import ListingStatus
+from src.core.listing.domain.exceptions import (
+    ListingActivationError,
+    ListingArchivingError,
+)
 from src.core.listing.domain.value_objects import Gallery
 from src.core.shared.domain.entities import AggregateRoot
 from src.core.shared.domain.enums import PriceCurrency
-from src.core.listing.domain.enums import ListingStatus
 
 
 @dataclass(frozen=False)
@@ -57,9 +60,6 @@ class Listing(AggregateRoot):
 
     def change_description(self, description: str) -> None:
         self.description = description
-        
+
     def change_attributes(self, attributes: dict[str, Any]) -> None:
         self.attributes = attributes
-
-
-

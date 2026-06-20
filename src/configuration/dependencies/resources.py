@@ -1,4 +1,3 @@
-from io import BytesIO
 from typing import AsyncGenerator
 
 import sentry_sdk
@@ -38,7 +37,7 @@ def init_sentry(
             integrations=[
                 FastApiIntegration(),
                 SqlalchemyIntegration(),
-            ]
+            ],
         )
 
     yield
@@ -47,7 +46,9 @@ def init_sentry(
         sentry_sdk.flush()
 
 
-async def init_engine(url: str, echo: bool = False) -> AsyncGenerator[AsyncEngine, None]:
+async def init_engine(
+    url: str, echo: bool = False
+) -> AsyncGenerator[AsyncEngine, None]:
     async_engine = create_async_engine(url=url, echo=echo)
     yield async_engine
     await async_engine.dispose()

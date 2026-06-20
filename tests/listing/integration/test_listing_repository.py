@@ -1,4 +1,5 @@
 import uuid
+
 import pytest
 
 from src.core.listing.domain.entities import Listing
@@ -25,7 +26,9 @@ class TestListingRepository:
 
     @pytest.mark.asyncio
     @pytest.mark.integration
-    async def test_save_updates_existing_listing(self, listing_repository, create_listing):
+    async def test_save_updates_existing_listing(
+        self, listing_repository, create_listing
+    ):
         listing = create_listing
         listing.change_price(9000000, listing.currency)
         await listing_repository.save(listing)

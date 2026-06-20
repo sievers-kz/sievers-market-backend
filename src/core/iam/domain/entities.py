@@ -1,12 +1,14 @@
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from uuid import UUID
 
 from src.core.iam.domain.enums import TokenType
-from src.core.iam.domain.exceptions import AccountAlreadyConfirmedError, AccountNotConfirmedError
+from src.core.iam.domain.exceptions import (
+    AccountAlreadyConfirmedError,
+    AccountNotConfirmedError,
+)
 from src.core.iam.domain.value_objects import Email, Password
-
 from src.core.shared.domain.entities import AggregateRoot, Entity
 
 
@@ -61,7 +63,9 @@ class Account(AggregateRoot):
     def rotate_refresh_token(self, old_token: str, new_token: str, expires_at):
         old = self._get_token_by_value(old_token)
         old.revoke_token()
-        self.add_new_token(type=TokenType.REFRESH, value=new_token, expires_at=expires_at)
+        self.add_new_token(
+            type=TokenType.REFRESH, value=new_token, expires_at=expires_at
+        )
 
     def request_reset_password(self, token_value: str, expires_at: datetime):
         self.revoke_all_tokens_by_type(TokenType.PASSWORD)
@@ -86,7 +90,9 @@ class Account(AggregateRoot):
         self.email = new_email
 
     def _get_token_by_value(self, token_value: str):
-        return next((token for token in self.tokens if token.value == token_value), None)
+        return next(
+            (token for token in self.tokens if token.value == token_value), None
+        )
 
 
 @dataclass(frozen=False)
@@ -99,14 +105,16 @@ class Token(Entity):
     expires_at: datetime
 
     @classmethod
-    def create(cls, account_id: UUID, type: TokenType, value: str, expires_at: datetime):
+    def create(
+        cls, account_id: UUID, type: TokenType, value: str, expires_at: datetime
+    ):
         return cls(
             id=uuid.uuid4(),
             account_id=account_id,
             type=type,
             value=value,
             is_revoked=False,
-            expires_at=expires_at
+            expires_at=expires_at,
         )
 
     def revoke_token(self):

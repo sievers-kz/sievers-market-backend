@@ -1,35 +1,26 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from src.configuration.settings.settings import PostgresSettings
 from src.configuration.database.connection import Base
-
-from src.core.shared.infrastructure.base_model import BaseModel
-
-from src.core.iam.infrastructure.models import Account, Token
-
+from src.configuration.settings.settings import PostgresSettings
+from src.core.catalog.infrastructure.models import Category, Rubric, Subcategory
 from src.core.customer.infrastructure.models import Customer
-
-from src.core.vendor.infrastructure.models import Vendor
-
+from src.core.iam.infrastructure.models import Account, Token
 from src.core.listing.infrastructure.models import Listing
-
 from src.core.media.infrastructure.models import Media
-
-from src.core.catalog.infrastructure.models import Rubric, Category, Subcategory
-
 from src.core.references.infrastructure.models import (
-    Region,
+    Brand,
     City,
     Color,
     Country,
-    Brand,
+    Region,
 )
+from src.core.shared.infrastructure.base_model import BaseModel
+from src.core.vendor.infrastructure.models import Vendor
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 database_settings = PostgresSettings()
@@ -102,4 +93,5 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     import asyncio
+
     asyncio.run(run_migrations_online())

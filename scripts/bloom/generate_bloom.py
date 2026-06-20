@@ -6,6 +6,7 @@ scripts/bloom/generate_bloom.py
 
 Запуск: python -m scripts.bloom.generate_bloom
 """
+
 import hashlib
 import sys
 import urllib.request
@@ -13,6 +14,11 @@ from io import BytesIO
 from pathlib import Path
 
 from dotenv import load_dotenv
+from minio import Minio
+from minio.error import S3Error
+from rbloom import Bloom
+
+from src.configuration.settings.settings import MinioConfig
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ENV_PATH = BASE_DIR / ".env"
@@ -22,12 +28,6 @@ if ENV_PATH.exists():
     print(f"✅ .env loaded from {ENV_PATH}")
 else:
     print(f"⚠️  .env not found at {ENV_PATH}, relying on environment variables")
-
-from minio import Minio
-from minio.error import S3Error
-from rbloom import Bloom
-
-from src.configuration.settings.settings import MinioConfig
 
 
 PASSWORDS_URL = (
@@ -86,9 +86,9 @@ class BloomGenerator:
         без промежуточного хранения всего списка в памяти.
 
         Явный User-Agent обязателен — GitHub блокирует дефолтный Python-агент.
-        Таймаут 60 сек защищает от зависания в CI.
+        Тайм-аут 60 сек защищать от зависания в CI.
         """
-        print(f"⬇️  Downloading and building bloom filter...")
+        print("⬇️  Downloading and building bloom filter...")
         print(f"    {PASSWORDS_URL}")
 
         req = urllib.request.Request(
@@ -112,8 +112,12 @@ class BloomGenerator:
     def _upload(self, bf: Bloom) -> None:
         data = bf.save_bytes()  # bytes
         size = len(data)
+        size_kb = size / 1024
 
-        print(f"⬆️  Uploading to {self._bucket}/{BLOOM_OBJECT_NAME} ({size / 1024:.1f} KB)...")
+        print(
+            f"⬆️  Uploading to {self._bucket}/{BLOOM_OBJECT_NAME} "
+            f"({size_kb:.1f} KB)..."
+        )
 
         if not self._client.bucket_exists(self._bucket):
             self._client.make_bucket(self._bucket)

@@ -25,8 +25,12 @@ class TestRestoreVendorUsecase:
         create_account_dto = create_user_request()
         account_id = await create_user_usecase.execute(create_account_dto)
 
-        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{account_id}")
-        account_confirmation_dto = AccountConfirmation(account_id=account_id, confirm_code=otp_code)
+        otp_code = await redis_service.get(
+            f"otp:{OTPType.CONFIRMATION.value}:{account_id}"
+        )
+        account_confirmation_dto = AccountConfirmation(
+            account_id=account_id, confirm_code=otp_code
+        )
         await account_confirmation_usecase.execute(account_confirmation_dto)
 
         create_vendor_dto = create_vendor_request()
@@ -40,4 +44,3 @@ class TestRestoreVendorUsecase:
 
         assert vendor_after is not None
         assert vendor_after.status == VendorStatus.ACTIVE
-

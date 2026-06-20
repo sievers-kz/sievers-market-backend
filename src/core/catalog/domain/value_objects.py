@@ -2,7 +2,11 @@ from dataclasses import dataclass
 from typing import Any
 
 from src.core.catalog.domain.enums import AttributeType
-from src.core.catalog.domain.exceptions import AttributeRequiredError, AttributeTypeError, AttributeOptionError
+from src.core.catalog.domain.exceptions import (
+    AttributeOptionError,
+    AttributeRequiredError,
+    AttributeTypeError,
+)
 
 
 @dataclass(frozen=True)

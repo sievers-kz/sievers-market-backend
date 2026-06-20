@@ -1,4 +1,9 @@
-from src.core.shared.domain.exceptions import NotFoundError, RulesError, AlreadyExistsError, ValidationError
+from src.core.shared.domain.exceptions import (
+    AlreadyExistsError,
+    NotFoundError,
+    RulesError,
+    ValidationError,
+)
 
 
 class VendorNotFoundError(NotFoundError):
@@ -19,17 +24,13 @@ class VendorAlreadyExistsError(AlreadyExistsError):
 class ContactFullnameRequiredError(ValidationError):
     def __init__(self, field: str):
         super().__init__(
-            message="Обязательное поле не заполнено",
-            details={"field": field}
+            message="Обязательное поле не заполнено", details={"field": field}
         )
 
 
 class ContactFullnameFormatError(ValidationError):
     def __init__(self, field: str):
-        super().__init__(
-            message="Неправильный формат поля",
-            details={"field": field}
-        )
+        super().__init__(message="Неправильный формат поля", details={"field": field})
 
 
 class InvalidTaxNumberError(ValidationError):

@@ -1,4 +1,4 @@
-from src.core.shared.domain.exceptions import NotFoundError, ValidationError, RulesError
+from src.core.shared.domain.exceptions import NotFoundError, RulesError, ValidationError
 
 
 class ListingNotFoundError(NotFoundError):
@@ -13,7 +13,9 @@ class ListingLargeImageSizeError(ValidationError):
 
 class ListingGalleryEmptyError(ValidationError):
     def __init__(self):
-        super().__init__(message="Объявление должно содержать как минимум 1 изображение")
+        super().__init__(
+            message="Объявление должно содержать как минимум 1 изображение"
+        )
 
 
 class ListingGalleryTooManyImagesError(ValidationError):

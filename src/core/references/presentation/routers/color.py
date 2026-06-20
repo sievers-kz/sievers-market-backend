@@ -1,14 +1,17 @@
 from typing import Annotated
 from uuid import UUID
 
-from dependency_injector.wiring import inject, Provide
+from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter
 from fastapi.params import Depends
 
 from src.configuration.dependencies.container import ApplicationContainer
 from src.core.references.application.services import ColorService
-from src.core.references.presentation.dto.color import ColorResponse, CreateColorRequest, UpdateColorRequest
-
+from src.core.references.presentation.dto.color import (
+    ColorResponse,
+    CreateColorRequest,
+    UpdateColorRequest,
+)
 
 color_router = APIRouter(prefix="/color")
 
@@ -18,13 +21,8 @@ color_router = APIRouter(prefix="/color")
 async def get_color(
     color_id: UUID,
     service: Annotated[
-        ColorService,
-        Depends(
-            Provide[
-                ApplicationContainer.reference.color_service
-            ]
-        )
-    ]
+        ColorService, Depends(Provide[ApplicationContainer.reference.color_service])
+    ],
 ):
     return await service.get_color_by_id(color_id)
 
@@ -33,13 +31,8 @@ async def get_color(
 @inject
 async def get_color_list(
     service: Annotated[
-        ColorService,
-        Depends(
-            Provide[
-                ApplicationContainer.reference.color_service
-            ]
-        )
-    ]
+        ColorService, Depends(Provide[ApplicationContainer.reference.color_service])
+    ],
 ):
     return await service.get_color_list()
 
@@ -49,13 +42,8 @@ async def get_color_list(
 async def create_color(
     dto: CreateColorRequest,
     service: Annotated[
-        ColorService,
-        Depends(
-            Provide[
-                ApplicationContainer.reference.color_service
-            ]
-        )
-    ]
+        ColorService, Depends(Provide[ApplicationContainer.reference.color_service])
+    ],
 ):
     return await service.create_color(dto)
 
@@ -66,13 +54,8 @@ async def update_color(
     color_id: UUID,
     dto: UpdateColorRequest,
     service: Annotated[
-        ColorService,
-        Depends(
-            Provide[
-                ApplicationContainer.reference.color_service
-            ]
-        )
-    ]
+        ColorService, Depends(Provide[ApplicationContainer.reference.color_service])
+    ],
 ):
     await service.update_color(color_id, dto)
 
@@ -82,12 +65,7 @@ async def update_color(
 async def delete_color(
     color_id: UUID,
     service: Annotated[
-        ColorService,
-        Depends(
-            Provide[
-                ApplicationContainer.reference.color_service
-            ]
-        )
-    ]
+        ColorService, Depends(Provide[ApplicationContainer.reference.color_service])
+    ],
 ):
     await service.delete_color(color_id)

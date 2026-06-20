@@ -4,9 +4,9 @@ from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.media.application.interfaces.repository import IMediaRepository
+from src.core.media.domain.entities import Media as DomainMedia
 from src.core.media.infrastructure.mapper import MediaMapper
 from src.core.media.infrastructure.models import Media as ORMMedia
-from src.core.media.domain.entities import Media as DomainMedia
 
 
 class MediaRepository(IMediaRepository):

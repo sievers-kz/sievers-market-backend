@@ -4,15 +4,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.catalog.application.interfaces import ISubcategoryRepository
+from src.core.catalog.domain.entities import Subcategory as DomainSubcategory
 from src.core.catalog.infrastructure.mappers import SubcategoryMapper
-
-from src.core.catalog.infrastructure.models import (
-    Subcategory as ORMSubcategory
-)
-
-from src.core.catalog.domain.entities import (
-    Subcategory as DomainSubcategory
-)
+from src.core.catalog.infrastructure.models import Subcategory as ORMSubcategory
 
 
 class SubcategoryRepository(ISubcategoryRepository):
@@ -21,7 +15,9 @@ class SubcategoryRepository(ISubcategoryRepository):
         self.subcategory = ORMSubcategory
 
     async def get_by_id(self, subcategory_id: UUID) -> DomainSubcategory:
-        statement = select(self.subcategory).where(self.subcategory.id == subcategory_id)
+        statement = select(self.subcategory).where(
+            self.subcategory.id == subcategory_id
+        )
         query_result = await self._session.execute(statement)
         result = query_result.scalar_one_or_none()
 
@@ -44,7 +40,3 @@ class SubcategoryRepository(ISubcategoryRepository):
         mapped_model = SubcategoryMapper.to_orm(subcategory)
         await self._session.merge(mapped_model)
         await self._session.flush()
-
-
-
-

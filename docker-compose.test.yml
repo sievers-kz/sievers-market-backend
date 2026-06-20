@@ -29,4 +29,3 @@ services:
       - MODE=test
       - POSTGRES_HOST=db
       - REDIS_HOST=redis
-

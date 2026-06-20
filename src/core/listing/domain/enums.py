@@ -13,7 +13,6 @@ class ListingStatus(str, Enum):
             self.ACTIVE: "Активный",
             self.INACTIVE: "Неактивный",
             self.ARCHIVED: "Архив",
-            self.DELETED: "Удален"
+            self.DELETED: "Удален",
         }
         return labels.get(self, "Неизвестное состояние")
-

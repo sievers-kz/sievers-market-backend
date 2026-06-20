@@ -23,13 +23,17 @@ class TestShopNameUseCase:
         create_account_dto = create_user_request()
         account_id = await create_user_usecase.execute(create_account_dto)
 
-        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{account_id}")
-        account_confirmation_dto = AccountConfirmation(account_id=account_id, confirm_code=otp_code)
+        otp_code = await redis_service.get(
+            f"otp:{OTPType.CONFIRMATION.value}:{account_id}"
+        )
+        account_confirmation_dto = AccountConfirmation(
+            account_id=account_id, confirm_code=otp_code
+        )
         await account_confirmation_usecase.execute(account_confirmation_dto)
 
         create_vendor_dto = create_vendor_request()
         await register_vendor_usecase.execute(account_id, create_vendor_dto)
-        
+
         vendor_before = await vendor_repository.get_by_account_id(account_id)
         change_shop_name_dto = ChangeShopNameRequest(shop_name="AGROW Market")
         await change_shop_name_usecase.execute(vendor_before.id, change_shop_name_dto)

@@ -3,9 +3,12 @@ from uuid import UUID
 from loguru import logger
 
 from src.core.references.application.interfaces.abstract_uow import IReferenceUnitOfWork
-from src.core.references.presentation.dto.brand import UpdateBrandRequest, CreateBrandRequest, BrandResponse
-
 from src.core.references.domain.entities import Brand
+from src.core.references.presentation.dto.brand import (
+    BrandResponse,
+    CreateBrandRequest,
+    UpdateBrandRequest,
+)
 
 
 class BrandService:
@@ -46,5 +49,3 @@ class BrandService:
             await uow.commit()
 
             logger.info("Deleted brand | brand_id={}", brand_id)
-
-

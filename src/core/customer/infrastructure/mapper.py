@@ -1,6 +1,6 @@
 from src.core.customer.domain.entities import Customer as DomainCustomer
-from src.core.customer.infrastructure.models import Customer as ORMCustomer
 from src.core.customer.domain.value_objects import Fullname
+from src.core.customer.infrastructure.models import Customer as ORMCustomer
 
 
 class CustomerMapper:
@@ -12,7 +12,7 @@ class CustomerMapper:
             last_name=buyer.fullname.last_name,
             first_name=buyer.fullname.first_name,
             patronymic=buyer.fullname.patronymic,
-            avatar_url=buyer.avatar_url
+            avatar_url=buyer.avatar_url,
         )
 
     @staticmethod
@@ -23,7 +23,7 @@ class CustomerMapper:
             fullname=Fullname(
                 last_name=buyer.last_name,
                 first_name=buyer.first_name,
-                patronymic=buyer.patronymic
+                patronymic=buyer.patronymic,
             ),
-            avatar_url=buyer.avatar_url
+            avatar_url=buyer.avatar_url,
         )

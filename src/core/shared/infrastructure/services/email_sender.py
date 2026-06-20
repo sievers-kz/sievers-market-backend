@@ -1,6 +1,7 @@
 import asyncio
+
 import resend
-from sendgrid import SendGridAPIClient, Mail, Content
+from sendgrid import Content, Mail, SendGridAPIClient
 
 from src.core.shared.application.interfaces.email_sender import IEmailSender
 
@@ -42,8 +43,8 @@ class ConsoleEmailSender(IEmailSender):
         template_data: dict | None = None,
         html_content: str | None = None,
     ) -> None:
-        print("\n" + "="*50)
-        print(f"[MOCK EMAIL] From: development@agrow.asia")
+        print("\n" + "=" * 50)
+        print("[MOCK EMAIL] From: development@agrow.asia")
         print(f"[MOCK SUBJECT] Subject: {subject}")
         print(f"[MOCK EMAIL] To: {to_email}")
 
@@ -53,7 +54,7 @@ class ConsoleEmailSender(IEmailSender):
             print(f"[MOCK HTML] Html: {html_content}")
 
         print(f"[MOCK EMAIL] Data: {template_data or {}}")
-        print("="*50 + "\n")
+        print("=" * 50 + "\n")
 
 
 class ResendEmailSender(IEmailSender):

@@ -1,26 +1,38 @@
-import pytest
 from uuid import uuid4
+
+import pytest
+
 from src.core.catalog.domain.entities import Subcategory
-from src.core.catalog.domain.value_objects import Attribute
 from src.core.catalog.domain.enums import AttributeType, CatalogStatus
 from src.core.catalog.domain.exceptions import DuplicateAttributeError
+from src.core.catalog.domain.value_objects import Attribute
 
 
 @pytest.fixture
 def sample_attributes():
     return [
-        Attribute(key="engine_power", label="Мощность", type=AttributeType.INTEGER, required=True),
-        Attribute(key="color", label="Цвет", type=AttributeType.ENUMERATE, options=["Красный", "Зеленый"]),
-        Attribute(key="is_new", label="Новый?", type=AttributeType.BOOLEAN, required=False)
+        Attribute(
+            key="engine_power",
+            label="Мощность",
+            type=AttributeType.INTEGER,
+            required=True,
+        ),
+        Attribute(
+            key="color",
+            label="Цвет",
+            type=AttributeType.ENUMERATE,
+            options=["Красный", "Зеленый"],
+        ),
+        Attribute(
+            key="is_new", label="Новый?", type=AttributeType.BOOLEAN, required=False
+        ),
     ]
 
 
 @pytest.fixture
 def active_subcategory(sample_attributes):
     return Subcategory.create(
-        category_id=uuid4(),
-        name="Тракторы",
-        attributes=sample_attributes
+        category_id=uuid4(), name="Тракторы", attributes=sample_attributes
     )
 
 
@@ -28,7 +40,9 @@ def test_subcategory_create_success(sample_attributes):
     category_id = uuid4()
     name = "Комбайны"
 
-    subcategory = Subcategory.create(category_id=category_id, name=name, attributes=sample_attributes)
+    subcategory = Subcategory.create(
+        category_id=category_id, name=name, attributes=sample_attributes
+    )
 
     assert subcategory.id is not None
     assert subcategory.category_id == category_id
@@ -66,9 +80,7 @@ def test_change_parent_ignore_if_same(active_subcategory, sample_attributes):
 
 
 def test_replace_attributes_success(active_subcategory):
-    new_attrs = [
-        Attribute(key="weight", label="Вес", type=AttributeType.FLOAT)
-    ]
+    new_attrs = [Attribute(key="weight", label="Вес", type=AttributeType.FLOAT)]
 
     active_subcategory.replace_attributes(new_attrs)
     assert active_subcategory.attributes == new_attrs
@@ -77,7 +89,7 @@ def test_replace_attributes_success(active_subcategory):
 def test_replace_attributes_raises_error_on_duplicates(active_subcategory):
     duplicated_attrs = [
         Attribute(key="volume", label="Объем", type=AttributeType.INTEGER),
-        Attribute(key="volume", label="Объем", type=AttributeType.INTEGER)
+        Attribute(key="volume", label="Объем", type=AttributeType.INTEGER),
     ]
 
     with pytest.raises(DuplicateAttributeError):
@@ -89,7 +101,7 @@ def test_validate_attributes_happy_path(active_subcategory):
         "engine_power": "120",
         "color": "Красный",
         "is_new": "true",
-        "hacker_garbage": "attack"
+        "hacker_garbage": "attack",
     }
 
     clean_data = active_subcategory.validate_attributes(user_input)
@@ -101,10 +113,7 @@ def test_validate_attributes_happy_path(active_subcategory):
 
 
 def test_validate_attributes_skips_optional_missing_fields(active_subcategory):
-    user_input = {
-        "engine_power": 80,
-        "color": "Зеленый"
-    }
+    user_input = {"engine_power": 80, "color": "Зеленый"}
 
     clean_data = active_subcategory.validate_attributes(user_input)
 

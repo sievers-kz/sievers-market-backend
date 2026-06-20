@@ -22,10 +22,10 @@ class MockTaxpayerGateway(ITaxpayerGateway):
             },
             "050540005822": {
                 "name": "Товарищество с ограниченной ответственностью Родина",
-                "address": "Целиноградский район, село Родина, улица Центральная, строение 15",
+                "address": "Целиноградский район, село Родина, улица Центральная, строение 15",  # noqa: E501
                 "type": LegalForm.LLP,
                 "is_liquidation": True,
-            }
+            },
         }
 
     async def fetch(self, tax_id: str) -> Optional[TaxpayerResponse]:
@@ -48,4 +48,3 @@ class RealTaxpayerGateway(ITaxpayerGateway):
 
     async def fetch(self, tax_id: str) -> Optional[TaxpayerResponse]:
         pass
-

@@ -1,16 +1,29 @@
 from typing import Annotated
 from uuid import UUID
 
-from dependency_injector.wiring import inject, Provide
+from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter
 from fastapi.params import Depends, Security
 
 from src.configuration.dependencies.container import ApplicationContainer
-from src.core.listing.application.usecases import CreateListingUseCase, ChangeListingAttributeUseCase, \
-    ChangeListingPriceUseCase, ChangeListingLocationUseCase, ChangeListingDescriptionUseCase, ActivateListingUseCase, \
-    DeactivateListingUseCase, ArchiveListingUseCase, DeleteListingUseCase
-from src.core.listing.presentation.dto import CreateListingRequest, ChangeListingAttributeRequest, \
-    ChangeListingDescriptionRequest, ChangeListingLocationRequest, ChangeListingPriceRequest
+from src.core.listing.application.usecases import (
+    ActivateListingUseCase,
+    ArchiveListingUseCase,
+    ChangeListingAttributeUseCase,
+    ChangeListingDescriptionUseCase,
+    ChangeListingLocationUseCase,
+    ChangeListingPriceUseCase,
+    CreateListingUseCase,
+    DeactivateListingUseCase,
+    DeleteListingUseCase,
+)
+from src.core.listing.presentation.dto import (
+    ChangeListingAttributeRequest,
+    ChangeListingDescriptionRequest,
+    ChangeListingLocationRequest,
+    ChangeListingPriceRequest,
+    CreateListingRequest,
+)
 from src.core.shared.presentation.dto import CurrentVendor
 from src.core.shared.presentation.security import get_current_vendor
 
@@ -23,13 +36,9 @@ async def create_listing(
     dto: CreateListingRequest,
     usecase: Annotated[
         CreateListingUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.listing.create_listing_usecase
-            ]
-        )
+        Depends(Provide[ApplicationContainer.listing.create_listing_usecase]),
     ],
-    current_vendor: CurrentVendor = Security(get_current_vendor)
+    current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
     respone = await usecase.execute(current_vendor.id, dto)
     return {"message": "Listing created successfully", "response": respone}
@@ -42,13 +51,9 @@ async def change_listing_price(
     dto: ChangeListingPriceRequest,
     usecase: Annotated[
         ChangeListingPriceUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.listing.change_listing_price_usecase
-            ]
-        )
+        Depends(Provide[ApplicationContainer.listing.change_listing_price_usecase]),
     ],
-    current_vendor: CurrentVendor = Security(get_current_vendor)
+    current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
     await usecase.execute(listing_id, dto)
     return {"message": "Listing price changed successfully"}
@@ -61,13 +66,9 @@ async def change_listing_location(
     dto: ChangeListingLocationRequest,
     usecase: Annotated[
         ChangeListingLocationUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.listing.change_listing_location_usecase
-            ]
-        )
+        Depends(Provide[ApplicationContainer.listing.change_listing_location_usecase]),
     ],
-    current_vendor: CurrentVendor = Security(get_current_vendor)
+    current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
     await usecase.execute(listing_id, dto)
     return {"message": "Listing location changed successfully"}
@@ -81,12 +82,10 @@ async def change_listing_description(
     usecase: Annotated[
         ChangeListingDescriptionUseCase,
         Depends(
-            Provide[
-                ApplicationContainer.listing.change_listing_description_usecase
-            ]
-        )
+            Provide[ApplicationContainer.listing.change_listing_description_usecase]
+        ),
     ],
-    current_vendor: CurrentVendor = Security(get_current_vendor)
+    current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
     await usecase.execute(listing_id, dto)
     return {"message": "Listing description changed successfully"}
@@ -99,13 +98,9 @@ async def change_listing_attribute(
     dto: ChangeListingAttributeRequest,
     usecase: Annotated[
         ChangeListingAttributeUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.listing.change_listing_attribute_usecase
-            ]
-        )
+        Depends(Provide[ApplicationContainer.listing.change_listing_attribute_usecase]),
     ],
-    current_vendor: CurrentVendor = Security(get_current_vendor)
+    current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
     await usecase.execute(listing_id, dto)
     return {"message": "Listing attribute changed successfully"}
@@ -117,11 +112,7 @@ async def activate_listing(
     listing_id: UUID,
     usecase: Annotated[
         ActivateListingUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.listing.activate_listing_usecase
-            ]
-        )
+        Depends(Provide[ApplicationContainer.listing.activate_listing_usecase]),
     ],
     current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
@@ -135,11 +126,7 @@ async def deactivate_listing(
     listing_id: UUID,
     usecase: Annotated[
         DeactivateListingUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.listing.deactivate_listing_usecase
-            ]
-        )
+        Depends(Provide[ApplicationContainer.listing.deactivate_listing_usecase]),
     ],
     current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
@@ -153,11 +140,7 @@ async def archive_listing(
     listing_id: UUID,
     usecase: Annotated[
         ArchiveListingUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.listing.archive_listing_usecase
-            ]
-        )
+        Depends(Provide[ApplicationContainer.listing.archive_listing_usecase]),
     ],
     current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
@@ -171,11 +154,7 @@ async def delete_listing(
     listing_id: UUID,
     usecase: Annotated[
         DeleteListingUseCase,
-        Depends(
-            Provide[
-                ApplicationContainer.listing.delete_listing_usecase
-            ]
-        )
+        Depends(Provide[ApplicationContainer.listing.delete_listing_usecase]),
     ],
     current_vendor: CurrentVendor = Security(get_current_vendor),
 ):

@@ -1,6 +1,6 @@
+from src.core.media.domain.entities import Media as DomainMedia
 from src.core.media.domain.value_objects import MediaSize
 from src.core.media.infrastructure.models import Media as ORMMedia
-from src.core.media.domain.entities import Media as DomainMedia
 
 
 class MediaMapper:
@@ -13,7 +13,8 @@ class MediaMapper:
                 media_url=m.media_url,
                 media_type=m.media_type,
                 media_size=MediaSize(m.media_size),
-            ) for m in media
+            )
+            for m in media
         ]
 
     @staticmethod
@@ -25,5 +26,6 @@ class MediaMapper:
                 media_url=m.media_url,
                 media_type=m.media_type,
                 media_size=m.media_size.value,
-            ) for m in media
+            )
+            for m in media
         ]

@@ -12,7 +12,7 @@ class TestActivateListingUseCase:
         activate_listing_usecase,
         create_vendor,
         listing_repository,
-        create_listing_request
+        create_listing_request,
     ):
         dto = create_listing_request
         listing_id = await create_listing_usecase.execute(create_vendor.id, dto)

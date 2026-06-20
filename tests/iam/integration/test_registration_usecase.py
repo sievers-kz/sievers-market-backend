@@ -18,7 +18,9 @@ class TestRegistrationUseCase:
         await create_user_usecase.execute(dto)
 
         user = await account_repository.get_account_by_email(dto.email)
-        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user.id}")
+        otp_code = await redis_service.get(
+            f"otp:{OTPType.CONFIRMATION.value}:{user.id}"
+        )
 
         assert user is not None
         assert user.is_active is False
@@ -27,10 +29,11 @@ class TestRegistrationUseCase:
 
     @pytest.mark.asyncio
     @pytest.mark.integration
-    async def test_fails_by_existing_user(self, create_user_usecase, account_repository):
+    async def test_fails_by_existing_user(
+        self, create_user_usecase, account_repository
+    ):
         dto = create_user_request()
         await create_user_usecase.execute(dto)
 
         with pytest.raises(AccountAlreadyExistsError):
             await create_user_usecase.execute(dto)
-

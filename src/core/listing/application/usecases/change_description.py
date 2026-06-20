@@ -11,7 +11,9 @@ class ChangeListingDescriptionUseCase:
     def __init__(self, uow: IListingUnitOfWork):
         self.uow = uow
 
-    async def execute(self, vendor_id: UUID, listing_id: UUID, dto: ChangeListingDescriptionRequest):
+    async def execute(
+        self, vendor_id: UUID, listing_id: UUID, dto: ChangeListingDescriptionRequest
+    ):
         async with self.uow as uow:
             listing = await uow.listing.get_by_id(listing_id)
             if not listing:

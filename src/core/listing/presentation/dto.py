@@ -29,13 +29,9 @@ class CreateListingRequest(DTO):
     attributes: dict[str, Any] = Field(
         default_factory=dict,
         json_schema_extra={
-            "example": {
-                "engine_power": 300,
-                "max_speed": 60,
-                "weight": 4000
-            }
+            "example": {"engine_power": 300, "max_speed": 60, "weight": 4000}
         },
-        description="Динамические спецификации объявления"
+        description="Динамические спецификации объявления",
     )
 
 
@@ -62,5 +58,5 @@ class ChangeListingAttributeRequest(DTO):
                 "height": 1400,
                 "length": 1600,
             }
-        }
+        },
     )

@@ -31,5 +31,3 @@ class Color(Entity):
     def update(self, name: str, hex: str):
         self.name = name
         self.hex = hex
-
-

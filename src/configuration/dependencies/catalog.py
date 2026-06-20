@@ -12,26 +12,15 @@ class CatalogContainer(containers.DeclarativeContainer):
     database_session = providers.Dependency()
 
     catalog_unit_of_work = providers.Factory(
-        CatalogUnitOfWork,
-        session_factory=session_factory
+        CatalogUnitOfWork, session_factory=session_factory
     )
 
-    rubric_service = providers.Factory(
-        RubricService,
-        uow=catalog_unit_of_work
-    )
+    rubric_service = providers.Factory(RubricService, uow=catalog_unit_of_work)
 
-    category_service = providers.Factory(
-        CategoryService,
-        uow=catalog_unit_of_work
-    )
+    category_service = providers.Factory(CategoryService, uow=catalog_unit_of_work)
 
     subcategory_service = providers.Factory(
-        SubcategoryService,
-        uow=catalog_unit_of_work
+        SubcategoryService, uow=catalog_unit_of_work
     )
 
-    query_service = providers.Factory(
-        CatalogQueryService,
-        session=database_session
-    )
+    query_service = providers.Factory(CatalogQueryService, session=database_session)

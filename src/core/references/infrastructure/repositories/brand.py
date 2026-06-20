@@ -1,11 +1,13 @@
 from uuid import UUID
 
-from sqlalchemy import select, delete
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.references.application.interfaces.abstract_brand_repository import IBrandRepository
-from src.core.references.infrastructure.models import Brand as ORMBrand
+from src.core.references.application.interfaces.abstract_brand_repository import (
+    IBrandRepository,
+)
 from src.core.references.domain.entities import Brand as DomainBrand
+from src.core.references.infrastructure.models import Brand as ORMBrand
 
 
 class BrandRepository(IBrandRepository):

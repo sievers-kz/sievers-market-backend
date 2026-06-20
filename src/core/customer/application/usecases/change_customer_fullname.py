@@ -1,8 +1,8 @@
 from uuid import UUID
 from venv import logger
 
-from src.core.customer.presentation.dto import ChangeCustomerFullname
 from src.core.customer.application.interfaces.uow import ICustomerUnitOfWork
+from src.core.customer.presentation.dto import ChangeCustomerFullname
 
 
 class ChangeCustomerFullnameUseCase:
@@ -15,7 +15,7 @@ class ChangeCustomerFullnameUseCase:
             customer.change_fullname(
                 fullname_data.last_name,
                 fullname_data.first_name,
-                fullname_data.patronymic
+                fullname_data.patronymic,
             )
 
             await uow.customer.save(customer)

@@ -11,7 +11,7 @@ class UserRole(str, enum.Enum):
         labels = {
             UserRole.BUYER: "Покупатель",
             UserRole.SELLER: "Продавец",
-            UserRole.ADMIN: "Администратор"
+            UserRole.ADMIN: "Администратор",
         }
         return labels.get(self, "Неизвестный тип роли")
 
@@ -28,4 +28,3 @@ class OTPType(str, enum.Enum):
     PASSWORD_RESET = "password_reset"
     CHANGE_EMAIL = "change_email"
     CHANGE_PHONE = "change_phone"
-

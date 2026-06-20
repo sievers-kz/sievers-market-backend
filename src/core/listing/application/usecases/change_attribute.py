@@ -9,12 +9,18 @@ from src.core.listing.presentation.dto import ChangeListingAttributeRequest
 
 
 class ChangeListingAttributeUseCase:
-    def __init__(self, uow: IListingUnitOfWork, subcategory_service: SubcategoryService):
+    def __init__(
+        self, uow: IListingUnitOfWork, subcategory_service: SubcategoryService
+    ):
         self.uow = uow
         self.subcategory_service = subcategory_service
 
-    async def execute(self, vendor_id: UUID, listing_id: UUID, dto: ChangeListingAttributeRequest):
-        validated_attributes = await self.subcategory_service.validate_attributes(dto.subcategory_id, dto.attributes)
+    async def execute(
+        self, vendor_id: UUID, listing_id: UUID, dto: ChangeListingAttributeRequest
+    ):
+        validated_attributes = await self.subcategory_service.validate_attributes(
+            dto.subcategory_id, dto.attributes
+        )
 
         async with self.uow as uow:
             listing = await uow.listing.get_by_id(listing_id)

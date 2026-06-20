@@ -1,4 +1,4 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from uuid import UUID
 
 from src.core.catalog.domain.entities import Subcategory

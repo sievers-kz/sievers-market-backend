@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from loguru import logger
 
 from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
@@ -12,10 +13,7 @@ from src.core.shared.application.interfaces.cache_service import ICacheService
 
 class RequestEmailChangeUseCase:
     def __init__(
-        self,
-        uow: IIAMUnitOfWork,
-        otp_service: OTPService,
-        cache_service: ICacheService
+        self, uow: IIAMUnitOfWork, otp_service: OTPService, cache_service: ICacheService
     ):
         self.uow = uow
         self.otp_service = otp_service
@@ -26,18 +24,16 @@ class RequestEmailChangeUseCase:
         async with self.uow as uow:
             existing = await uow.account.get_account_by_email(email_vo.value)
             if existing:
-                logger.info("Email change attempt to existing email | account_id={}", existing.id)
+                logger.info(
+                    "Email change attempt to existing email | account_id={}",
+                    existing.id,
+                )
                 raise AccountAlreadyExistsError()
 
         await self.cache_service.set(
-            key=f"email_change:pending:{account_id}",
-            value=email_vo.value,
-            ttl=300
+            key=f"email_change:pending:{account_id}", value=email_vo.value, ttl=300
         )
 
         await self.otp_service.send(
-            account_id=account_id,
-            email=email_vo.value,
-            otp_type=OTPType.CHANGE_EMAIL
+            account_id=account_id, email=email_vo.value, otp_type=OTPType.CHANGE_EMAIL
         )
-

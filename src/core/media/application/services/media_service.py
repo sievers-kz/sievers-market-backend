@@ -7,8 +7,12 @@ from src.core.media.application.interfaces.storage import IObjectStorage
 from src.core.media.application.interfaces.uow import IMediaUnitOfWork
 from src.core.media.domain.entities import Media
 from src.core.media.domain.value_objects import MediaSize
-from src.core.media.presentation.dto import GenerateUploadUrlRequest, UploadUrlResponse, ConfirmUploadResponse, \
-    ConfirmUploadRequest
+from src.core.media.presentation.dto import (
+    ConfirmUploadRequest,
+    ConfirmUploadResponse,
+    GenerateUploadUrlRequest,
+    UploadUrlResponse,
+)
 
 
 class MediaService:
@@ -16,7 +20,9 @@ class MediaService:
         self.uow = uow
         self.storage = storage
 
-    async def generate_upload_url(self, dto: GenerateUploadUrlRequest) -> list[UploadUrlResponse]:
+    async def generate_upload_url(
+        self, dto: GenerateUploadUrlRequest
+    ) -> list[UploadUrlResponse]:
         response = []
 
         for file in dto.files:
@@ -28,13 +34,15 @@ class MediaService:
                 UploadUrlResponse(
                     client_filename=file.client_filename,
                     upload_url=upload_url,
-                    file_path=object_key
+                    file_path=object_key,
                 )
             )
 
         return response
 
-    async def confirm_upload(self, account_id: UUID, dto: ConfirmUploadRequest) -> list[ConfirmUploadResponse]:
+    async def confirm_upload(
+        self, account_id: UUID, dto: ConfirmUploadRequest
+    ) -> list[ConfirmUploadResponse]:
         async with self.uow as uow:
             media_list = [
                 Media.create(

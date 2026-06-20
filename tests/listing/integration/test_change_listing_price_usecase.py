@@ -22,8 +22,12 @@ class TestChangeListingPriceUsecase:
         listing_id = await create_listing_usecase.execute(create_vendor.id, dto)
 
         listing = await listing_repository.get_by_id(listing_id)
-        change_price_dto = ChangeListingPriceRequest(price="100", currency=PriceCurrency.USD)
-        await change_listing_price_usecase.execute(create_vendor.id, listing_id, change_price_dto)
+        change_price_dto = ChangeListingPriceRequest(
+            price="100", currency=PriceCurrency.USD
+        )
+        await change_listing_price_usecase.execute(
+            create_vendor.id, listing_id, change_price_dto
+        )
 
         listing_after = await listing_repository.get_by_id(listing_id)
         assert listing_after.price != listing.price
@@ -42,4 +46,6 @@ class TestChangeListingPriceUsecase:
         dto = ChangeListingPriceRequest(price="100", currency=PriceCurrency.USD)
 
         with pytest.raises(ListingNotFoundError):
-            await change_listing_price_usecase.execute(create_vendor.id, listing_id, dto)
+            await change_listing_price_usecase.execute(
+                create_vendor.id, listing_id, dto
+            )

@@ -37,5 +37,3 @@ class ListingMapper:
             gallery=Gallery.from_dicts(orm_model.gallery),
             status=orm_model.status,
         )
-
-

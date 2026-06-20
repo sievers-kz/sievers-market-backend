@@ -4,13 +4,12 @@ import pytest
 import pytest_asyncio
 from loguru import logger
 from sqlalchemy import NullPool
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from scripts.seeds.seed import DataSeeder
 from src.configuration.database.connection import Base
 from src.configuration.dependencies.container import ApplicationContainer
 from src.configuration.settings.settings import ApplicationSettings
-
 
 pytest_plugins = [
     "tests.iam.conftest",
@@ -29,12 +28,12 @@ def test_settings() -> ApplicationSettings:
 @pytest_asyncio.fixture(scope="session")
 async def test_engine(test_settings: ApplicationSettings):
     if test_settings.mode != "test":
-        pytest.exit(f"СТОП! Попытка запустить тесты на рабочей БД: {test_settings.database.name}")
+        pytest.exit(
+            f"СТОП! Попытка запустить тесты на рабочей БД: {test_settings.database.name}"  # noqa: E501
+        )
 
     async_engine = create_async_engine(
-        url=test_settings.database.database_url,
-        echo=False,
-        poolclass=NullPool
+        url=test_settings.database.database_url, echo=False, poolclass=NullPool
     )
 
     yield async_engine
@@ -46,7 +45,9 @@ async def setup_database(test_engine):
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    async_session = async_sessionmaker(bind=test_engine, expire_on_commit=False, class_=AsyncSession)
+    async_session = async_sessionmaker(
+        bind=test_engine, expire_on_commit=False, class_=AsyncSession
+    )
     async with async_session() as session:
         seeder = DataSeeder(session=session)
         await seeder.seed_all()
@@ -68,7 +69,7 @@ async def session_factory(test_engine):
             class_=AsyncSession,
             expire_on_commit=False,
             autoflush=False,
-            join_transaction_mode="create_savepoint"
+            join_transaction_mode="create_savepoint",
         )
 
         yield factory
@@ -88,7 +89,7 @@ def mock_bloom():
     return bloom
 
 
-@pytest.fixture(scope="session" ,autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def mute_logger():
     logger.remove()
     yield
@@ -102,5 +103,3 @@ async def container(session_factory, test_settings, mock_bloom):
     container.gateways.bloom_filter.override(mock_bloom)
 
     yield container
-
-

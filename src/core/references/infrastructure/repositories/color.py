@@ -3,9 +3,11 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.references.application.interfaces.abstract_color_repository import IColorRepository
-from src.core.references.infrastructure.models import Color as ORMColor
+from src.core.references.application.interfaces.abstract_color_repository import (
+    IColorRepository,
+)
 from src.core.references.domain.entities import Color as DomainColor
+from src.core.references.infrastructure.models import Color as ORMColor
 
 
 class ColorRepository(IColorRepository):
@@ -21,7 +23,12 @@ class ColorRepository(IColorRepository):
         if results is None:
             return []
 
-        return [DomainColor(id=color.id, name=color.name, hex=color.hex, status=color.status) for color in results]
+        return [
+            DomainColor(
+                id=color.id, name=color.name, hex=color.hex, status=color.status
+            )
+            for color in results
+        ]
 
     async def get_by_id(self, color_id: UUID) -> DomainColor:
         statement = select(self.color).where(self.color.id == color_id)
@@ -31,9 +38,13 @@ class ColorRepository(IColorRepository):
         if result is None:
             return None
 
-        return DomainColor(id=result.id, name=result.name, hex=result.hex, status=result.status)
+        return DomainColor(
+            id=result.id, name=result.name, hex=result.hex, status=result.status
+        )
 
     async def save(self, color: DomainColor) -> None:
-        mapped = ORMColor(id=color.id, name=color.name, hex=color.hex, status=color.status)
+        mapped = ORMColor(
+            id=color.id, name=color.name, hex=color.hex, status=color.status
+        )
         await self._session.merge(mapped)
         await self._session.commit()

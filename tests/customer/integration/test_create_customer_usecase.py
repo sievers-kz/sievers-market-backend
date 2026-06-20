@@ -21,8 +21,12 @@ class TestCreateCustomerUseCase:
         dto = create_user_request()
         account_id = await create_user_usecase.execute(dto)
 
-        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{account_id}")
-        confirmation_dto = AccountConfirmation(account_id=account_id, confirm_code=otp_code)
+        otp_code = await redis_service.get(
+            f"otp:{OTPType.CONFIRMATION.value}:{account_id}"
+        )
+        confirmation_dto = AccountConfirmation(
+            account_id=account_id, confirm_code=otp_code
+        )
         await account_confirmation_usecase.execute(confirmation_dto)
 
         customer_dto = CreateCustomerRequest(last_name="Бисенов", first_name="Мейржан")
@@ -31,4 +35,3 @@ class TestCreateCustomerUseCase:
         customer = await customer_repository.get_by_account_id(account_id)
         assert customer is not None
         assert customer.fullname.last_name == "Бисенов"
-
