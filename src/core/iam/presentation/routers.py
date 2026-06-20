@@ -1,8 +1,8 @@
 from typing import Annotated
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends
-from fastapi.params import Security
+from fastapi import APIRouter, Depends, Header, HTTPException, Response, status
+from fastapi.params import Cookie, Security
 
 from src.configuration.dependencies.container import ApplicationContainer
 from src.core.iam.application.usecases import (
@@ -31,6 +31,9 @@ from src.core.iam.presentation.dto import (
     ResendCodeRequest,
     ResetPasswordData,
 )
+from src.core.shared.infrastructure.services.api_session_service import (
+    APISessionService,
+)
 from src.core.shared.presentation.dto import CurrentUser
 from src.core.shared.presentation.security import get_current_user
 
@@ -54,20 +57,23 @@ async def create_new_user(
     }
 
 
-@iam.post("/account_confirmation")
+@iam.post("/account_confirmation", response_model=LoginResponse | dict)
 @inject
 async def confirm_email(
+    response: Response,
     dto: AccountConfirmation,
     usecase: Annotated[
         AccountConfirmationUseCase,
         Depends(Provide[ApplicationContainer.iam.account_confirmation_usecase]),
     ],
+    api_session_service: Annotated[
+        APISessionService,
+        Depends(Provide[ApplicationContainer.shared.api_session_service]),
+    ],
+    client_type: Annotated[str | None, Header(alias="X-Client-Type")] = "web",
 ):
-    response = await usecase.execute(dto)
-    return {
-        "message": "Ваша электронная почта успешно подтверждена!",
-        "response": response,
-    }
+    tokens = await usecase.execute(dto)
+    return api_session_service.prepare_response(response, tokens, client_type)
 
 
 @iam.post("/resend-code")
@@ -85,39 +91,83 @@ async def resend_confirmation_code(
     }
 
 
-@iam.post("/login")
+@iam.post("/login", response_model=LoginResponse | dict)
 @inject
 async def login_user(
+    response: Response,
     dto: LoginAccount,
     usecase: Annotated[
         LoginUserUseCase, Depends(Provide[ApplicationContainer.iam.login_user_usecase])
     ],
+    api_session_service: Annotated[
+        APISessionService,
+        Depends(Provide[ApplicationContainer.shared.api_session_service]),
+    ],
+    client_type: Annotated[str | None, Header(alias="X-Client-Type")] = "web",
 ):
-    return await usecase.execute(dto)
+    tokens = await usecase.execute(dto)
+    return api_session_service.prepare_response(response, tokens, client_type)
 
 
-@iam.post("/refresh", response_model=LoginResponse)
+@iam.post("/refresh", response_model=LoginResponse | dict)
 @inject
 async def refresh_token(
-    dto: RefreshData,
+    response: Response,
     usecase: Annotated[
         RefreshTokenUseCase,
         Depends(Provide[ApplicationContainer.iam.refresh_token_usecase]),
     ],
+    api_session_service: Annotated[
+        APISessionService,
+        Depends(Provide[ApplicationContainer.shared.api_session_service]),
+    ],
+    dto: RefreshData | None = None,
+    refresh_token_from_cookie: Annotated[
+        str | None, Cookie(alias="refresh_token")
+    ] = None,
+    client_type: Annotated[str | None, Header(alias="X-Client-Type")] = "web",
 ):
-    return await usecase.execute(dto)
+    raw_refresh_token = refresh_token_from_cookie or (
+        dto.refresh_token if dto else None
+    )
+    if not raw_refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Рефреш-токен не найден в запросе",
+        )
+
+    refresh_dto = RefreshData(refresh_token=raw_refresh_token)
+    new_tokens: LoginResponse = await usecase.execute(refresh_dto)
+
+    return api_session_service.prepare_response(response, new_tokens, client_type)
 
 
 @iam.post("/logout")
 @inject
 async def logout_user(
-    dto: RefreshData,
+    response: Response,
     usecase: Annotated[
         LogoutUserUseCase,
         Depends(Provide[ApplicationContainer.iam.logout_user_usecase]),
     ],
+    api_session_service: Annotated[
+        APISessionService,
+        Depends(Provide[ApplicationContainer.shared.api_session_service]),
+    ],
+    dto: RefreshData | None = None,
+    refresh_token_from_cookie: Annotated[
+        str | None, Cookie(alias="refresh_token")
+    ] = None,
 ):
-    await usecase.execute(dto)
+    raw_refresh_token = refresh_token_from_cookie or (
+        dto.refresh_token if dto else None
+    )
+
+    if raw_refresh_token:
+        logout_dto = RefreshData(refresh_token=raw_refresh_token)
+        await usecase.execute(logout_dto)
+
+    api_session_service.clear_session(response)
     return {"message": "Вы вышли из системы"}
 
 

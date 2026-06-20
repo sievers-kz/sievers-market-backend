@@ -2,33 +2,63 @@ from typing import Annotated
 from uuid import UUID
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import Depends, Header, HTTPException, status
+from fastapi.security import APIKeyCookie
+from fastapi.security import HTTPAuthorizationCredentials as BearerCredentials
+from fastapi.security import HTTPBearer
 
 from src.configuration.dependencies.container import ApplicationContainer
 from src.core.customer.application.interfaces.uow import ICustomerUnitOfWork
 from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 from src.core.iam.domain.enums import TokenType
+from src.core.iam.domain.exceptions import (
+    InvalidTokenError,
+    InvalidTokenTypeError,
+    TokenExpiredError,
+)
 from src.core.iam.infrastructure.services.pyjwt_token import ITokenService
+from src.core.shared.infrastructure.services.api_session_service import (
+    APISessionService,
+)
 from src.core.shared.presentation.dto import CurrentCustomer, CurrentUser, CurrentVendor
 from src.core.vendor.application.interfaces.uow import IVendorUnitOfWork
 
 bearer_scheme = HTTPBearer(
     scheme_name="BearerAuth",
     description="Введите JWT токен в формате: Bearer <токен>",
-    auto_error=True,
+    auto_error=False,
+)
+
+cookie_scheme = APIKeyCookie(
+    scheme_name="CookieAuth",
+    name="access_token",
+    auto_error=False,
 )
 
 
 @inject
+def get_from_auth_scheme(
+    token_from_bearer: Annotated[
+        BearerCredentials | None, Depends(bearer_scheme)
+    ] = None,
+    token_from_cookie: Annotated[str | None, Depends(cookie_scheme)] = None,
+    client_type: Annotated[str | None, Header(alias="X-Client-Type")] = None,
+    api_session_service: APISessionService = Depends(
+        Provide[ApplicationContainer.shared.api_session_service]
+    ),
+) -> str:
+    return api_session_service.extract_token(
+        token_from_bearer, token_from_cookie, client_type
+    )
+
+
+@inject
 async def get_current_user_id(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    token: Annotated[str, Depends(get_from_auth_scheme)],
     token_service: ITokenService = Depends(
         Provide[ApplicationContainer.iam.pyjwt_token_service]
     ),
 ) -> UUID:
-    token = credentials.credentials
-
     try:
         payload = token_service.verify_token(token, TokenType.ACCESS)
         account_id_from_jwt = payload.get("sub")
@@ -42,7 +72,7 @@ async def get_current_user_id(
 
         return UUID(account_id_from_jwt)
 
-    except ValueError as exc:
+    except (InvalidTokenTypeError, TokenExpiredError, InvalidTokenError) as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Невалидный или просроченный токен",

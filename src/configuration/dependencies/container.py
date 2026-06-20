@@ -37,6 +37,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         redis_client=gateways.redis_client,
         arq_pool=gateways.arq_pool,
         resend_config=configurations.resend_config,
+        application_settings=configurations.configuration,
     )
 
     reference = providers.Container(
