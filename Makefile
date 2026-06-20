@@ -40,15 +40,6 @@ db:
 cache:
 	$(COMPOSE) exec redis redis-cli
 
-test:
-	$(COMPOSE) exec app pytest -v
-
-coverage:
-	$(COMPOSE) exec app pytest --cov=src --cov-report=term-missing
-
-coverage-html:
-	$(COMPOSE) exec app pytest --cov=src --cov-report=html
-
 ci:
 	@echo "=== Running CI Test pipeline ==="
 	$(COMPOSE_TEST) down -v
