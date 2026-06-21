@@ -1,5 +1,6 @@
 import pytest
 
+from src.core.vendor.domain.enums import LegalForm
 from src.core.vendor.domain.exceptions import (
     VendorNotFoundError,
     VendorOnLiquidationError,
@@ -14,7 +15,7 @@ class TestTaxpayerValidationService:
         self, taxpayer_validation_service
     ):
         tax_id = "020716550967"
-        response = await taxpayer_validation_service.validate(tax_id)
+        response = await taxpayer_validation_service.validate(tax_id, LegalForm.IE)
 
         assert response is not None
         assert response.tax_id == tax_id
@@ -25,7 +26,7 @@ class TestTaxpayerValidationService:
         self, taxpayer_validation_service, redis_service
     ):
         tax_id = "020716550967"
-        await taxpayer_validation_service.validate(tax_id)
+        await taxpayer_validation_service.validate(tax_id, LegalForm.IE)
 
         cached_taxpayer = await redis_service.get(f"taxpayer:{tax_id}")
         taxpayer = TaxpayerResponse.model_validate_json(cached_taxpayer)
@@ -40,7 +41,7 @@ class TestTaxpayerValidationService:
     ):
         tax_id = "123456789012"
         with pytest.raises(VendorNotFoundError):
-            await taxpayer_validation_service.validate(tax_id)
+            await taxpayer_validation_service.validate(tax_id, LegalForm.LLP)
 
         cached_taxpayer = await redis_service.get(f"taxpayer:{tax_id}")
         assert cached_taxpayer is None
@@ -52,7 +53,7 @@ class TestTaxpayerValidationService:
     ):
         tax_id = "050540005822"
         with pytest.raises(VendorOnLiquidationError):
-            await taxpayer_validation_service.validate(tax_id)
+            await taxpayer_validation_service.validate(tax_id, LegalForm.LLP)
 
         cached_taxpayer = await redis_service.get(f"taxpayer:{tax_id}")
         assert cached_taxpayer is None

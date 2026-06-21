@@ -9,8 +9,8 @@ class APISessionService:
         self, mode: str, access_token_lifetime: int, refresh_token_lifetime: int
     ):
         self._is_production = mode == "prod"
-        self._access_token_lifetime = access_token_lifetime
-        self._refresh_token_lifetime = refresh_token_lifetime
+        self._access_token_lifetime = access_token_lifetime * 60
+        self._refresh_token_lifetime = refresh_token_lifetime * 24 * 60 * 60
 
     def extract_token(
         self,

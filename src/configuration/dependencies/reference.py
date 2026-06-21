@@ -1,11 +1,10 @@
 from dependency_injector import containers, providers
 
-from src.core.references.application.services import BrandService, ColorService
-from src.core.references.infrastructure.repositories import (
-    BrandRepository,
-    ColorRepository,
-)
-from src.core.references.infrastructure.uow import ReferenceUnitOfWork
+from src.core.references.infrastructure.repositories.brand import BrandRepository
+from src.core.references.infrastructure.repositories.city import CityRepository
+from src.core.references.infrastructure.repositories.color import ColorRepository
+from src.core.references.infrastructure.repositories.country import CountryRepository
+from src.core.references.infrastructure.repositories.region import RegionRepository
 
 
 class ReferenceContainer(containers.DeclarativeContainer):
@@ -13,13 +12,7 @@ class ReferenceContainer(containers.DeclarativeContainer):
     database_session = providers.Dependency()
 
     brand_repository = providers.Factory(BrandRepository, session=database_session)
-
     color_repository = providers.Factory(ColorRepository, session=database_session)
-
-    reference_unit_of_work = providers.Factory(
-        ReferenceUnitOfWork, session_factory=session_factory
-    )
-
-    brand_service = providers.Factory(BrandService, uow=reference_unit_of_work)
-
-    color_service = providers.Factory(ColorService, uow=reference_unit_of_work)
+    country_repository = providers.Factory(CountryRepository, session=database_session)
+    region_repository = providers.Factory(RegionRepository, session=database_session)
+    city_repository = providers.Factory(CityRepository, session=database_session)

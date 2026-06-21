@@ -24,3 +24,11 @@ class MinioService(IObjectStorage):
             object_name=object_name,
             expires=timedelta(seconds=expiration),
         )
+
+    def generate_download_url(self, object_name: str, expiration: int = 3600) -> str:
+        return self._client.get_presigned_url(
+            method="GET",
+            bucket_name=self._bucket_name,
+            object_name=object_name,
+            expires=timedelta(seconds=expiration),
+        )

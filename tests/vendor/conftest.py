@@ -27,11 +27,11 @@ def mock_taxpayer_gateway(container):
 
 @pytest.fixture
 def taxpayer_validation_service(container, mock_taxpayer_gateway):
-    container.vendor.real_taxpayer_gateway.override(mock_taxpayer_gateway)
+    container.vendor.kgd_taxpayer_gateway.override(mock_taxpayer_gateway)
     service = container.vendor.taxpayer_validation_service()
 
     yield service
-    container.vendor.real_taxpayer_gateway.reset_override()
+    container.vendor.kgd_taxpayer_gateway.reset_override()
 
 
 @pytest.fixture

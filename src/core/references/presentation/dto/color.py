@@ -15,5 +15,5 @@ class CreateColorRequest(DTO):
 
 
 class UpdateColorRequest(DTO):
-    name: str | None
-    hex: str | None
+    name: str | None = None
+    hex: str | None = None

@@ -24,6 +24,7 @@ from src.core.vendor.application.usecases import (
     RegisterVendorUseCase,
     RestoreVendorUseCase,
 )
+from src.core.vendor.domain.enums import LegalForm
 from src.core.vendor.infrastructure.query import VendorCabinetQueryService
 from src.core.vendor.presentation.dto import (
     ChangeContactFullnameRequest,
@@ -47,9 +48,10 @@ async def verify_vendor(
         TaxpayerValidationService,
         Depends(Provide[ApplicationContainer.vendor.taxpayer_validation_service]),
     ],
+    legal_form: LegalForm = Query(..., alias="legal_form"),
     current_user: CurrentUser = Security(get_current_user),
 ):
-    return await service.validate(tax_id)
+    return await service.validate(tax_id, legal_form)
 
 
 @vendor_router.post("/", summary="Create a new vendor")

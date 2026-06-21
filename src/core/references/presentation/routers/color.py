@@ -2,11 +2,11 @@ from typing import Annotated
 from uuid import UUID
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 from fastapi.params import Depends
 
 from src.configuration.dependencies.container import ApplicationContainer
-from src.core.references.application.services import ColorService
+from src.core.references.infrastructure.repositories.color import ColorRepository
 from src.core.references.presentation.dto.color import (
     ColorResponse,
     CreateColorRequest,
@@ -16,56 +16,54 @@ from src.core.references.presentation.dto.color import (
 color_router = APIRouter(prefix="/color")
 
 
-@color_router.get("/{color_id}", response_model=ColorResponse)
 @inject
-async def get_color(
-    color_id: UUID,
-    service: Annotated[
-        ColorService, Depends(Provide[ApplicationContainer.reference.color_service])
+def get_repo(
+    repo: Annotated[
+        ColorRepository,
+        Depends(Provide[ApplicationContainer.reference.color_repository]),
     ],
-):
-    return await service.get_color_by_id(color_id)
+) -> ColorRepository:
+    return repo
 
 
 @color_router.get("/", response_model=list[ColorResponse])
-@inject
-async def get_color_list(
-    service: Annotated[
-        ColorService, Depends(Provide[ApplicationContainer.reference.color_service])
-    ],
+async def get_all(repo: ColorRepository = Depends(get_repo)):
+    return await repo.get_all()
+
+
+@color_router.get("/{color_id}", response_model=ColorResponse)
+async def get_by_id(color_id: UUID, repo: ColorRepository = Depends(get_repo)):
+    color = await repo.get_by_id(color_id)
+    if not color:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Цвет не найден"
+        )
+    return color
+
+
+@color_router.post(
+    "/", response_model=ColorResponse, status_code=status.HTTP_201_CREATED
+)
+async def create(dto: CreateColorRequest, repo: ColorRepository = Depends(get_repo)):
+    return await repo.create(dto.name, dto.hex)
+
+
+@color_router.patch("/{color_id}", response_model=ColorResponse)
+async def update(
+    color_id: UUID, dto: UpdateColorRequest, repo: ColorRepository = Depends(get_repo)
 ):
-    return await service.get_color_list()
+    color = await repo.update(color_id, dto.name, dto.hex)
+    if not color:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Цвет не найден"
+        )
+    return color
 
 
-@color_router.post("/")
-@inject
-async def create_color(
-    dto: CreateColorRequest,
-    service: Annotated[
-        ColorService, Depends(Provide[ApplicationContainer.reference.color_service])
-    ],
-):
-    return await service.create_color(dto)
-
-
-@color_router.patch("/{color_id}")
-@inject
-async def update_color(
-    color_id: UUID,
-    dto: UpdateColorRequest,
-    service: Annotated[
-        ColorService, Depends(Provide[ApplicationContainer.reference.color_service])
-    ],
-):
-    await service.update_color(color_id, dto)
-
-
-@color_router.delete("/{color_id}")
-@inject
-async def delete_color(
-    color_id: UUID,
-    service: Annotated[
-        ColorService, Depends(Provide[ApplicationContainer.reference.color_service])
-    ],
-):
-    await service.delete_color(color_id)
+@color_router.delete("/{color_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete(color_id: UUID, repo: ColorRepository = Depends(get_repo)):
+    deleted = await repo.delete(color_id)
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Цвет не найден"
+        )

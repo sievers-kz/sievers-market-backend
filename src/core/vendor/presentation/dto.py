@@ -19,7 +19,6 @@ class CreateVendorRequest(DTO):
 class TaxpayerResponse(DTO):
     tax_id: str
     legal_name: str
-    legal_address: str
     legal_form: LegalForm
     is_liquidation: bool
 
