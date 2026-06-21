@@ -81,6 +81,10 @@ class SentryConfig(BaseConfig):
     mode: str = Field(alias="MODE")
 
 
+class KGDSettings(BaseConfig):
+    portal_token: str = Field(alias="KGD_PORTAL_TOKEN")
+
+
 class ApplicationSettings(BaseConfig):
     mode: str = Field(alias="MODE")
     database: PostgresSettings = Field(default_factory=PostgresSettings)
@@ -92,3 +96,4 @@ class ApplicationSettings(BaseConfig):
     redis_config: RedisConfig = Field(default_factory=RedisConfig)
     resend_config: ResendSettings = Field(default_factory=ResendSettings)
     sentry_config: SentryConfig = Field(default_factory=SentryConfig)
+    kgd_settings: KGDSettings = Field(default_factory=KGDSettings)

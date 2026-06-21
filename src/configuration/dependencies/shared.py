@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from dependency_injector import containers, providers
 
 from src.core.shared.infrastructure.services.api_session_service import (
@@ -16,7 +14,7 @@ from src.core.shared.infrastructure.services.redis_service import RedisService
 
 class SharedContainer(containers.DeclarativeContainer):
     resend_config = providers.Configuration()
-    application_settings = providers.Configuration()
+    app_config = providers.Configuration()
 
     console_email_sender = providers.Singleton(ConsoleEmailSender)
     phone_normalizer = providers.Singleton(PhoneNormalizer)
@@ -38,13 +36,7 @@ class SharedContainer(containers.DeclarativeContainer):
 
     api_session_service = providers.Factory(
         APISessionService,
-        mode=application_settings.mode,
-        access_token_lifetime=providers.Factory(
-            timedelta,
-            minutes=application_settings.authentication.access_token_lifetime.as_int(),
-        ),
-        refresh_token_lifetime=providers.Factory(
-            timedelta,
-            days=application_settings.authentication.refresh_token_lifetime.as_int(),
-        ),
+        mode=app_config.mode,
+        access_token_lifetime=app_config.authentication.access_token_lifetime,
+        refresh_token_lifetime=app_config.authentication.refresh_token_lifetime,
     )

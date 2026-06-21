@@ -15,8 +15,8 @@ from src.core.vendor.application.usecases.close_vendor import CloseVendorUseCase
 from src.core.vendor.infrastructure.query import VendorCabinetQueryService
 from src.core.vendor.infrastructure.repository import VendorRepository
 from src.core.vendor.infrastructure.taxpayer_gateway import (
+    KGDTaxpayerGateway,
     MockTaxpayerGateway,
-    RealTaxpayerGateway,
 )
 from src.core.vendor.infrastructure.uow import VendorUnitOfWork
 
@@ -27,9 +27,12 @@ class VendorContainer(containers.DeclarativeContainer):
     phone_normalizer = providers.Dependency()
     customer_service = providers.Dependency()
     redis_service = providers.Dependency()
+    kgd_settings = providers.Configuration()
 
     mock_taxpayer_gateway = providers.Factory(MockTaxpayerGateway)
-    real_taxpayer_gateway = providers.Factory(RealTaxpayerGateway)
+    kgd_taxpayer_gateway = providers.Factory(
+        KGDTaxpayerGateway, portal_token=kgd_settings.portal_token
+    )
 
     uow = providers.Factory(VendorUnitOfWork, session_factory=session_factory)
 
@@ -40,7 +43,7 @@ class VendorContainer(containers.DeclarativeContainer):
 
     taxpayer_validation_service = providers.Factory(
         TaxpayerValidationService,
-        gateway=mock_taxpayer_gateway,
+        gateway=kgd_taxpayer_gateway,
         cache_service=redis_service,
     )
 

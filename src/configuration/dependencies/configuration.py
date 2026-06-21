@@ -12,3 +12,4 @@ class ConfigurationContainer(containers.DeclarativeContainer):
     redis = configuration.redis_config
     resend_config = configuration.resend_config
     sentry_config = configuration.sentry_config
+    kgd_settings = configuration.kgd_settings

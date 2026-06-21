@@ -2,11 +2,11 @@ from typing import Annotated
 from uuid import UUID
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 from fastapi.params import Depends
 
 from src.configuration.dependencies.container import ApplicationContainer
-from src.core.references.application.services import BrandService
+from src.core.references.infrastructure.repositories.brand import BrandRepository
 from src.core.references.presentation.dto.brand import (
     BrandResponse,
     CreateBrandRequest,
@@ -16,56 +16,54 @@ from src.core.references.presentation.dto.brand import (
 brand_router = APIRouter(prefix="/brand")
 
 
-@brand_router.get("/{brand_id}")
 @inject
-async def get_brand(
-    brand_id: UUID,
-    service: Annotated[
-        BrandService, Depends(Provide[ApplicationContainer.reference.brand_service])
+def get_repo(
+    repo: Annotated[
+        BrandRepository,
+        Depends(Provide[ApplicationContainer.reference.brand_repository]),
     ],
-):
-    return await service.get_brand_by_id(brand_id)
+) -> BrandRepository:
+    return repo
 
 
 @brand_router.get("/", response_model=list[BrandResponse])
-@inject
-async def get_brand_list(
-    service: Annotated[
-        BrandService, Depends(Provide[ApplicationContainer.reference.brand_service])
-    ],
+async def get_all(repo: BrandRepository = Depends(get_repo)):
+    return await repo.get_all()
+
+
+@brand_router.get("/{brand_id}", response_model=BrandResponse)
+async def get_by_id(brand_id: UUID, repo: BrandRepository = Depends(get_repo)):
+    brand = await repo.get_by_id(brand_id)
+    if not brand:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Бренд не найден"
+        )
+    return brand
+
+
+@brand_router.post(
+    "/", response_model=BrandResponse, status_code=status.HTTP_201_CREATED
+)
+async def create(dto: CreateBrandRequest, repo: BrandRepository = Depends(get_repo)):
+    return await repo.create(dto.name)
+
+
+@brand_router.patch("/{brand_id}", response_model=BrandResponse)
+async def update(
+    brand_id: UUID, dto: UpdateBrandRequest, repo: BrandRepository = Depends(get_repo)
 ):
-    return await service.get_brand_list()
+    brand = await repo.update(brand_id, dto.name)
+    if not brand:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Бренд не найден"
+        )
+    return brand
 
 
-@brand_router.post("/")
-@inject
-async def create_brand(
-    dto: CreateBrandRequest,
-    service: Annotated[
-        BrandService, Depends(Provide[ApplicationContainer.reference.brand_service])
-    ],
-):
-    await service.create_brand(dto)
-
-
-@brand_router.patch("/{brand_id}")
-@inject
-async def update_brand(
-    brand_id: UUID,
-    dto: UpdateBrandRequest,
-    service: Annotated[
-        BrandService, Depends(Provide[ApplicationContainer.reference.brand_service])
-    ],
-):
-    await service.update_brand(brand_id, dto)
-
-
-@brand_router.delete("/{brand_id}")
-@inject
-async def delete_brand(
-    brand_id: UUID,
-    service: Annotated[
-        BrandService, Depends(Provide[ApplicationContainer.reference.brand_service])
-    ],
-):
-    await service.delete_brand(brand_id)
+@brand_router.delete("/{brand_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete(brand_id: UUID, repo: BrandRepository = Depends(get_repo)):
+    deleted = await repo.delete(brand_id)
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Бренд не найден"
+        )

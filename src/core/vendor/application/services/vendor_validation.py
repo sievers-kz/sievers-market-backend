@@ -2,6 +2,7 @@ from typing import Optional
 
 from src.core.shared.application.interfaces.cache_service import ICacheService
 from src.core.vendor.application.interfaces.taxpayer_gateway import ITaxpayerGateway
+from src.core.vendor.domain.enums import LegalForm
 from src.core.vendor.domain.exceptions import (
     VendorNotFoundError,
     VendorOnLiquidationError,
@@ -14,8 +15,10 @@ class TaxpayerValidationService:
         self.gateway = gateway
         self.cache_service = cache_service
 
-    async def validate(self, tax_id: str) -> Optional[TaxpayerResponse]:
-        taxpayer = await self.gateway.fetch(tax_id)
+    async def validate(
+        self, tax_id: str, legal_form: LegalForm
+    ) -> Optional[TaxpayerResponse]:
+        taxpayer = await self.gateway.fetch(tax_id, legal_form)
         if not taxpayer:
             raise VendorNotFoundError()
 

@@ -66,3 +66,10 @@ class MediaService:
             )
             for media in media_list
         ]
+
+    async def get_media_url(self, media_id: UUID) -> str | None:
+        async with self.uow as uow:
+            media = await uow.media.get_by_id(media_id)
+            if not media:
+                return None
+        return self.storage.generate_download_url(media.media_url)
