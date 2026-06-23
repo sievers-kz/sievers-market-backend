@@ -58,6 +58,7 @@ class ApplicationFactory:
             ],
         )
         self.app.container = self.container
+        self.app.state.mode = self.container.configurations.configuration.mode
 
     def _include_routers(self):
         routers = [

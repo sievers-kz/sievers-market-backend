@@ -1,9 +1,9 @@
 MODE ?= dev
 
 ifeq ($(MODE), prod)
-    COMPOSE = docker-compose -f docker-compose.yml -f docker-compose.prod.yml
+    COMPOSE = docker compose -f docker-compose.yml -f docker-compose.prod.yml
 else
-    COMPOSE = docker-compose -f docker-compose.yml -f docker-compose.dev.yml
+    COMPOSE = docker compose -f docker-compose.yml -f docker-compose.dev.yml
 endif
 
 COMPOSE_TEST = docker compose --env-file .env.test -f docker-compose.yml -f docker-compose.test.yml
@@ -39,15 +39,6 @@ db:
 
 cache:
 	$(COMPOSE) exec redis redis-cli
-
-test:
-	$(COMPOSE) exec app pytest -v
-
-coverage:
-	$(COMPOSE) exec app pytest --cov=src --cov-report=term-missing
-
-coverage-html:
-	$(COMPOSE) exec app pytest --cov=src --cov-report=html
 
 ci:
 	@echo "=== Running CI Test pipeline ==="

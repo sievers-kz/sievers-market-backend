@@ -1,4 +1,5 @@
 from typing import Annotated
+from uuid import UUID
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter
@@ -41,3 +42,22 @@ async def confirm_upload(
 ):
     media_response = await service.confirm_upload(current_user.id, dto)
     return media_response
+
+
+@media_router.get("/{media_id}")
+@inject
+async def get_media(
+    media_id: UUID,
+    service: Annotated[
+        MediaService, Depends(Provide[ApplicationContainer.media.media_service])
+    ],
+):
+    from fastapi import HTTPException, status
+    from fastapi.responses import RedirectResponse
+
+    url = await service.get_media_url(media_id)
+    if not url:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Медиафайл не найден"
+        )
+    return RedirectResponse(url)

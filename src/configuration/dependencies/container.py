@@ -37,6 +37,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         redis_client=gateways.redis_client,
         arq_pool=gateways.arq_pool,
         resend_config=configurations.resend_config,
+        app_config=configurations.configuration,
     )
 
     reference = providers.Container(
@@ -84,4 +85,5 @@ class ApplicationContainer(containers.DeclarativeContainer):
         phone_normalizer=shared.phone_normalizer,
         customer_service=customer.customer_service,
         redis_service=shared.redis_service,
+        kgd_settings=configurations.kgd_settings,
     )

@@ -16,7 +16,7 @@ class ChangeListingDescriptionUseCase:
     ):
         async with self.uow as uow:
             listing = await uow.listing.get_by_id(listing_id)
-            if not listing:
+            if not listing or listing.owner_id != vendor_id:
                 raise ListingNotFoundError()
 
             listing.change_description(dto.description)

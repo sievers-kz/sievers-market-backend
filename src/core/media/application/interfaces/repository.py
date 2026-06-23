@@ -12,3 +12,7 @@ class IMediaRepository(ABC):
     @abstractmethod
     async def delete(self, media_id: UUID) -> None:
         raise NotImplementedError
+
+    @abstractmethod
+    async def get_by_id(self, media_id: UUID) -> Media:
+        raise NotImplementedError

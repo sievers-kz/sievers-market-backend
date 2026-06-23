@@ -3,35 +3,38 @@ from uuid import UUID
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.references.application.interfaces.abstract_brand_repository import (
-    IBrandRepository,
-)
-from src.core.references.domain.entities import Brand as DomainBrand
-from src.core.references.infrastructure.models import Brand as ORMBrand
+from src.core.references.infrastructure.models import Brand
 
 
-class BrandRepository(IBrandRepository):
+class BrandRepository:
     def __init__(self, session: AsyncSession):
         self._session = session
-        self.brand = ORMBrand
 
-    async def get_all(self):
-        statement = select(self.brand)
-        query_result = await self._session.execute(statement)
-        results = query_result.scalars().all()
-        return [DomainBrand(id=brand.id, name=brand.name) for brand in results]
+    async def get_all(self) -> list[Brand]:
+        result = await self._session.execute(select(Brand))
+        return result.scalars().all()
 
-    async def get_by_id(self, brand_id: UUID):
-        statement = select(self.brand).where(self.brand.id == brand_id)
-        query_result = await self._session.execute(statement)
-        result = query_result.scalars().first()
-        return DomainBrand(id=result.id, name=result.name)
+    async def get_by_id(self, brand_id: UUID) -> Brand | None:
+        result = await self._session.execute(select(Brand).where(Brand.id == brand_id))
+        return result.scalar_one_or_none()
 
-    async def save(self, brand: DomainBrand) -> None:
-        mapped = self.brand(id=brand.id, name=brand.name)
-        await self._session.merge(mapped)
+    async def create(self, name: str) -> Brand:
+        brand = Brand(name=name)
+        self._session.add(brand)
         await self._session.commit()
+        await self._session.refresh(brand)
+        return brand
 
-    async def delete(self, brand_id: UUID) -> None:
-        statement = delete(self.brand).where(self.brand.id == brand_id)
-        await self._session.execute(statement)
+    async def update(self, brand_id: UUID, name: str) -> Brand | None:
+        brand = await self.get_by_id(brand_id)
+        if not brand:
+            return None
+
+        brand.name = name
+        await self._session.commit()
+        await self._session.refresh(brand)
+        return brand
+
+    async def delete(self, brand_id: UUID) -> bool:
+        result = await self._session.execute(delete(Brand).where(Brand.id == brand_id))
+        return result.rowcount > 0

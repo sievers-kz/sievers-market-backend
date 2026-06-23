@@ -33,7 +33,7 @@ class ResetPasswordData(BaseModel):
 
 
 class RefreshData(BaseModel):
-    refresh_token: str
+    refresh_token: str | None = None
 
 
 class LoginAccount(BaseModel):

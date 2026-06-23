@@ -1,50 +1,45 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.references.application.interfaces.abstract_color_repository import (
-    IColorRepository,
-)
-from src.core.references.domain.entities import Color as DomainColor
-from src.core.references.infrastructure.models import Color as ORMColor
+from src.core.references.infrastructure.models import Color
 
 
-class ColorRepository(IColorRepository):
+class ColorRepository:
     def __init__(self, session: AsyncSession):
         self._session = session
-        self.color = ORMColor
 
-    async def get_all(self) -> list[DomainColor]:
-        statement = select(self.color)
-        query_result = await self._session.execute(statement)
-        results = query_result.scalars().all()
+    async def get_all(self) -> list[Color]:
+        result = await self._session.execute(select(Color))
+        return result.scalars().all()
 
-        if results is None:
-            return []
+    async def get_by_id(self, color_id: UUID) -> Color | None:
+        result = await self._session.execute(select(Color).where(Color.id == color_id))
+        return result.scalar_one_or_none()
 
-        return [
-            DomainColor(
-                id=color.id, name=color.name, hex=color.hex, status=color.status
-            )
-            for color in results
-        ]
-
-    async def get_by_id(self, color_id: UUID) -> DomainColor:
-        statement = select(self.color).where(self.color.id == color_id)
-        query_result = await self._session.execute(statement)
-        result = query_result.scalars().first()
-
-        if result is None:
-            return None
-
-        return DomainColor(
-            id=result.id, name=result.name, hex=result.hex, status=result.status
-        )
-
-    async def save(self, color: DomainColor) -> None:
-        mapped = ORMColor(
-            id=color.id, name=color.name, hex=color.hex, status=color.status
-        )
-        await self._session.merge(mapped)
+    async def create(self, name: str, hex: str) -> Color:
+        color = Color(name=name, hex=hex)
+        self._session.add(color)
         await self._session.commit()
+        await self._session.refresh(color)
+        return color
+
+    async def update(
+        self, color_id: UUID, name: str | None, hex: str | None
+    ) -> Color | None:
+        color = await self.get_by_id(color_id)
+        if not color:
+            return None
+        if name is not None:
+            color.name = name
+        if hex is not None:
+            color.hex = hex
+
+        await self._session.commit()
+        await self._session.refresh(color)
+        return color
+
+    async def delete(self, color_id: UUID) -> bool:
+        result = await self._session.execute(delete(Color).where(Color.id == color_id))
+        return result.rowcount > 0

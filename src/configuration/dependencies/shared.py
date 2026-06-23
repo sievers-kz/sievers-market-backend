@@ -1,5 +1,8 @@
 from dependency_injector import containers, providers
 
+from src.core.shared.infrastructure.services.api_session_service import (
+    APISessionService,
+)
 from src.core.shared.infrastructure.services.arq_service import ArqService
 from src.core.shared.infrastructure.services.email_sender import (
     ConsoleEmailSender,
@@ -11,6 +14,7 @@ from src.core.shared.infrastructure.services.redis_service import RedisService
 
 class SharedContainer(containers.DeclarativeContainer):
     resend_config = providers.Configuration()
+    app_config = providers.Configuration()
 
     console_email_sender = providers.Singleton(ConsoleEmailSender)
     phone_normalizer = providers.Singleton(PhoneNormalizer)
@@ -29,3 +33,10 @@ class SharedContainer(containers.DeclarativeContainer):
 
     arq_pool = providers.Dependency()
     arq_service = providers.Singleton(ArqService, pool=arq_pool)
+
+    api_session_service = providers.Factory(
+        APISessionService,
+        mode=app_config.mode,
+        access_token_lifetime=app_config.authentication.access_token_lifetime,
+        refresh_token_lifetime=app_config.authentication.refresh_token_lifetime,
+    )

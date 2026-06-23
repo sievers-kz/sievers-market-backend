@@ -43,12 +43,17 @@ class Attribute:
             if self.type == AttributeType.BOOLEAN:
                 return str(value).lower() in ("true", "1", "yes")
             if self.type == AttributeType.ENUMERATE:
-                if value not in (self.options or []):
+                if value not in self._enumerate_keys():
                     raise AttributeOptionError()
                 return value
             return str(value)
         except (ValueError, TypeError):
             raise AttributeTypeError(field=self.label)
+
+    def _enumerate_keys(self) -> list:
+        if not self.options:
+            return []
+        return [opt["key"] if isinstance(opt, dict) else opt for opt in self.options]
 
     @classmethod
     def from_dict(cls, data: dict) -> "Attribute":
