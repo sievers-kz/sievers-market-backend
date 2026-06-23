@@ -1,7 +1,3 @@
-<p align="left">
-  <img src="docs/assets/agrow-market-github-readme-preview-resized.png" alt="AGROW MARKET Logo" width="1056"/>
-</p>
-
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
@@ -15,7 +11,7 @@
 ![Clean Arch](https://img.shields.io/badge/Clean_Architecture-000000?style=for-the-badge)
 ![SOLID](https://img.shields.io/badge/SOLID_Principles-000000?style=for-the-badge)
 
-# AGROW MARKET Backend
+# Altum Market Backend
 RESTful B2B агромаркетплейс для автоматизации торгово-закупочных процессов в АПК, реализованный на FastAPI
 с применением принципов Domain-Driven Design и Clean Architecture.
 
@@ -56,8 +52,8 @@ RESTful B2B агромаркетплейс для автоматизации т�
 ### 1. Клонирование репозитория
 Склонируйте проект и перейдите в его корневую директорию:
 ```bash
-> git clone https://github.com
-> cd agrow_market_backend
+> git clone https://github.com/altum-kz/altum-market-backend
+> cd altum-market-backend
 ```
 
 ### 2. Настройка переменных окружения

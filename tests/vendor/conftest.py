@@ -35,7 +35,7 @@ def taxpayer_validation_service(container, mock_taxpayer_gateway):
 
 
 @pytest.fixture
-def register_vendor_usecase(container):
+def register_vendor_usecase(container, taxpayer_validation_service):
     return container.vendor.register_vendor_usecase()
 
 
