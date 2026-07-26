@@ -6,7 +6,9 @@ from src.core.catalog.infrastructure.attribute_validation import (
 from src.core.catalog.infrastructure.query import CatalogQueryService
 from src.core.catalog.infrastructure.repositories.attributes import (
     AttributeDefinitionRepository,
+    AttributeGroupRepository,
     SubcategoryAttributeRepository,
+    UnitOfMeasureRepository,
 )
 from src.core.catalog.infrastructure.repositories.categories import (
     CategoryRepository,
@@ -32,6 +34,12 @@ class CatalogContainer(containers.DeclarativeContainer):
     )
     subcategory_attribute_repository = providers.Factory(
         SubcategoryAttributeRepository, session=database_session
+    )
+    attribute_group_repository = providers.Factory(
+        AttributeGroupRepository, session=database_session
+    )
+    unit_of_measure_repository = providers.Factory(
+        UnitOfMeasureRepository, session=database_session
     )
 
     query_service = providers.Factory(CatalogQueryService, session=database_session)
