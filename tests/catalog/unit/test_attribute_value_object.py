@@ -1,12 +1,12 @@
 import pytest
 
-from src.core.catalog.domain.enums import AttributeType
-from src.core.catalog.domain.exceptions import (
+from src.core.catalog.domain.value_objects import Attribute
+from src.core.catalog.infrastructure.enums import AttributeType
+from src.core.catalog.infrastructure.exceptions import (
     AttributeOptionError,
     AttributeRequiredError,
     AttributeTypeError,
 )
-from src.core.catalog.domain.value_objects import Attribute
 
 
 @pytest.mark.parametrize(

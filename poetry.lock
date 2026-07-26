@@ -1024,6 +1024,24 @@ files = [
 ]
 
 [[package]]
+name = "files-to-prompt"
+version = "0.6"
+description = "Concatenate a directory full of files into a single prompt for use with LLMs"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "files_to_prompt-0.6-py3-none-any.whl", hash = "sha256:83d9a8b33246a10233218716a5c78034da4f5614748eda2f0ab94f1117801337"},
+    {file = "files_to_prompt-0.6.tar.gz", hash = "sha256:9af57eecbdb29d3cce034c186493ffc6c1205ea4f5abde6fb32ccb1d96eae40c"},
+]
+
+[package.dependencies]
+click = "*"
+
+[package.extras]
+test = ["pytest"]
+
+[[package]]
 name = "flake8"
 version = "7.3.0"
 description = "the modular source code checker: pep8 pyflakes and co"
@@ -3420,4 +3438,4 @@ dev = ["black (>=19.3b0) ; python_version >= \"3.6\"", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "9cdf7df28bd76f16b54e7ae67b779d3ee67e6e780f14ada22881508a757182f9"
+content-hash = "cef9ded1f9ef9027dac4677e68c9eae61b38f5e1049f28da6c4e4cfd4e4f4b74"

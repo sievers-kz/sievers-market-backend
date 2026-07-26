@@ -17,6 +17,7 @@ class Account(AggregateRoot):
     id: UUID
     email: Email
     password: Password
+    password_changed_at: datetime
     is_active: bool
     created_at: datetime
     updated_at: datetime | None
@@ -28,6 +29,7 @@ class Account(AggregateRoot):
             id=uuid.uuid4(),
             email=email,
             password=password,
+            password_changed_at=datetime.now(timezone.utc),
             is_active=False,
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
@@ -73,7 +75,7 @@ class Account(AggregateRoot):
 
     def reset_password(self, new_hashed_password: str):
         self.password = Password(new_hashed_password)
-        self.updated_at = datetime.now(timezone.utc)
+        self.password_changed_at = datetime.now(timezone.utc)
         self.revoke_all_tokens_by_type(TokenType.REFRESH)
 
     def revoke_all_tokens_by_type(self, token_type: TokenType):
@@ -83,7 +85,7 @@ class Account(AggregateRoot):
 
     def change_password(self, new_hashed_password: str):
         self.password = Password(new_hashed_password)
-        self.updated_at = datetime.now(timezone.utc)
+        self.password_changed_at = datetime.now(timezone.utc)
         self.revoke_all_tokens_by_type(TokenType.REFRESH)
 
     def change_email(self, new_email: Email):

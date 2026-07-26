@@ -18,6 +18,7 @@ from src.core.iam.application.usecases import (
     ResendConfirmationCodeUseCase,
     ResetPasswordUseCase,
 )
+from src.core.iam.infrastructure.services.query_service import GetMeQueryService
 from src.core.iam.presentation.dto import (
     AccountConfirmation,
     ChangeEmailRequest,
@@ -27,6 +28,7 @@ from src.core.iam.presentation.dto import (
     ForgotPasswordData,
     LoginAccount,
     LoginResponse,
+    MeResponse,
     RefreshData,
     ResendCodeRequest,
     ResetPasswordData,
@@ -38,6 +40,17 @@ from src.core.shared.presentation.dto import CurrentUser
 from src.core.shared.presentation.security import get_current_user
 
 iam = APIRouter(prefix="/api/v1/iam", tags=["IAM"])
+
+
+@iam.get("/me", response_model=MeResponse)
+@inject
+async def get_me(
+    service: Annotated[
+        GetMeQueryService, Depends(Provide[ApplicationContainer.iam.query_service])
+    ],
+    current_user: CurrentUser = Security(get_current_user),
+):
+    return await service.get_me(current_user.id)
 
 
 @iam.post("/registration")
@@ -190,13 +203,20 @@ async def request_forgot_password(
 @iam.post("/reset-password")
 @inject
 async def reset_user_password(
+    response: Response,
     dto: ResetPasswordData,
+    api_session_service: Annotated[
+        APISessionService,
+        Depends(Provide[ApplicationContainer.shared.api_session_service]),
+    ],
     usecase: Annotated[
         ResetPasswordUseCase,
         Depends(Provide[ApplicationContainer.iam.reset_password_usecase]),
     ],
 ):
     await usecase.execute(dto)
+    api_session_service.clear_session(response)
+
     return {
         "message": "Пароль успешно изменён! Пожалуйста, "
         "войдите систему с новым паролем."
@@ -206,14 +226,21 @@ async def reset_user_password(
 @iam.post("/change-password")
 @inject
 async def change_password(
+    respone: Response,
     dto: ChangePasswordData,
     usecase: Annotated[
         ChangePasswordUseCase,
         Depends(Provide[ApplicationContainer.iam.change_password_usecase]),
     ],
+    api_session_service: Annotated[
+        APISessionService,
+        Depends(Provide[ApplicationContainer.shared.api_session_service]),
+    ],
     current_user: CurrentUser = Security(get_current_user),
 ):
     await usecase.execute(current_user.id, dto)
+    api_session_service.clear_session(respone)
+
     return {
         "message": "Пароль успешно изменён! Пожалуйста, "
         "войдите систему с новым паролем."

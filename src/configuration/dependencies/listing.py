@@ -18,7 +18,7 @@ from src.core.listing.infrastructure.uow import ListingUnitOfWork
 class ListingContainer(containers.DeclarativeContainer):
     session_factory = providers.Dependency()
     database_session = providers.Dependency()
-    subcategory_service = providers.Dependency()
+    attribute_validation = providers.Dependency()
 
     uow = providers.Factory(ListingUnitOfWork, session_factory=session_factory)
 
@@ -30,7 +30,7 @@ class ListingContainer(containers.DeclarativeContainer):
     create_listing_usecase = providers.Factory(
         CreateListingUseCase,
         uow=uow,
-        subcategory_service=subcategory_service,
+        attribute_validation=attribute_validation,
     )
 
     change_listing_price_usecase = providers.Factory(
@@ -51,7 +51,7 @@ class ListingContainer(containers.DeclarativeContainer):
     change_listing_attribute_usecase = providers.Factory(
         ChangeListingAttributeUseCase,
         uow=uow,
-        subcategory_service=subcategory_service,
+        attribute_validation=attribute_validation,
     )
 
     activate_listing_usecase = providers.Factory(

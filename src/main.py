@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from scalar_fastapi import Layout, Theme, get_scalar_api_reference
+from starlette.middleware.cors import CORSMiddleware
 
 from src.configuration.dependencies.container import ApplicationContainer
 from src.configuration.exception_handlers import setup_exception_handlers
@@ -83,10 +84,20 @@ class ApplicationFactory:
                 layout=Layout.MODERN,
             )
 
+    def _setup_cors(self):
+        return self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
     def build(self) -> FastAPI:
         self._wire_dependency()
         self._include_routers()
         self._setup_docs()
+        self._setup_cors()
         return self.app
 
 

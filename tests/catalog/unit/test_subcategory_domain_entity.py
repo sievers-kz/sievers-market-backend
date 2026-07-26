@@ -3,9 +3,9 @@ from uuid import uuid4
 import pytest
 
 from src.core.catalog.domain.entities import Subcategory
-from src.core.catalog.domain.enums import AttributeType, CatalogStatus
-from src.core.catalog.domain.exceptions import DuplicateAttributeError
 from src.core.catalog.domain.value_objects import Attribute
+from src.core.catalog.infrastructure.enums import AttributeType, CatalogStatus
+from src.core.catalog.infrastructure.exceptions import DuplicateAttributeError
 
 
 @pytest.fixture

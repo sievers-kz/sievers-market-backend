@@ -17,6 +17,11 @@ class Account(BaseModel):
 
     password_hash: Mapped[str] = mapped_column(Text, nullable=False)
 
+    password_changed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+
     is_active: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False, server_default="false"
     )

@@ -15,11 +15,23 @@ from src.core.catalog.presentation.dto.catalog import (
     RubricResponse,
     VendorCardResponse,
 )
+from src.core.catalog.presentation.routers.attribute_definition import (
+    attribute_definition_router,
+)
+from src.core.catalog.presentation.routers.attribute_group import attribute_group_router
 from src.core.catalog.presentation.routers.subcategory import subcategory_router
+from src.core.catalog.presentation.routers.subcategory_attribute import (
+    subcategory_attribute_router,
+)
+from src.core.catalog.presentation.routers.unit_of_measure import unit_of_measure_router
 from src.core.shared.presentation.dto import PaginatedResponse
 
 catalog_router = APIRouter(prefix="/api/v1/catalog", tags=["Catalog"])
 catalog_router.include_router(subcategory_router)
+catalog_router.include_router(attribute_definition_router)
+catalog_router.include_router(subcategory_attribute_router)
+catalog_router.include_router(attribute_group_router)
+catalog_router.include_router(unit_of_measure_router)
 
 
 @catalog_router.get("/{subcategory_id}/form", response_model=AttributeResponse)
