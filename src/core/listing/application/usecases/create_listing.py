@@ -3,7 +3,9 @@ from uuid import UUID
 
 from loguru import logger
 
-from src.core.catalog.application.services.subcategory import SubcategoryService
+from src.core.catalog.infrastructure.attribute_validation import (
+    AttributeValidationService,
+)
 from src.core.listing.application.interfaces.uow import IListingUnitOfWork
 from src.core.listing.domain.entities import Listing
 from src.core.listing.domain.enums import ListingStatus
@@ -15,13 +17,13 @@ class CreateListingUseCase:
     def __init__(
         self,
         uow: IListingUnitOfWork,
-        subcategory_service: SubcategoryService,
+        attribute_validation: AttributeValidationService,
     ):
         self.uow = uow
-        self.subcategory_service = subcategory_service
+        self.attribute_validation = attribute_validation
 
     async def execute(self, owner_id: UUID, dto: CreateListingRequest):
-        validated_attributes = await self.subcategory_service.validate_attributes(
+        validated_attributes = await self.attribute_validation.validate(
             dto.subcategory_id, dto.attributes
         )
 

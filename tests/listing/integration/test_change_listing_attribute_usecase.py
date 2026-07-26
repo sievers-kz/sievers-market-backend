@@ -24,7 +24,13 @@ class TestChangeListingPriceUsecase:
         listing_id = await create_listing_usecase.execute(create_vendor.id, dto)
 
         change_attribute_dto = ChangeListingAttributeRequest(
-            subcategory_id=subcategory_id, attributes={"engine_power": 123}
+            subcategory_id=subcategory_id,
+            attributes={
+                "engine_power": 123,
+                "brand": "John Deere",
+                "year_of_issue": 2024,
+                "condition": "used",
+            },
         )
         await change_listing_attribute_usecase.execute(
             create_vendor.id, listing_id, change_attribute_dto

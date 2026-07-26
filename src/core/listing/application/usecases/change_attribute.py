@@ -2,7 +2,9 @@ from uuid import UUID
 
 from loguru import logger
 
-from src.core.catalog.application.services.subcategory import SubcategoryService
+from src.core.catalog.infrastructure.attribute_validation import (
+    AttributeValidationService,
+)
 from src.core.listing.application.interfaces.uow import IListingUnitOfWork
 from src.core.listing.domain.exceptions import ListingNotFoundError
 from src.core.listing.presentation.dto import ChangeListingAttributeRequest
@@ -10,15 +12,15 @@ from src.core.listing.presentation.dto import ChangeListingAttributeRequest
 
 class ChangeListingAttributeUseCase:
     def __init__(
-        self, uow: IListingUnitOfWork, subcategory_service: SubcategoryService
+        self, uow: IListingUnitOfWork, attribute_validation: AttributeValidationService
     ):
         self.uow = uow
-        self.subcategory_service = subcategory_service
+        self.attribute_validation = attribute_validation
 
     async def execute(
         self, vendor_id: UUID, listing_id: UUID, dto: ChangeListingAttributeRequest
     ):
-        validated_attributes = await self.subcategory_service.validate_attributes(
+        validated_attributes = await self.attribute_validation.validate(
             dto.subcategory_id, dto.attributes
         )
 

@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from src.configuration.database.connection import Base
 from src.configuration.settings.settings import PostgresSettings
-from src.core.catalog.infrastructure.models import Category, Rubric, Subcategory
+from src.core.catalog.infrastructure.models import Category, Rubric, Subcategory, AttributeDefinition, AttributeGroup, SubcategoryAttribute, UnitOfMeasure
 from src.core.customer.infrastructure.models import Customer
 from src.core.iam.infrastructure.models import Account, Token
 from src.core.listing.infrastructure.models import Listing

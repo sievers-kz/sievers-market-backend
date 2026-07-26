@@ -3,13 +3,30 @@ from uuid import UUID
 
 from pydantic import field_validator
 
+from src.core.catalog.infrastructure.enums import AttributeType
 from src.core.shared.presentation.dto import DTO
 from src.core.vendor.domain.enums import LegalForm
 
 
+class AttributeFieldResponse(DTO):
+    key: str
+    label: str
+    type: AttributeType
+    required: bool
+    filterable: bool
+    unit: dict | None
+    options: list[dict]
+
+
+class AttributeGroupFieldsResponse(DTO):
+    key: str
+    label: str
+    position: int
+    fields: list[AttributeFieldResponse]
+
+
 class AttributeResponse(DTO):
-    base_fields: list[dict]
-    dynamic_fields: list[dict]
+    groups: list[AttributeGroupFieldsResponse]
 
 
 class SubcategoryResponse(DTO):

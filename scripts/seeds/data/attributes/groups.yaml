@@ -1,0 +1,12 @@
+- key: general
+  label: Основная информация
+  position: 0
+- key: engine
+  label: Двигатель
+  position: 1
+- key: transmission
+  label: Трансмиссия
+  position: 2
+- key: chassis
+  label: Ходовая часть
+  position: 3

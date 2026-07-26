@@ -1,26 +1,50 @@
 from dependency_injector import containers, providers
 
-from src.core.catalog.application.services.category import CategoryService
-from src.core.catalog.application.services.rubric import RubricService
-from src.core.catalog.application.services.subcategory import SubcategoryService
+from src.core.catalog.infrastructure.attribute_validation import (
+    AttributeValidationService,
+)
 from src.core.catalog.infrastructure.query import CatalogQueryService
-from src.core.catalog.infrastructure.uow import CatalogUnitOfWork
+from src.core.catalog.infrastructure.repositories.attributes import (
+    AttributeDefinitionRepository,
+    AttributeGroupRepository,
+    SubcategoryAttributeRepository,
+    UnitOfMeasureRepository,
+)
+from src.core.catalog.infrastructure.repositories.categories import (
+    CategoryRepository,
+    RubricRepository,
+    SubcategoryRepository,
+)
 
 
 class CatalogContainer(containers.DeclarativeContainer):
     session_factory = providers.Dependency()
     database_session = providers.Dependency()
 
-    catalog_unit_of_work = providers.Factory(
-        CatalogUnitOfWork, session_factory=session_factory
+    rubric_repository = providers.Factory(RubricRepository, session=database_session)
+    category_repository = providers.Factory(
+        CategoryRepository, session=database_session
+    )
+    subcategory_repository = providers.Factory(
+        SubcategoryRepository, session=database_session
     )
 
-    rubric_service = providers.Factory(RubricService, uow=catalog_unit_of_work)
-
-    category_service = providers.Factory(CategoryService, uow=catalog_unit_of_work)
-
-    subcategory_service = providers.Factory(
-        SubcategoryService, uow=catalog_unit_of_work
+    attribute_definition_repository = providers.Factory(
+        AttributeDefinitionRepository, session=database_session
+    )
+    subcategory_attribute_repository = providers.Factory(
+        SubcategoryAttributeRepository, session=database_session
+    )
+    attribute_group_repository = providers.Factory(
+        AttributeGroupRepository, session=database_session
+    )
+    unit_of_measure_repository = providers.Factory(
+        UnitOfMeasureRepository, session=database_session
     )
 
     query_service = providers.Factory(CatalogQueryService, session=database_session)
+
+    attribute_validation = providers.Factory(
+        AttributeValidationService,
+        link_repo=subcategory_attribute_repository,
+    )

@@ -67,7 +67,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         ListingContainer,
         session_factory=gateways.session_factory,
         database_session=gateways.database_session,
-        subcategory_service=catalog.subcategory_service,
+        attribute_validation=catalog.attribute_validation,
     )
 
     media = providers.Container(
