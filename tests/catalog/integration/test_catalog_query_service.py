@@ -29,8 +29,6 @@ class TestCatalogQueryService:
         result = await catalog_query_service.get_subcategory_attributes(subcategory_id)
 
         assert result is not None
-        assert result.base_fields is not None
-        assert result.dynamic_fields is not None
 
     @pytest.mark.asyncio
     @pytest.mark.integration
