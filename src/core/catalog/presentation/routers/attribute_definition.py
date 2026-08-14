@@ -29,6 +29,7 @@ async def create_attribute_definition(
         label=dto.label,
         type=dto.type,
         options=[opt.model_dump() for opt in dto.options],
+        source=dto.source,
     )
     return definition
 

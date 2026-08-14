@@ -13,3 +13,4 @@ class ConfigurationContainer(containers.DeclarativeContainer):
     resend_config = configuration.resend_config
     sentry_config = configuration.sentry_config
     kgd_settings = configuration.kgd_settings
+    meilisearch_config = configuration.meilisearch_config

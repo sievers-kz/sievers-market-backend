@@ -1,4 +1,5 @@
 import uuid
+from unittest.mock import AsyncMock
 
 import pytest
 import pytest_asyncio
@@ -8,6 +9,7 @@ from src.core.listing.domain.entities import Listing
 from src.core.listing.domain.enums import ListingStatus
 from src.core.listing.domain.value_objects import Gallery, Image
 from src.core.listing.presentation.dto import CreateListingRequest, ListingImage
+from src.core.shared.application.interfaces.search_service import ISearchService
 from src.core.shared.domain.enums import PriceCurrency
 from tests.iam.conftest import create_domain_account
 from tests.vendor.conftest import create_domain_vendor
@@ -77,6 +79,17 @@ async def create_listing_request(database_session):
             "year_of_issue": 2024,
         },
     )
+
+
+@pytest.fixture
+def mock_search_service(container):
+    mock = AsyncMock(spec=ISearchService)
+    return mock
+
+
+@pytest_asyncio.fixture
+async def listing_search_service(container, mock_search_service):
+    return await container.listing.listing_search_service.override(mock_search_service)
 
 
 @pytest_asyncio.fixture

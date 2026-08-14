@@ -19,6 +19,7 @@ from src.core.catalog.presentation.dto.catalog import (
     AttributeGroupFieldsResponse,
     AttributeResponse,
     DetailVendorResponse,
+    FilterableAttributeResponse,
     ListingCardResponse,
     ListingDetailResponse,
     RubricResponse,
@@ -74,10 +75,47 @@ class CatalogQueryService(QueryService):
                         else None
                     ),
                     options=link.attribute.options,
+                    source=link.attribute.source,
                 )
             )
 
         return AttributeResponse(groups=list(groups_map.values()))
+
+    async def get_filterable_attributes(self, subcategory_id: UUID) -> list:
+        statement = (
+            select(SubcategoryAttribute)
+            .where(
+                SubcategoryAttribute.subcategory_id == subcategory_id,
+                SubcategoryAttribute.filterable.is_(True),
+            )
+            .options(
+                joinedload(SubcategoryAttribute.attribute),
+                joinedload(SubcategoryAttribute.unit),
+            )
+        )
+
+        query_result = await self._session.execute(statement)
+        links = query_result.scalars().unique().all()
+
+        filters = []
+        for link in links:
+            filter_fields = AttributeFieldResponse(
+                key=link.attribute.key,
+                label=link.attribute.label,
+                type=link.attribute.type,
+                required=link.required,
+                filterable=link.filterable,
+                unit=(
+                    {"key": link.unit.key, "label": link.unit.label}
+                    if link.unit
+                    else None
+                ),
+                options=link.attribute.options,
+                source=link.attribute.source,
+            )
+            filters.append(filter_fields)
+
+        return FilterableAttributeResponse(filters=filters)
 
     async def get_category_tree(self) -> list[RubricResponse]:
         statement = (

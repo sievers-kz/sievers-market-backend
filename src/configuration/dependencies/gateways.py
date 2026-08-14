@@ -9,6 +9,7 @@ from src.configuration.database.connection import get_database_session
 from src.configuration.dependencies.resources import (
     init_bloom,
     init_engine,
+    init_meilisearch,
     init_sentry,
 )
 from src.core.shared.infrastructure.services.email_sender import SendGridEmailSender
@@ -20,6 +21,7 @@ class GatewaysContainer(containers.DeclarativeContainer):
     redis_config = providers.Configuration()
     minio_config = providers.Configuration()
     sentry_config = providers.Configuration()
+    meilisearch_config = providers.Configuration()
 
     async_engine = providers.Resource(
         init_engine, url=database_config.database_url, echo=False
@@ -81,4 +83,10 @@ class GatewaysContainer(containers.DeclarativeContainer):
         environment=sentry_config.mode,
         traces_sample_rate=sentry_config.traces_sample_rate,
         profiles_sample_rate=sentry_config.profiles_sample_rate,
+    )
+
+    meilisearch_client = providers.Resource(
+        init_meilisearch,
+        url=meilisearch_config.url,
+        key=meilisearch_config.key,
     )

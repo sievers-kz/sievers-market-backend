@@ -14,6 +14,7 @@ class CreateAttributeDefinitionRequest(DTO):
     label: str
     type: AttributeType
     options: list[OptionItem] = []
+    source: str | None = None
 
 
 class AttributeDefinitionResponse(DTO):
@@ -22,6 +23,7 @@ class AttributeDefinitionResponse(DTO):
     label: str
     type: AttributeType
     options: list[OptionItem]
+    source: str | None = None
 
 
 class CreateAttributeGroupRequest(DTO):

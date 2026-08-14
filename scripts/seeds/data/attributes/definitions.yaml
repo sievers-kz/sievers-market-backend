@@ -1,6 +1,7 @@
 - key: brand
   label: Марка
   type: reference
+  source: brand
 
 - key: model
   label: Модель
@@ -20,10 +21,12 @@
 - key: color
   label: Цвет
   type: reference
+  source: color
 
 - key: country
   label: Страна производства
   type: reference
+  source: country
 
 - key: engine_power
   label: Мощность двигателя

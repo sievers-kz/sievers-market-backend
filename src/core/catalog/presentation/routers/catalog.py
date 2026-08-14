@@ -10,6 +10,7 @@ from src.core.catalog.infrastructure.query import CatalogQueryService
 from src.core.catalog.presentation.dto.catalog import (
     AttributeResponse,
     DetailVendorResponse,
+    FilterableAttributeResponse,
     ListingCardResponse,
     ListingDetailResponse,
     RubricResponse,
@@ -44,6 +45,20 @@ async def get_form(
     ],
 ):
     return await service.get_subcategory_attributes(subcategory_id)
+
+
+@catalog_router.get(
+    "/{subcategory_id}/filters", response_model=FilterableAttributeResponse
+)
+@inject
+async def get_filters(
+    subcategory_id: UUID,
+    service: Annotated[
+        CatalogQueryService,
+        Depends(Provide[ApplicationContainer.catalog.query_service]),
+    ],
+):
+    return await service.get_filterable_attributes(subcategory_id)
 
 
 @catalog_router.get("/tree", response_model=list[RubricResponse])

@@ -11,6 +11,7 @@ class AttributeDefinitionSeed(DTO):
     label: str
     type: str
     options: list[OptionSeed] = []
+    source: str | None = None
 
 
 class AttributeGroupSeed(DTO):

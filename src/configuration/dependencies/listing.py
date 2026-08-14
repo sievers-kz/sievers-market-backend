@@ -1,5 +1,6 @@
 from dependency_injector import containers, providers
 
+from src.core.listing.application.services.listing_search import ListingSearchService
 from src.core.listing.application.usecases import (
     ActivateListingUseCase,
     ArchiveListingUseCase,
@@ -19,8 +20,14 @@ class ListingContainer(containers.DeclarativeContainer):
     session_factory = providers.Dependency()
     database_session = providers.Dependency()
     attribute_validation = providers.Dependency()
+    meilisearch_service = providers.Dependency()
 
     uow = providers.Factory(ListingUnitOfWork, session_factory=session_factory)
+
+    listing_search_service = providers.Factory(
+        ListingSearchService,
+        search_service=meilisearch_service,
+    )
 
     listing_repository = providers.Factory(
         ListingRepository,
@@ -31,6 +38,7 @@ class ListingContainer(containers.DeclarativeContainer):
         CreateListingUseCase,
         uow=uow,
         attribute_validation=attribute_validation,
+        listing_search_service=listing_search_service,
     )
 
     change_listing_price_usecase = providers.Factory(

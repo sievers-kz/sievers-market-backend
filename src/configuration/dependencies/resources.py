@@ -1,6 +1,7 @@
 from typing import AsyncGenerator
 
 import sentry_sdk
+from meilisearch_python_sdk import AsyncClient
 from minio import Minio
 from rbloom import Bloom
 from sentry_sdk.integrations.fastapi import FastApiIntegration
@@ -52,3 +53,14 @@ async def init_engine(
     async_engine = create_async_engine(url=url, echo=echo)
     yield async_engine
     await async_engine.dispose()
+
+
+async def init_meilisearch(
+    url: str,
+    key: str,
+):
+    client = AsyncClient(url=url, api_key=key)
+    try:
+        yield client
+    finally:
+        await client.aclose()
