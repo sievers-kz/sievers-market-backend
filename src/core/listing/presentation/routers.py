@@ -6,6 +6,7 @@ from fastapi import APIRouter
 from fastapi.params import Depends, Security
 
 from src.configuration.dependencies.container import ApplicationContainer
+from src.core.listing.application.services.listing_search import ListingSearchService
 from src.core.listing.application.usecases import (
     ActivateListingUseCase,
     ArchiveListingUseCase,
@@ -23,6 +24,7 @@ from src.core.listing.presentation.dto import (
     ChangeListingLocationRequest,
     ChangeListingPriceRequest,
     CreateListingRequest,
+    ListingSearchQuery,
 )
 from src.core.shared.presentation.dto import CurrentVendor
 from src.core.shared.presentation.security import get_current_vendor
@@ -55,7 +57,7 @@ async def change_listing_price(
     ],
     current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
-    await usecase.execute(listing_id, dto)
+    await usecase.execute(current_vendor.id, listing_id, dto)
     return {"message": "Listing price changed successfully"}
 
 
@@ -70,7 +72,7 @@ async def change_listing_location(
     ],
     current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
-    await usecase.execute(listing_id, dto)
+    await usecase.execute(current_vendor.id, listing_id, dto)
     return {"message": "Listing location changed successfully"}
 
 
@@ -87,7 +89,7 @@ async def change_listing_description(
     ],
     current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
-    await usecase.execute(listing_id, dto)
+    await usecase.execute(current_vendor.id, listing_id, dto)
     return {"message": "Listing description changed successfully"}
 
 
@@ -102,7 +104,7 @@ async def change_listing_attribute(
     ],
     current_vendor: CurrentVendor = Security(get_current_vendor),
 ):
-    await usecase.execute(listing_id, dto)
+    await usecase.execute(current_vendor.id, listing_id, dto)
     return {"message": "Listing attribute changed successfully"}
 
 
@@ -160,3 +162,15 @@ async def delete_listing(
 ):
     await usecase.execute(current_vendor.id, listing_id)
     return {"message": "Объявление удалено"}
+
+
+@listing_router.post("/search")
+@inject
+async def search_listing(
+    params: ListingSearchQuery,
+    service: Annotated[
+        ListingSearchService,
+        Depends(Provide[ApplicationContainer.listing.listing_search_service]),
+    ],
+):
+    return await service.search_listings(params)

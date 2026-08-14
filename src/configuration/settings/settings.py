@@ -85,6 +85,11 @@ class KGDSettings(BaseConfig):
     portal_token: str = Field(alias="KGD_PORTAL_TOKEN")
 
 
+class MeilisearchConfig(BaseConfig):
+    url: str = Field(alias="MEILISEARCH_URL")
+    key: str = Field(alias="MEILISEARCH_KEY")
+
+
 class ApplicationSettings(BaseConfig):
     mode: str = Field(alias="MODE")
     database: PostgresSettings = Field(default_factory=PostgresSettings)
@@ -97,3 +102,4 @@ class ApplicationSettings(BaseConfig):
     resend_config: ResendSettings = Field(default_factory=ResendSettings)
     sentry_config: SentryConfig = Field(default_factory=SentryConfig)
     kgd_settings: KGDSettings = Field(default_factory=KGDSettings)
+    meilisearch_config: MeilisearchConfig = Field(default_factory=MeilisearchConfig)

@@ -17,7 +17,7 @@ color_router = APIRouter(prefix="/color")
 
 
 @inject
-def get_repo(
+async def get_repo(
     repo: Annotated[
         ColorRepository,
         Depends(Provide[ApplicationContainer.reference.color_repository]),

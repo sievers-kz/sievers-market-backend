@@ -8,6 +8,9 @@ from src.core.shared.infrastructure.services.email_sender import (
     ConsoleEmailSender,
     ResendEmailSender,
 )
+from src.core.shared.infrastructure.services.meilisearch_service import (
+    MeilisearchService,
+)
 from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormalizer
 from src.core.shared.infrastructure.services.redis_service import RedisService
 
@@ -15,6 +18,7 @@ from src.core.shared.infrastructure.services.redis_service import RedisService
 class SharedContainer(containers.DeclarativeContainer):
     resend_config = providers.Configuration()
     app_config = providers.Configuration()
+    meilisearch_client = providers.Dependency()
 
     console_email_sender = providers.Singleton(ConsoleEmailSender)
     phone_normalizer = providers.Singleton(PhoneNormalizer)
@@ -39,4 +43,9 @@ class SharedContainer(containers.DeclarativeContainer):
         mode=app_config.mode,
         access_token_lifetime=app_config.authentication.access_token_lifetime,
         refresh_token_lifetime=app_config.authentication.refresh_token_lifetime,
+    )
+
+    meilisearch_service = providers.Factory(
+        MeilisearchService,
+        client=meilisearch_client,
     )

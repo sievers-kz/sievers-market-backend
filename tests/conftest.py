@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import pytest_asyncio
@@ -10,6 +10,7 @@ from scripts.seeds.seed import DataSeeder
 from src.configuration.database.connection import Base
 from src.configuration.dependencies.container import ApplicationContainer
 from src.configuration.settings.settings import ApplicationSettings
+from src.core.shared.application.interfaces.search_service import ISearchService
 
 pytest_plugins = [
     "tests.iam.conftest",
@@ -93,6 +94,13 @@ def mock_bloom():
 def mute_logger():
     logger.remove()
     yield
+
+
+@pytest.fixture(autouse=True)
+def mock_search_service(container):
+    mock = AsyncMock(spec=ISearchService)
+    with container.shared.meilisearch_service.override(mock):
+        yield mock
 
 
 @pytest_asyncio.fixture(scope="function")

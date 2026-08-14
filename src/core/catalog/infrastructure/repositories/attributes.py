@@ -24,10 +24,10 @@ class AttributeDefinitionRepository:
         return list(result.scalars().all())
 
     async def create(
-        self, key: str, label: str, type, options: list
+        self, key: str, label: str, type, options: list, source: str
     ) -> AttributeDefinition:
         definition = AttributeDefinition(
-            key=key, label=label, type=type, options=options
+            key=key, label=label, type=type, options=options, source=source
         )
         self._session.add(definition)
         await self._session.commit()

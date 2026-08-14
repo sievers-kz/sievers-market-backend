@@ -17,7 +17,7 @@ brand_router = APIRouter(prefix="/brand")
 
 
 @inject
-def get_repo(
+async def get_repo(
     repo: Annotated[
         BrandRepository,
         Depends(Provide[ApplicationContainer.reference.brand_repository]),

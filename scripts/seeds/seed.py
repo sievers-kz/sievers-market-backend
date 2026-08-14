@@ -145,6 +145,7 @@ class DataSeeder:
                 label=dto.label,
                 type=AttributeType(dto.type),
                 options=[opt.model_dump() for opt in dto.options],
+                source=dto.source,
             )
             self.session.add(definition)
             await self.session.flush()

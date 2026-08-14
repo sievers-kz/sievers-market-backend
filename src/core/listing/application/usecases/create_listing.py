@@ -7,6 +7,7 @@ from src.core.catalog.infrastructure.attribute_validation import (
     AttributeValidationService,
 )
 from src.core.listing.application.interfaces.uow import IListingUnitOfWork
+from src.core.listing.application.services.listing_search import ListingSearchService
 from src.core.listing.domain.entities import Listing
 from src.core.listing.domain.enums import ListingStatus
 from src.core.listing.domain.value_objects import Gallery
@@ -18,9 +19,11 @@ class CreateListingUseCase:
         self,
         uow: IListingUnitOfWork,
         attribute_validation: AttributeValidationService,
+        listing_search_service: ListingSearchService,
     ):
         self.uow = uow
         self.attribute_validation = attribute_validation
+        self.listing_search_service = listing_search_service
 
     async def execute(self, owner_id: UUID, dto: CreateListingRequest):
         validated_attributes = await self.attribute_validation.validate(
@@ -46,5 +49,8 @@ class CreateListingUseCase:
             await uow.listing.save(listing)
             await uow.commit()
 
+        await self.listing_search_service.index_listing(listing, listing.attributes)
+
         return listing.id
+
         logger.info("Listing created | listing_id={} owner_id={}", listing.id, owner_id)

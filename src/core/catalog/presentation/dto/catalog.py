@@ -16,6 +16,7 @@ class AttributeFieldResponse(DTO):
     filterable: bool
     unit: dict | None
     options: list[dict]
+    source: str | None = None
 
 
 class AttributeGroupFieldsResponse(DTO):
@@ -27,6 +28,10 @@ class AttributeGroupFieldsResponse(DTO):
 
 class AttributeResponse(DTO):
     groups: list[AttributeGroupFieldsResponse]
+
+
+class FilterableAttributeResponse(DTO):
+    filters: list[AttributeFieldResponse]
 
 
 class SubcategoryResponse(DTO):

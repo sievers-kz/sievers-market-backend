@@ -61,6 +61,7 @@ class AttributeDefinition(BaseModel):
     label: Mapped[str] = mapped_column(String, nullable=False)
     type: Mapped[AttributeType] = mapped_column(nullable=False)
     options: Mapped[dict] = mapped_column(JSONB, default=[])
+    source: Mapped[str] = mapped_column(String, nullable=True)
 
 
 class SubcategoryAttribute(BaseModel):
