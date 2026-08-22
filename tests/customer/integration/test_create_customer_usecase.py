@@ -19,19 +19,18 @@ class TestCreateCustomerUseCase:
         redis_service,
     ):
         dto = create_user_request()
-        account_id = await create_user_usecase.execute(dto)
+        email = await create_user_usecase.execute(dto)
+        account = await account_repository.get_account_by_email(email)
 
         otp_code = await redis_service.get(
-            f"otp:{OTPType.CONFIRMATION.value}:{account_id}"
+            f"otp:{OTPType.CONFIRMATION.value}:{account.id}"
         )
-        confirmation_dto = AccountConfirmation(
-            account_id=account_id, confirm_code=otp_code
-        )
+        confirmation_dto = AccountConfirmation(email=email, confirm_code=otp_code)
         await account_confirmation_usecase.execute(confirmation_dto)
 
         customer_dto = CreateCustomerRequest(last_name="Бисенов", first_name="Мейржан")
-        await create_customer_usecase.execute(account_id, customer_dto)
+        await create_customer_usecase.execute(account.id, customer_dto)
 
-        customer = await customer_repository.get_by_account_id(account_id)
+        customer = await customer_repository.get_by_account_id(account.id)
         assert customer is not None
         assert customer.fullname.last_name == "Бисенов"
