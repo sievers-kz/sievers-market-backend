@@ -44,11 +44,13 @@ class ListingContainer(containers.DeclarativeContainer):
     change_listing_price_usecase = providers.Factory(
         ChangeListingPriceUseCase,
         uow=uow,
+        listing_search_service=listing_search_service,
     )
 
     change_listing_location_usecase = providers.Factory(
         ChangeListingLocationUseCase,
         uow=uow,
+        listing_search_service=listing_search_service,
     )
 
     change_listing_description_usecase = providers.Factory(

@@ -1,3 +1,6 @@
+include .env
+export
+
 MODE ?= dev
 
 ifeq ($(MODE), prod)
@@ -11,7 +14,7 @@ COMPOSE_TEST = docker compose --env-file .env.test -f docker-compose.yml -f dock
 .PHONY: up build start stop destroy logs restart shell db cache test coverage coverage-html ci
 
 up:
-	$(COMPOSE) up -d --build
+	$(COMPOSE) up -d --build --remove-orphans
 
 build:
 	$(COMPOSE) build
@@ -38,7 +41,7 @@ db:
 	$(COMPOSE) exec db sh -c 'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_NAME"'
 
 cache:
-	$(COMPOSE) exec redis redis-cli
+	$(COMPOSE) exec -e REDISCLI_AUTH=$(REDIS_PASSWORD) redis redis-cli
 
 ci:
 	@echo "=== Running CI Test pipeline ==="

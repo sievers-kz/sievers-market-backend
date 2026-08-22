@@ -12,6 +12,7 @@ repos:
         stages: [pre-commit]
       - id: check-added-large-files
         stages: [pre-commit]
+        exclude: ^scripts/bloom/wordlist/weak_passwords\.bloom$
 
   - repo: https://github.com/PyCQA/isort
     rev: 9.0.0a3

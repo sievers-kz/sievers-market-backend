@@ -5,9 +5,9 @@ from minio import Minio
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
+from scripts.bloom.load_bloom import load_bloom
 from src.configuration.database.connection import get_database_session
 from src.configuration.dependencies.resources import (
-    init_bloom,
     init_engine,
     init_meilisearch,
     init_sentry,
@@ -71,11 +71,7 @@ class GatewaysContainer(containers.DeclarativeContainer):
         secure=minio_config.secure_config,
     )
 
-    bloom_filter = providers.Resource(
-        init_bloom,
-        client=minio_client,
-        bucket_name=minio_config.bucket_name,
-    )
+    bloom_filter = providers.Singleton(load_bloom)
 
     sentry = providers.Resource(
         init_sentry,
