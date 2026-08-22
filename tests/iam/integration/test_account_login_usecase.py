@@ -35,7 +35,7 @@ class TestAccountLoginUseCase:
         )
 
         confirmation_dto = AccountConfirmation(
-            account_id=user.id, confirm_code=otp_code
+            email=user.email.value, confirm_code=otp_code
         )
         await account_confirmation_usecase.execute(confirmation_dto)
 
@@ -74,7 +74,7 @@ class TestAccountLoginUseCase:
         )
 
         confirmation_dto = AccountConfirmation(
-            account_id=user.id, confirm_code=otp_code
+            email=user.email.value, confirm_code=otp_code
         )
         await account_confirmation_usecase.execute(confirmation_dto)
 

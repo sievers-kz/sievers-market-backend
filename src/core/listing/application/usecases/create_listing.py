@@ -49,8 +49,9 @@ class CreateListingUseCase:
             await uow.listing.save(listing)
             await uow.commit()
 
-        await self.listing_search_service.index_listing(listing, listing.attributes)
-
-        return listing.id
+        await self.listing_search_service.index_listing(
+            listing=listing, attributes=listing.attributes
+        )
 
         logger.info("Listing created | listing_id={} owner_id={}", listing.id, owner_id)
+        return listing.id

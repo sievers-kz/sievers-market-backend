@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Annotated, Literal, Union
-from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -70,7 +69,7 @@ class LoginResponse(BaseModel):
 
 
 class AccountConfirmation(BaseModel):
-    account_id: UUID
+    email: EmailStr
     confirm_code: str
 
 

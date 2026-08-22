@@ -28,7 +28,7 @@ class TestAccountConfirmationUsecase:
             f"otp:{OTPType.CONFIRMATION.value}:{unconfirmed_user.id}"
         )
         confirmation_dto = AccountConfirmation(
-            account_id=unconfirmed_user.id, confirm_code=otp_code
+            email=unconfirmed_user.email.value, confirm_code=otp_code
         )
         await account_confirmation_usecase.execute(confirmation_dto)
 
@@ -48,7 +48,7 @@ class TestAccountConfirmationUsecase:
 
         account = await account_repository.get_account_by_email(dto.email)
         confirmation_dto = AccountConfirmation(
-            account_id=account.id, confirm_code="123456"
+            email=account.email.value, confirm_code="123456"
         )
 
         with pytest.raises(InvalidOTPCodeError):

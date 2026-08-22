@@ -38,6 +38,8 @@ class ApplicationFactory:
         @asynccontextmanager
         async def lifespan(app: FastAPI):
             await self.container.init_resources()
+            self.container.gateways.bloom_filter()
+
             yield
             await self.container.shutdown_resources()
 

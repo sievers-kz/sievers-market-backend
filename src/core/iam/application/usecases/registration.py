@@ -42,4 +42,4 @@ class CreateAccountUseCase:
             otp_type=OTPType.CONFIRMATION,
         )
 
-        return account.id
+        return account.email.value

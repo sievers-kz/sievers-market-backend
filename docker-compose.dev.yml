@@ -12,16 +12,6 @@ services:
     ports:
       - "7700:7700"
 
-  bloom-init:
-    build: .
-    command: python -m scripts.bloom.generate_bloom
-    env_file: .env
-    entrypoint: [ ]
-    depends_on:
-      minio:
-        condition: service_healthy
-    restart: "no"
-
   app:
     build: .
     restart: always
@@ -40,8 +30,6 @@ services:
         condition: service_healthy
       meilisearch:
         condition: service_healthy
-      bloom-init:
-        condition: service_completed_successfully
     environment:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
