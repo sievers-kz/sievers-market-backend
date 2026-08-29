@@ -12,12 +12,10 @@ from src.configuration.dependencies.resources import (
     init_meilisearch,
     init_sentry,
 )
-from src.core.shared.infrastructure.services.email_sender import SendGridEmailSender
 
 
 class GatewaysContainer(containers.DeclarativeContainer):
     database_config = providers.Configuration()
-    sendgrid_config = providers.Configuration()
     redis_config = providers.Configuration()
     minio_config = providers.Configuration()
     sentry_config = providers.Configuration()
@@ -33,12 +31,6 @@ class GatewaysContainer(containers.DeclarativeContainer):
 
     database_session = providers.Resource(
         get_database_session, session_factory=session_factory
-    )
-
-    sendgrid_sender = providers.Singleton(
-        SendGridEmailSender,
-        api_key=sendgrid_config.api_key,
-        from_email=sendgrid_config.from_email,
     )
 
     redis_client = providers.Singleton(

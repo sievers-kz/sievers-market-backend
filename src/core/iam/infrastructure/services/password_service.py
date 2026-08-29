@@ -18,7 +18,7 @@ class PasswordService:
             raise InvalidPasswordError(
                 "Слишком длинный пароль. Пароль не должен превышать 64 символа"
             )
-        if raw in self._bloom:
+        if raw is not None and self._bloom is not None and raw in self._bloom:
             raise InvalidPasswordError(
                 "Пароль слишком распространен. Придумайте другой"
             )

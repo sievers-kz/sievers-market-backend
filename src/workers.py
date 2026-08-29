@@ -13,7 +13,7 @@ async def send_otp_email(ctx, to: str, code: str):
     sender = ctx["resend_sender"]
     await sender.send_email(
         to_email=to,
-        subject="Ваш код верификации AGROW",
+        subject="Ваш код верификации Sievers",
         html_content=f"<h3>Ваш код <strong>{code}</strong> для верификации аккаунта</h3>",  # noqa: E501
     )
 
@@ -22,7 +22,7 @@ async def send_otp_password_reset(ctx, to: str, code: str):
     sender = ctx["resend_sender"]
     await sender.send_email(
         to_email=to,
-        subject="Ваш код для сброса пароля AGROW",
+        subject="Ваш код для сброса пароля Sievers",
         html_content=f"<h3>Ваш код <strong>{code}</strong> для сброса пароля</h3>",  # noqa: E501
     )
 
