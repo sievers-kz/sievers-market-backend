@@ -18,7 +18,6 @@ class ApplicationContainer(containers.DeclarativeContainer):
     gateways = providers.Container(
         GatewaysContainer,
         database_config=configurations.database,
-        sendgrid_config=configurations.sendgrid,
         redis_config=configurations.redis,
         minio_config=configurations.minio_config,
         sentry_config=configurations.sentry_config,

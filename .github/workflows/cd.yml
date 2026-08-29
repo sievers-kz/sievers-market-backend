@@ -1,0 +1,46 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - development
+
+jobs:
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging'}}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Auto-generate .env via jq
+        env:
+          RAW_VARS: ${{ toJSON(vars) }}
+          RAW_SECRETS: ${{ toJSON(secrets) }}
+        run: |
+          echo "$RAW_VARS" | jq -r 'to_entries | .[] | select(.key | startswith("DEPLOY_") | not) | "\(.key)=\(.value)"' > .env
+          echo "$RAW_SECRETS" | jq -r 'to_entries | .[] | select(.key | startswith("DEPLOY_") | not) | "\(.key)=\(.value)"' >> .env
+
+      - name: Copy files and .env to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ vars.DEPLOY_HOST }}
+          username: ${{ vars.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "."
+          target: ${{ vars.DEPLOY_PATH }}
+          rm: false
+
+      - name: Run Makefile on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.DEPLOY_HOST }}
+          username: ${{ vars.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd ${{ vars.DEPLOY_PATH }}
+            make up
+            docker image prune -f

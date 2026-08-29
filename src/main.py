@@ -7,7 +7,6 @@ from starlette.middleware.cors import CORSMiddleware
 from src.configuration.dependencies.container import ApplicationContainer
 from src.configuration.exception_handlers import setup_exception_handlers
 from src.configuration.logging import setup_logger
-from src.configuration.settings.settings import ApplicationSettings
 from src.core.catalog.presentation.routers.catalog import catalog_router
 from src.core.customer.presentation.routers import customer_router
 from src.core.iam.presentation.routers import iam
@@ -20,6 +19,7 @@ from src.core.vendor.presentation.router import vendor_router
 class ApplicationFactory:
     def __init__(self):
         self.container = ApplicationContainer()
+        self.settings = self.container.configurations.configuration
         self._configure_logging()
         self.container.gateways.sentry.init()
 
@@ -31,8 +31,7 @@ class ApplicationFactory:
         setup_exception_handlers(self.app)
 
     def _configure_logging(self):
-        settings = ApplicationSettings()
-        setup_logger(mode=settings.mode)
+        setup_logger(mode=self.settings.mode)
 
     def _lifespan(self):
         @asynccontextmanager
@@ -61,7 +60,7 @@ class ApplicationFactory:
             ],
         )
         self.app.container = self.container
-        self.app.state.mode = self.container.configurations.configuration.mode
+        self.app.state.mode = self.settings.mode
 
     def _include_routers(self):
         routers = [
@@ -87,9 +86,9 @@ class ApplicationFactory:
             )
 
     def _setup_cors(self):
-        return self.app.add_middleware(
+        self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=["*"],
+            allow_origins=self.settings.cors_origins,
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
