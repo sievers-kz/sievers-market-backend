@@ -28,6 +28,7 @@ class ApplicationFactory:
             version="1.0.0",
             lifespan=self._lifespan(),
         )
+
         setup_exception_handlers(self.app)
 
     def _configure_logging(self):
@@ -59,8 +60,9 @@ class ApplicationFactory:
                 "src.core.references.presentation.routers",
             ],
         )
+
         self.app.container = self.container
-        self.app.state.mode = self.settings.mode
+        self.app.state.mode = self.settings.mode()
 
     def _include_routers(self):
         routers = [
@@ -88,7 +90,7 @@ class ApplicationFactory:
     def _setup_cors(self):
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=self.settings.cors_origins,
+            allow_origins=self.settings.cors_origins(),
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
