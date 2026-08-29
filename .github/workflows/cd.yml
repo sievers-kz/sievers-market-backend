@@ -42,5 +42,5 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd ${{ vars.DEPLOY_PATH }}
-            make up
+            make up MODE=${{ vars.MODE }}
             docker image prune -f
