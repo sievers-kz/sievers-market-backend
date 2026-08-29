@@ -1,5 +1,3 @@
-include .env
-
 MODE ?= dev
 
 ifeq ($(MODE), dev)
@@ -9,11 +7,11 @@ else
 endif
 
 COMPOSE_TEST = docker compose --env-file .env.test -f docker-compose.yml -f docker-compose.test.yml
+CI_SERVICES = db redis minio meilisearch sut
 
 .PHONY: up build start stop destroy logs restart shell db cache test coverage coverage-html ci
 
 up:
-
 	$(COMPOSE) up -d --build --remove-orphans
 
 build:
@@ -41,12 +39,12 @@ db:
 	$(COMPOSE) exec db sh -c 'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_NAME"'
 
 cache:
-	$(COMPOSE) exec -e REDISCLI_AUTH=$(REDIS_PASSWORD) redis redis-cli
+	$(COMPOSE) exec redis sh -c 'redis-cli -a "$$REDIS_PASSWORD"'
 
 ci:
 	@echo "=== Running CI Test pipeline ==="
 	$(COMPOSE_TEST) down -v
-	@$(COMPOSE_TEST) up --build --abort-on-container-exit --exit-code-from sut; \
+	@$(COMPOSE_TEST) up --build --abort-on-container-exit --exit-code-from sut $(CI_SERVICES); \
 	EXIT_CODE=$$?; \
 	echo "=== [CI] Cleaning up test environment ==="; \
 	$(COMPOSE_TEST) down -v; \
