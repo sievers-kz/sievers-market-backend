@@ -48,3 +48,4 @@ jobs:
             make up MODE=${{ vars.MODE }}
             docker image prune -af --filter "until=24h"
             docker builder prune -af --filter "until=24h"
+            sudo /usr/local/bin/deploy-nginx.sh ${{ vars.DEPLOY_PATH }}
