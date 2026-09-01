@@ -9,7 +9,11 @@ endif
 COMPOSE_TEST = docker compose --env-file .env.test -f docker-compose.yml -f docker-compose.test.yml
 CI_SERVICES = db redis minio meilisearch sut
 
-.PHONY: up build start stop destroy logs restart shell db cache test coverage coverage-html ci
+.PHONY: up build start stop destroy logs restart shell db cache test coverage coverage-html ci deploy
+
+deploy:
+	$(COMPOSE) pull
+	$(COMPOSE) up -d --remove-orphans
 
 up:
 	$(COMPOSE) up -d --build --remove-orphans

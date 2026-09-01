@@ -1,8 +1,6 @@
 services:
   backend:
-    build:
-      context: .
-      target: runtime
+    image: ghcr.io/sievers-kz/sievers-market-backend:${IMAGE_TAG}
     env_file: .env
     restart: always
     depends_on:
@@ -22,9 +20,7 @@ services:
           memory: 512M
 
   worker:
-    build:
-      context: .
-      target: runtime
+    image: ghcr.io/sievers-kz/sievers-market-backend:${IMAGE_TAG}
     restart: always
     env_file: .env
     entrypoint: []

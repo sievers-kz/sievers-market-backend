@@ -11,7 +11,7 @@
 ![Clean Arch](https://img.shields.io/badge/Clean_Architecture-000000?style=for-the-badge)
 ![SOLID](https://img.shields.io/badge/SOLID_Principles-000000?style=for-the-badge)
 
-# Altum Market Backend
+# Sievers Market Backend
 RESTful B2B агромаркетплейс для автоматизации торгово-закупочных процессов в АПК, реализованный на FastAPI
 с применением принципов Domain-Driven Design и Clean Architecture.
 
@@ -53,7 +53,7 @@ RESTful B2B агромаркетплейс для автоматизации т�
 Склонируйте проект и перейдите в его корневую директорию:
 ```bash
 > git clone https://github.com/altum-kz/altum-market-backend
-> cd altum-market-backend
+> cd sievers-market-backend
 ```
 
 ### 2. Настройка переменных окружения
@@ -68,7 +68,6 @@ RESTful B2B агромаркетплейс для автоматизации т�
 ```bash
 > make up
 ```
-*Примечание: При первом запуске сервис `bloom-init` автоматически сгенерирует необходимые фильтры Блума для медиа-хранилища и завершит свою работу.*
 
 ### 4. Документация API и интерактивная песочница
 После успешного запуска бэкенд будет доступен локально. Вы можете протестировать эндпоинты через интерактивную документацию:
