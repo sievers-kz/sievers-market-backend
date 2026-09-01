@@ -28,3 +28,16 @@ class PaginatedResponse(DTO, Generic[T]):
     total: int
     page: int
     pages: int
+
+
+class SearchResult(DTO):
+    hits: list[dict]
+    total: int
+    page: int
+    pages: int
+
+
+class SearchIndexConfig(DTO):
+    filterable: list[str] = []
+    sortable: list[str] = []
+    searchable: list[str] = []

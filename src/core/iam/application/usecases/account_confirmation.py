@@ -21,7 +21,7 @@ class AccountConfirmationUseCase:
 
     async def execute(self, confirmation_data: AccountConfirmation):
         async with self.unit_of_work as uow:
-            account = await uow.account.get_account_by_id(confirmation_data.account_id)
+            account = await uow.account.get_account_by_email(confirmation_data.email)
             if not account:
                 raise AccountNotFoundError()
 
@@ -35,6 +35,7 @@ class AccountConfirmationUseCase:
             refresh_token = self.token_service.create_token(
                 account.id, TokenType.REFRESH
             )
+
             account.add_new_token(
                 refresh_token.type, refresh_token.value, refresh_token.expires_at
             )
@@ -44,6 +45,7 @@ class AccountConfirmationUseCase:
             await uow.commit()
 
             logger.info("ACCOUNT VERIFIED | account_id={}", account.id)
+
             return LoginResponse(
                 access_token=access_token.value, refresh_token=refresh_token.value
             )

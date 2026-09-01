@@ -1,0 +1,77 @@
+- key: brand
+  label: Марка
+  type: reference
+  source: brand
+
+- key: model
+  label: Модель
+  type: string
+
+- key: year_of_issue
+  label: Год выпуска
+  type: integer
+
+- key: condition
+  label: Состояние
+  type: enumerate
+  options:
+    - {key: new, label: Новый}
+    - {key: used, label: Б/У}
+
+- key: color
+  label: Цвет
+  type: reference
+  source: color
+
+- key: country
+  label: Страна производства
+  type: reference
+  source: country
+
+- key: engine_power
+  label: Мощность двигателя
+  type: integer
+
+- key: fuel_type
+  label: Тип топлива
+  type: enumerate
+  options:
+    - {key: gasoline, label: Бензин}
+    - {key: diesel, label: Дизель}
+    - {key: gas, label: Газ}
+    - {key: hybrid, label: Гибрид}
+
+- key: transmission_type
+  label: Тип КПП
+  type: enumerate
+  options:
+    - {key: manual, label: Механика}
+    - {key: automatic, label: Автомат}
+
+- key: drive_type
+  label: Тип привода
+  type: enumerate
+  options:
+    - {key: front, label: Передний привод}
+    - {key: rear, label: Задний привод}
+    - {key: full, label: Полный привод}
+
+- key: torque
+  label: Крутящий момент
+  type: integer
+
+- key: engine_volume
+  label: Объём двигателя
+  type: float
+
+- key: max_speed
+  label: Максимальная скорость
+  type: integer
+
+- key: track_type
+  label: Тип гусениц
+  type: enumerate
+  options:
+    - {key: metall, label: Металлические}
+    - {key: rubber, label: Резиновые}
+    - {key: polymer, label: Полимерные}

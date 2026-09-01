@@ -2,11 +2,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from scalar_fastapi import Layout, Theme, get_scalar_api_reference
+from starlette.middleware.cors import CORSMiddleware
 
 from src.configuration.dependencies.container import ApplicationContainer
 from src.configuration.exception_handlers import setup_exception_handlers
 from src.configuration.logging import setup_logger
-from src.configuration.settings.settings import ApplicationSettings
 from src.core.catalog.presentation.routers.catalog import catalog_router
 from src.core.customer.presentation.routers import customer_router
 from src.core.iam.presentation.routers import iam
@@ -19,6 +19,7 @@ from src.core.vendor.presentation.router import vendor_router
 class ApplicationFactory:
     def __init__(self):
         self.container = ApplicationContainer()
+        self.settings = self.container.configurations.configuration
         self._configure_logging()
         self.container.gateways.sentry.init()
 
@@ -27,16 +28,18 @@ class ApplicationFactory:
             version="1.0.0",
             lifespan=self._lifespan(),
         )
+
         setup_exception_handlers(self.app)
 
     def _configure_logging(self):
-        settings = ApplicationSettings()
-        setup_logger(mode=settings.mode)
+        setup_logger(mode=self.settings.mode)
 
     def _lifespan(self):
         @asynccontextmanager
         async def lifespan(app: FastAPI):
             await self.container.init_resources()
+            self.container.gateways.bloom_filter()
+
             yield
             await self.container.shutdown_resources()
 
@@ -57,8 +60,9 @@ class ApplicationFactory:
                 "src.core.references.presentation.routers",
             ],
         )
+
         self.app.container = self.container
-        self.app.state.mode = self.container.configurations.configuration.mode
+        self.app.state.mode = self.settings.mode()
 
     def _include_routers(self):
         routers = [
@@ -83,10 +87,20 @@ class ApplicationFactory:
                 layout=Layout.MODERN,
             )
 
+    def _setup_cors(self):
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=self.settings.cors_origins(),
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
     def build(self) -> FastAPI:
         self._wire_dependency()
         self._include_routers()
         self._setup_docs()
+        self._setup_cors()
         return self.app
 
 

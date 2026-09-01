@@ -13,7 +13,9 @@ services:
     volumes: []
 
   sut:
-    build: .
+    build:
+      context: .
+      target: test
     entrypoint: ["/app/entrypoint.test.sh"]
     restart: "no"
     depends_on:
@@ -26,6 +28,4 @@ services:
     env_file:
       - .env.test
     environment:
-      - MODE=test
-      - POSTGRES_HOST=db
-      - REDIS_HOST=redis
+      MODE: test

@@ -1,10 +1,32 @@
 from datetime import datetime
-from uuid import UUID
+from typing import Annotated, Literal, Union
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
+from src.core.customer.presentation.dto import CustomerProfileResponse
 from src.core.iam.domain.enums import TokenType
 from src.core.shared.presentation.dto import DTO
+from src.core.vendor.presentation.dto import VendorProfileResponse
+
+
+class CustomerMeResponse(DTO):
+    role: Literal["customer"] = "customer"
+    profile: CustomerProfileResponse
+
+
+class VendorMeResponse(DTO):
+    role: Literal["vendor"] = "vendor"
+    profile: VendorProfileResponse
+
+
+class NoRoleMeResponse(DTO):
+    role: Literal[None] = None
+
+
+MeResponse = Annotated[
+    Union[CustomerMeResponse, VendorMeResponse, NoRoleMeResponse],
+    Field(discriminator="role"),
+]
 
 
 class ResendCodeRequest(BaseModel):
@@ -47,7 +69,7 @@ class LoginResponse(BaseModel):
 
 
 class AccountConfirmation(BaseModel):
-    account_id: UUID
+    email: EmailStr
     confirm_code: str
 
 

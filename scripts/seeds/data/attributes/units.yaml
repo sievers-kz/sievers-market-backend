@@ -1,0 +1,8 @@
+- key: hp
+  label: л.с
+- key: nm
+  label: Нм
+- key: l
+  label: л
+- key: kmh
+  label: км/ч

@@ -19,6 +19,7 @@ def create_domain_account(
         id=uuid.uuid4(),
         email=Email("test@example.com"),
         password=Password("$2b$12$fakehashstring..."),
+        password_changed_at=datetime.now(timezone.utc),
         is_active=is_active,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),

@@ -7,18 +7,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, load_only
 from sqlalchemy.sql.functions import coalesce
 
-from src.core.catalog.application.interfaces.query_service import ICatalogQueryService
-from src.core.catalog.domain.enums import CatalogStatus
-from src.core.catalog.infrastructure.models import Category, Rubric, Subcategory
+from src.core.catalog.infrastructure.enums import CatalogStatus
+from src.core.catalog.infrastructure.models import (
+    Category,
+    Rubric,
+    Subcategory,
+    SubcategoryAttribute,
+)
 from src.core.catalog.presentation.dto.catalog import (
+    AttributeFieldResponse,
+    AttributeGroupFieldsResponse,
     AttributeResponse,
     DetailVendorResponse,
+    FilterableAttributeResponse,
     ListingCardResponse,
     ListingDetailResponse,
     RubricResponse,
     VendorCardResponse,
 )
-from src.core.catalog.presentation.dto.subcategory import Attribute
 from src.core.listing.domain.enums import ListingStatus
 from src.core.listing.infrastructure.models import Listing
 from src.core.references.infrastructure.models import City
@@ -27,30 +33,89 @@ from src.core.vendor.domain.enums import VendorStatus
 from src.core.vendor.infrastructure.models import Vendor
 
 
-class CatalogQueryService(QueryService, ICatalogQueryService):
+class CatalogQueryService(QueryService):
     def __init__(self, session: AsyncSession):
         super().__init__(session=session)
 
-    async def get_subcategory_attributes(self, subcategory_id: UUID) -> list[Attribute]:
+    async def get_subcategory_attributes(self, subcategory_id: UUID) -> list:
         statement = (
-            select(Subcategory, Rubric)
-            .join(Category, Subcategory.category_id == Category.id)
-            .join(Rubric, Category.rubric_id == Rubric.id)
+            select(SubcategoryAttribute)
+            .where(SubcategoryAttribute.subcategory_id == subcategory_id)
             .options(
-                load_only(Subcategory.attributes),
-                load_only(Rubric.attributes),
+                joinedload(SubcategoryAttribute.attribute),
+                joinedload(SubcategoryAttribute.group),
+                joinedload(SubcategoryAttribute.unit),
             )
-            .where(Subcategory.id == subcategory_id)
         )
 
         query_result = await self._session.execute(statement)
-        result = query_result.first()
-        subcategory, rubric = result
+        links = query_result.scalars().unique().all()
 
-        return AttributeResponse(
-            base_fields=rubric.attributes,
-            dynamic_fields=subcategory.attributes,
+        groups_map: dict[UUID, AttributeGroupFieldsResponse] = {}
+        for link in sorted(links, key=lambda lnk: lnk.group.position):
+            group = link.group
+            if group.id not in groups_map:
+                groups_map[group.id] = AttributeGroupFieldsResponse(
+                    key=group.key,
+                    label=group.label,
+                    position=group.position,
+                    fields=[],
+                )
+
+            groups_map[group.id].fields.append(
+                AttributeFieldResponse(
+                    key=link.attribute.key,
+                    label=link.attribute.label,
+                    type=link.attribute.type,
+                    required=link.required,
+                    filterable=link.filterable,
+                    unit=(
+                        {"key": link.unit.key, "label": link.unit.label}
+                        if link.unit
+                        else None
+                    ),
+                    options=link.attribute.options,
+                    source=link.attribute.source,
+                )
+            )
+
+        return AttributeResponse(groups=list(groups_map.values()))
+
+    async def get_filterable_attributes(self, subcategory_id: UUID) -> list:
+        statement = (
+            select(SubcategoryAttribute)
+            .where(
+                SubcategoryAttribute.subcategory_id == subcategory_id,
+                SubcategoryAttribute.filterable.is_(True),
+            )
+            .options(
+                joinedload(SubcategoryAttribute.attribute),
+                joinedload(SubcategoryAttribute.unit),
+            )
         )
+
+        query_result = await self._session.execute(statement)
+        links = query_result.scalars().unique().all()
+
+        filters = []
+        for link in links:
+            filter_fields = AttributeFieldResponse(
+                key=link.attribute.key,
+                label=link.attribute.label,
+                type=link.attribute.type,
+                required=link.required,
+                filterable=link.filterable,
+                unit=(
+                    {"key": link.unit.key, "label": link.unit.label}
+                    if link.unit
+                    else None
+                ),
+                options=link.attribute.options,
+                source=link.attribute.source,
+            )
+            filters.append(filter_fields)
+
+        return FilterableAttributeResponse(filters=filters)
 
     async def get_category_tree(self) -> list[RubricResponse]:
         statement = (

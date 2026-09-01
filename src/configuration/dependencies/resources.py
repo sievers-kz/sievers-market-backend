@@ -1,25 +1,10 @@
 from typing import AsyncGenerator
 
 import sentry_sdk
-from minio import Minio
-from rbloom import Bloom
+from meilisearch_python_sdk import AsyncClient
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
-
-from scripts.bloom.generate_bloom import BLOOM_OBJECT_NAME, _bloom_hash
-
-
-async def init_bloom(client: Minio, bucket_name: str) -> AsyncGenerator[Bloom, None]:
-    response = client.get_object(bucket_name, BLOOM_OBJECT_NAME)
-    try:
-        data = response.read()
-    finally:
-        response.close()
-        response.release_conn()
-
-    bf = Bloom.load_bytes(data, _bloom_hash)
-    yield bf
 
 
 def init_sentry(
@@ -52,3 +37,14 @@ async def init_engine(
     async_engine = create_async_engine(url=url, echo=echo)
     yield async_engine
     await async_engine.dispose()
+
+
+async def init_meilisearch(
+    url: str,
+    key: str,
+):
+    client = AsyncClient(url=url, api_key=key)
+    try:
+        yield client
+    finally:
+        await client.aclose()

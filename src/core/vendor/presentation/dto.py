@@ -54,6 +54,7 @@ class VendorProfileResponse(DTO):
     account_id: UUID
     vendor_id: UUID
     email: str
+    password_changed_at: datetime
     is_verified: bool
     contact_last_name: str
     contact_first_name: str

@@ -18,10 +18,10 @@ class ApplicationContainer(containers.DeclarativeContainer):
     gateways = providers.Container(
         GatewaysContainer,
         database_config=configurations.database,
-        sendgrid_config=configurations.sendgrid,
         redis_config=configurations.redis,
         minio_config=configurations.minio_config,
         sentry_config=configurations.sentry_config,
+        meilisearch_config=configurations.meilisearch_config,
     )
 
     catalog = providers.Container(
@@ -38,6 +38,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         arq_pool=gateways.arq_pool,
         resend_config=configurations.resend_config,
         app_config=configurations.configuration,
+        meilisearch_client=gateways.meilisearch_client,
     )
 
     reference = providers.Container(
@@ -67,7 +68,8 @@ class ApplicationContainer(containers.DeclarativeContainer):
         ListingContainer,
         session_factory=gateways.session_factory,
         database_session=gateways.database_session,
-        subcategory_service=catalog.subcategory_service,
+        attribute_validation=catalog.attribute_validation,
+        meilisearch_service=shared.meilisearch_service,
     )
 
     media = providers.Container(

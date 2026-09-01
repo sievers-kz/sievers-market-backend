@@ -72,13 +72,16 @@ async def create_listing_request(database_session):
         ],
         attributes={
             "engine_power": 300,
+            "brand": "John Deere",
+            "condition": "used",
+            "year_of_issue": 2024,
         },
     )
 
 
-@pytest.fixture
-def create_listing_usecase(container):
-    return container.listing.create_listing_usecase()
+@pytest_asyncio.fixture
+async def create_listing_usecase(container):
+    return await container.listing.create_listing_usecase()
 
 
 @pytest.fixture
@@ -116,9 +119,9 @@ def change_listing_description_usecase(container):
     return container.listing.change_listing_description_usecase()
 
 
-@pytest.fixture
-def change_listing_attribute_usecase(container):
-    return container.listing.change_listing_attribute_usecase()
+@pytest_asyncio.fixture
+async def change_listing_attribute_usecase(container):
+    return await container.listing.change_listing_attribute_usecase()
 
 
 @pytest_asyncio.fixture

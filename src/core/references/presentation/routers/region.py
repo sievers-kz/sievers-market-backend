@@ -17,7 +17,7 @@ region_router = APIRouter(prefix="/region")
 
 
 @inject
-def get_repo(
+async def get_repo(
     repo: Annotated[
         RegionRepository,
         Depends(Provide[ApplicationContainer.reference.region_repository]),

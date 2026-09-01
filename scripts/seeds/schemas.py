@@ -1,10 +1,32 @@
-from src.core.catalog.presentation.dto.subcategory import Attribute
 from src.core.shared.presentation.dto import DTO
+
+
+class OptionSeed(DTO):
+    key: str
+    label: str
+
+
+class AttributeDefinitionSeed(DTO):
+    key: str
+    label: str
+    type: str
+    options: list[OptionSeed] = []
+    source: str | None = None
+
+
+class AttributeGroupSeed(DTO):
+    key: str
+    label: str
+    position: int = 0
+
+
+class UnitSeed(DTO):
+    key: str
+    label: str
 
 
 class SubcategorySeed(DTO):
     name: str
-    attributes: list[Attribute]
 
 
 class CategorySeed(DTO):
@@ -14,8 +36,21 @@ class CategorySeed(DTO):
 
 class RubricSeed(DTO):
     name: str
-    attributes: list[Attribute] = []
     categories: list[CategorySeed]
+
+
+class SubcategoryAttributeLinkSeed(DTO):
+    attribute: str
+    group: str
+    unit: str | None = None
+    required: bool = False
+    filterable: bool = False
+    position: int = 0
+
+
+class SubcategoryAttributesSeed(DTO):
+    subcategory: str
+    attributes: list[SubcategoryAttributeLinkSeed]
 
 
 class BrandSeed(DTO):

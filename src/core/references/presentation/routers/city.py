@@ -17,7 +17,7 @@ city_router = APIRouter(prefix="/city")
 
 
 @inject
-def get_repo(
+async def get_repo(
     repo: Annotated[
         CityRepository, Depends(Provide[ApplicationContainer.reference.city_repository])
     ],

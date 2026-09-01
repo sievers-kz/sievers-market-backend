@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 from typing import Any
+from uuid import UUID
 
 import yaml
 from dotenv import load_dotenv
@@ -9,15 +10,27 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from scripts.seeds.schemas import (
+    AttributeDefinitionSeed,
+    AttributeGroupSeed,
     BrandSeed,
     ColorSeed,
     CountrySeed,
     RegionSeed,
     RubricSeed,
+    SubcategoryAttributesSeed,
+    UnitSeed,
 )
 from src.configuration.settings.settings import PostgresSettings
-from src.core.catalog.domain.enums import CatalogStatus
-from src.core.catalog.infrastructure.models import Category, Rubric, Subcategory
+from src.core.catalog.infrastructure.enums import AttributeType, CatalogStatus
+from src.core.catalog.infrastructure.models import (
+    AttributeDefinition,
+    AttributeGroup,
+    Category,
+    Rubric,
+    Subcategory,
+    SubcategoryAttribute,
+    UnitOfMeasure,
+)
 from src.core.references.infrastructure.models import (
     Brand,
     City,
@@ -35,115 +48,119 @@ if ENV_PATH.exists():
 else:
     print(f"❌ .env NOT FOUND at {ENV_PATH}")
 
-
 logger = logging.getLogger(__name__)
 
 
 class DataSeeder:
     def __init__(self, session: AsyncSession):
         self.session = session
-        # Путь к папке с фикстурами
         self.data_dir = Path(__file__).resolve().parent / "data"
-        print(self.data_dir)
 
     def _load_yaml(self, file_name: str) -> Any:
-        """Универсальный метод для загрузки YAML файлов"""
         file_path = self.data_dir / file_name
-        print(f"FILE PATH: {file_path}")
         if not file_path.exists():
             logger.error(f"❌ File not found: {file_path}")
             return None
-
-        logger.info(f"📂 Loading YAML: {file_path}")
         with open(file_path, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
 
     async def seed_brands(self):
-        raw_data = self._load_yaml("brands.yaml")
+        raw_data = self._load_yaml("references/brands.yaml")
         if not raw_data:
             return
-
-        try:
-            adapter = TypeAdapter(list[BrandSeed])
-            brands = adapter.validate_python(raw_data)
-
-            for brand_dto in brands:
-                self.session.add(Brand(name=brand_dto.name))
-            logger.info("✅ Brands seeded with DTO")
-        except Exception as e:
-            logger.error(f"❌ Brand validation failed: {e}")
-            raise
+        brands = TypeAdapter(list[BrandSeed]).validate_python(raw_data)
+        for dto in brands:
+            self.session.add(Brand(name=dto.name))
+        logger.info("✅ Brands seeded")
 
     async def seed_colors(self):
-        raw_data = self._load_yaml("colors.yaml")
+        raw_data = self._load_yaml("references/colors.yaml")
         if not raw_data:
             return
-
-        adapter = TypeAdapter(list[ColorSeed])
-        colors = adapter.validate_python(raw_data)
-
-        for color_dto in colors:
-            self.session.add(Color(name=color_dto.name, hex=color_dto.hex))
-        logger.info("✅ Colors seeded with DTO")
+        colors = TypeAdapter(list[ColorSeed]).validate_python(raw_data)
+        for dto in colors:
+            self.session.add(Color(name=dto.name, hex=dto.hex))
+        logger.info("✅ Colors seeded")
 
     async def seed_countries(self):
-        raw_data = self._load_yaml("countries.yaml")
+        raw_data = self._load_yaml("references/countries.yaml")
         if not raw_data:
             return
-
-        try:
-            adapter = TypeAdapter(list[CountrySeed])
-            countries_data = adapter.validate_python(raw_data)
-
-            for c_dto in countries_data:
-                country = Country(
-                    name=c_dto.name,
-                )
-                self.session.add(country)
-
-            logger.info("✅ Countries seeded")
-        except Exception as e:
-            logger.error(f"❌ Countries seeding failed: {e}")
-            raise
+        countries = TypeAdapter(list[CountrySeed]).validate_python(raw_data)
+        for dto in countries:
+            self.session.add(Country(name=dto.name))
+        logger.info("✅ Countries seeded")
 
     async def seed_locations(self):
-        raw_data = self._load_yaml("locations.yaml")
+        raw_data = self._load_yaml("references/locations.yaml")
         if not raw_data:
             return
+        regions = TypeAdapter(list[RegionSeed]).validate_python(raw_data)
+        for r_dto in regions:
+            region = Region(name=r_dto.name)
+            self.session.add(region)
+            await self.session.flush()
+            for city_name in r_dto.cities:
+                self.session.add(City(name=city_name, region_id=region.id))
+        logger.info("✅ Regions and Cities seeded")
 
-        try:
-            adapter = TypeAdapter(list[RegionSeed])
-            regions_data = adapter.validate_python(raw_data)
+    async def seed_attribute_groups(self) -> dict[str, UUID]:
+        raw_data = self._load_yaml("attributes/groups.yaml")
+        groups = TypeAdapter(list[AttributeGroupSeed]).validate_python(raw_data or [])
 
-            for r_dto in regions_data:
-                region = Region(name=r_dto.name)
-                self.session.add(region)
+        key_to_id = {}
+        for dto in groups:
+            group = AttributeGroup(key=dto.key, label=dto.label, position=dto.position)
+            self.session.add(group)
+            await self.session.flush()
+            key_to_id[dto.key] = group.id
 
-                await self.session.flush()
+        logger.info("✅ Attribute groups seeded")
+        return key_to_id
 
-                for city_name in r_dto.cities:
-                    city = City(name=city_name, region_id=region.id)
-                    self.session.add(city)
+    async def seed_units(self) -> dict[str, UUID]:
+        raw_data = self._load_yaml("attributes/units.yaml")
+        units = TypeAdapter(list[UnitSeed]).validate_python(raw_data or [])
 
-            logger.info("✅ Regions and Cities seeded")
-        except Exception as e:
-            logger.error(f"❌ Locations seeding failed: {e}")
-            raise
+        key_to_id = {}
+        for dto in units:
+            unit = UnitOfMeasure(key=dto.key, label=dto.label)
+            self.session.add(unit)
+            await self.session.flush()
+            key_to_id[dto.key] = unit.id
 
-    async def seed_catalog_hierarchy(self):
-        raw_data = self._load_yaml("categories.yaml")
-        if not raw_data:
-            return
+        logger.info("✅ Units of measure seeded")
+        return key_to_id
 
-        adapter = TypeAdapter(list[RubricSeed])
-        rubrics_data = adapter.validate_python(raw_data)
+    async def seed_attribute_definitions(self) -> dict[str, UUID]:
+        raw_data = self._load_yaml("attributes/definitions.yaml")
+        definitions = TypeAdapter(list[AttributeDefinitionSeed]).validate_python(
+            raw_data or []
+        )
 
-        for r_dto in rubrics_data:
-            rubric = Rubric(
-                name=r_dto.name,
-                attributes=[a.model_dump() for a in r_dto.attributes],
-                status=CatalogStatus.ACTIVE,
+        key_to_id = {}
+        for dto in definitions:
+            definition = AttributeDefinition(
+                key=dto.key,
+                label=dto.label,
+                type=AttributeType(dto.type),
+                options=[opt.model_dump() for opt in dto.options],
+                source=dto.source,
             )
+            self.session.add(definition)
+            await self.session.flush()
+            key_to_id[dto.key] = definition.id
+
+        logger.info("✅ Attribute definitions seeded")
+        return key_to_id
+
+    async def seed_catalog_hierarchy(self) -> dict[str, UUID]:
+        raw_data = self._load_yaml("categories/categories.yaml")
+        rubrics = TypeAdapter(list[RubricSeed]).validate_python(raw_data or [])
+
+        subcategory_name_to_id = {}
+        for r_dto in rubrics:
+            rubric = Rubric(name=r_dto.name, status=CatalogStatus.ACTIVE)
             self.session.add(rubric)
             await self.session.flush()
 
@@ -158,12 +175,61 @@ class DataSeeder:
                     subcategory = Subcategory(
                         category_id=category.id,
                         name=s_dto.name,
-                        attributes=[a.model_dump() for a in s_dto.attributes],
                         status=CatalogStatus.ACTIVE,
                     )
                     self.session.add(subcategory)
+                    await self.session.flush()
+                    subcategory_name_to_id[s_dto.name] = subcategory.id
 
-        logger.info("✅ Catalog hierarchy seeded with Pydantic validation")
+        logger.info("✅ Catalog hierarchy seeded")
+        return subcategory_name_to_id
+
+    async def seed_subcategory_attributes(
+        self,
+        subcategory_name_to_id: dict[str, UUID],
+        attribute_key_to_id: dict[str, UUID],
+        group_key_to_id: dict[str, UUID],
+        unit_key_to_id: dict[str, UUID],
+    ):
+        raw_data = self._load_yaml("attributes/links.yaml")
+        links_data = TypeAdapter(list[SubcategoryAttributesSeed]).validate_python(
+            raw_data or []
+        )
+
+        for entry in links_data:
+            subcategory_id = subcategory_name_to_id.get(entry.subcategory)
+            if not subcategory_id:
+                logger.error(
+                    f"❌ Subcategory not found for attributes seed: {entry.subcategory}"
+                )
+                continue
+
+            for link_dto in entry.attributes:
+                attribute_id = attribute_key_to_id.get(link_dto.attribute)
+                group_id = group_key_to_id.get(link_dto.group)
+                unit_id = unit_key_to_id.get(link_dto.unit) if link_dto.unit else None
+
+                if not attribute_id or not group_id:
+                    logger.error(
+                        f"Skipping link: attribute={link_dto.attribute} "
+                        f"group={link_dto.group} "
+                        f"not found for subcategory={entry.subcategory}"
+                    )
+                    continue
+
+                self.session.add(
+                    SubcategoryAttribute(
+                        subcategory_id=subcategory_id,
+                        attribute_id=attribute_id,
+                        group_id=group_id,
+                        unit_id=unit_id,
+                        required=link_dto.required,
+                        filterable=link_dto.filterable,
+                        position=link_dto.position,
+                    )
+                )
+
+        logger.info("✅ Subcategory attributes linked")
 
     async def is_already_seeded(self) -> bool:
         result = await self.session.execute(select(func.count()).select_from(Rubric))
@@ -179,7 +245,18 @@ class DataSeeder:
             await self.seed_colors()
             await self.seed_countries()
             await self.seed_locations()
-            await self.seed_catalog_hierarchy()
+
+            group_key_to_id = await self.seed_attribute_groups()
+            unit_key_to_id = await self.seed_units()
+            attribute_key_to_id = await self.seed_attribute_definitions()
+            subcategory_name_to_id = await self.seed_catalog_hierarchy()
+
+            await self.seed_subcategory_attributes(
+                subcategory_name_to_id=subcategory_name_to_id,
+                attribute_key_to_id=attribute_key_to_id,
+                group_key_to_id=group_key_to_id,
+                unit_key_to_id=unit_key_to_id,
+            )
 
             await self.session.commit()
             logger.info("🚀 All data seeded successfully!")

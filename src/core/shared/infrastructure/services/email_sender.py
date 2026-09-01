@@ -1,37 +1,6 @@
-import asyncio
-
 import resend
-from sendgrid import Content, Mail, SendGridAPIClient
 
 from src.core.shared.application.interfaces.email_sender import IEmailSender
-
-
-class SendGridEmailSender(IEmailSender):
-    def __init__(
-        self,
-        api_key: str,
-        from_email: str,
-    ):
-        self._client = SendGridAPIClient(api_key)
-        self._from_email = from_email
-
-    async def send_email(
-        self,
-        to_email: str,
-        subject: str,
-        template_id: str | None = None,
-        template_data: dict | None = None,
-        html_content: str | None = None,
-    ):
-        message = Mail(from_email=self._from_email, to_emails=to_email, subject=subject)
-
-        if template_id:
-            message.template_id = template_id
-            message.dynamic_template_data = template_data or {}
-        else:
-            message.content = Content("text/html", html_content)
-
-        await asyncio.to_thread(self._client.send, message)
 
 
 class ConsoleEmailSender(IEmailSender):
@@ -44,7 +13,7 @@ class ConsoleEmailSender(IEmailSender):
         html_content: str | None = None,
     ) -> None:
         print("\n" + "=" * 50)
-        print("[MOCK EMAIL] From: development@agrow.asia")
+        print("[MOCK EMAIL] From: noreply@mail.sievers.kz")
         print(f"[MOCK SUBJECT] Subject: {subject}")
         print(f"[MOCK EMAIL] To: {to_email}")
 

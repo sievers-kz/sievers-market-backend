@@ -35,7 +35,7 @@ class TestResetPasswordUsecase:
         )
 
         confirmation_dto = AccountConfirmation(
-            account_id=user_after_registration.id, confirm_code=otp_code
+            email=user_after_registration.email.value, confirm_code=otp_code
         )
         await account_confirmation_usecase.execute(confirmation_dto)
 

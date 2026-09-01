@@ -1,0 +1,30 @@
+- subcategory: Колесные тракторы
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_power, group: engine, unit: hp, required: true, filterable: true, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+    - {attribute: engine_volume, group: engine, unit: l, position: 2}
+    - {attribute: torque, group: engine, unit: nm, position: 3}
+    - {attribute: transmission_type, group: transmission, position: 0}
+    - {attribute: drive_type, group: transmission, position: 1}
+    - {attribute: max_speed, group: chassis, unit: kmh, position: 0}
+
+- subcategory: Гусеничные тракторы
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_power, group: engine, unit: hp, required: true, filterable: true, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+    - {attribute: engine_volume, group: engine, unit: l, position: 2}
+    - {attribute: torque, group: engine, unit: nm, position: 3}
+    - {attribute: transmission_type, group: transmission, position: 0}
+    - {attribute: track_type, group: chassis, position: 0}

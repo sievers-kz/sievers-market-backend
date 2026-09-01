@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -22,4 +23,5 @@ class CustomerProfileResponse(DTO):
     first_name: str
     patronymic: str | None
     email: str
+    password_changed_at: datetime
     avatar_url: str | None

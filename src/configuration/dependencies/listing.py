@@ -1,5 +1,6 @@
 from dependency_injector import containers, providers
 
+from src.core.listing.application.services.listing_search import ListingSearchService
 from src.core.listing.application.usecases import (
     ActivateListingUseCase,
     ArchiveListingUseCase,
@@ -18,9 +19,15 @@ from src.core.listing.infrastructure.uow import ListingUnitOfWork
 class ListingContainer(containers.DeclarativeContainer):
     session_factory = providers.Dependency()
     database_session = providers.Dependency()
-    subcategory_service = providers.Dependency()
+    attribute_validation = providers.Dependency()
+    meilisearch_service = providers.Dependency()
 
     uow = providers.Factory(ListingUnitOfWork, session_factory=session_factory)
+
+    listing_search_service = providers.Factory(
+        ListingSearchService,
+        search_service=meilisearch_service,
+    )
 
     listing_repository = providers.Factory(
         ListingRepository,
@@ -30,17 +37,20 @@ class ListingContainer(containers.DeclarativeContainer):
     create_listing_usecase = providers.Factory(
         CreateListingUseCase,
         uow=uow,
-        subcategory_service=subcategory_service,
+        attribute_validation=attribute_validation,
+        listing_search_service=listing_search_service,
     )
 
     change_listing_price_usecase = providers.Factory(
         ChangeListingPriceUseCase,
         uow=uow,
+        listing_search_service=listing_search_service,
     )
 
     change_listing_location_usecase = providers.Factory(
         ChangeListingLocationUseCase,
         uow=uow,
+        listing_search_service=listing_search_service,
     )
 
     change_listing_description_usecase = providers.Factory(
@@ -51,7 +61,7 @@ class ListingContainer(containers.DeclarativeContainer):
     change_listing_attribute_usecase = providers.Factory(
         ChangeListingAttributeUseCase,
         uow=uow,
-        subcategory_service=subcategory_service,
+        attribute_validation=attribute_validation,
     )
 
     activate_listing_usecase = providers.Factory(
