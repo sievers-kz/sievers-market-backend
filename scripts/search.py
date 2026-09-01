@@ -1,5 +1,3 @@
-# scripts/sync_search_schema.py
-
 import asyncio
 
 from meilisearch_python_sdk import AsyncClient

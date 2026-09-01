@@ -39,6 +39,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          target: runtime
           push: true
           tags: |
             ghcr.io/sievers-kz/sievers-market-backend:${{ steps.meta.outputs.tag }}
@@ -84,7 +85,6 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd ${{ vars.DEPLOY_PATH }}
-
             make deploy MODE=${{ vars.MODE }}
             docker image prune -af --filter "until=24h"
             sudo /usr/local/bin/deploy-nginx.sh ${{ vars.DEPLOY_PATH }}
