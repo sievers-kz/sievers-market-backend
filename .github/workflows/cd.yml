@@ -7,8 +7,46 @@ on:
       - development
 
 jobs:
+  build-and-push:
+    name: Build and Push Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set image tag
+        id: meta
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "tag=production-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=staging-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build and Push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/sievers-kz/sievers-market-backend:${{ steps.meta.outputs.tag }}
+            ghcr.io/sievers-kz/sievers-market-backend:${{ github.ref_name == 'main' && 'production-latest' || 'staging-latest'}}
+
   deploy:
     name: Deploy Application
+    needs: build-and-push
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'main' && 'production' || 'staging'}}
     concurrency:
@@ -26,6 +64,7 @@ jobs:
         run: |
           echo "$RAW_VARS" | jq -r 'to_entries | .[] | select(.key | startswith("DEPLOY_") | not) | "\(.key)=\(.value)"' > .env
           echo "$RAW_SECRETS" | jq -r 'to_entries | .[] | select(.key | startswith("DEPLOY_") | not) | "\(.key)=\(.value)"' >> .env
+          echo "IMAGE_TAG=${{ github.ref_name == 'main' && 'production-latest' || 'staging-latest'}}" >> .env
 
       - name: Copy files and .env to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -37,7 +76,7 @@ jobs:
           target: ${{ vars.DEPLOY_PATH }}
           rm: false
 
-      - name: Run Makefile on VPS
+      - name: Deploy on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ vars.DEPLOY_HOST }}
@@ -45,7 +84,7 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd ${{ vars.DEPLOY_PATH }}
-            make up MODE=${{ vars.MODE }}
+
+            make deploy MODE=${{ vars.MODE }}
             docker image prune -af --filter "until=24h"
-            docker builder prune -af --filter "until=24h"
             sudo /usr/local/bin/deploy-nginx.sh ${{ vars.DEPLOY_PATH }}
