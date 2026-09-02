@@ -48,7 +48,7 @@ COPY --chown=app:app . .
 RUN mkdir -p /app/logs \
     && chown -R app:app /app \
     && sed -i 's/\r$//g' /app/entrypoint.sh \
-    && chmod +x /app/entrypoint.sh \
+    && chmod +x /app/entrypoint.sh
 
 USER app
 EXPOSE 8000
