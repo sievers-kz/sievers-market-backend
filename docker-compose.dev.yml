@@ -13,6 +13,9 @@ services:
       - "7700:7700"
 
   backend:
+    build:
+      context: .
+      target: runtime
     volumes:
       - .:/app
     environment:
@@ -20,6 +23,9 @@ services:
     user: root
 
   worker:
+    build:
+      context: .
+      target: runtime
     volumes:
       - .:/app
     user: root

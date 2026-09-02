@@ -43,7 +43,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && groupadd -r app && useradd -r -g app app
 
 COPY --from=builder /opt/venv /opt/venv
-COPY --chown=app:app . .
+COPY --chown=app:app src/ ./src/
+COPY --chown=app:app scripts/ ./scripts/
+COPY --chown=app:app alembic.ini entrypoint.sh ./
 
 RUN mkdir -p /app/logs \
     && chown -R app:app /app \
