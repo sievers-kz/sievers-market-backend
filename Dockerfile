@@ -45,7 +45,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /opt/venv /opt/venv
 COPY --chown=app:app . .
 
-RUN sed -i 's/\r$//g' /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+RUN mkdir -p /app/logs \
+    && chown -R app:app /app \
+    && sed -i 's/\r$//g' /app/entrypoint.sh \
+    && chmod +x /app/entrypoint.sh
 
 USER app
 EXPOSE 8000
