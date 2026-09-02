@@ -67,14 +67,21 @@ jobs:
           echo "$RAW_SECRETS" | jq -r 'to_entries | .[] | select(.key | startswith("DEPLOY_") | not) | "\(.key)=\(.value)"' >> .env
           echo "IMAGE_TAG=${{ github.ref_name == 'main' && 'production-latest' || 'staging-latest'}}" >> .env
 
+      - name: Prepare deploy bundle
+        run: |
+          mkdir -p deploy-bundle
+          cp docker-compose.yml Makefile deploy-bundle/
+          cp -r infra deploy-bundle/
+
       - name: Copy files and .env to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ vars.DEPLOY_HOST }}
           username: ${{ vars.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "."
+          source: "deploy-bundle/*,.env"
           target: ${{ vars.DEPLOY_PATH }}
+          strip_components: 1
           rm: false
 
       - name: Deploy on VPS
