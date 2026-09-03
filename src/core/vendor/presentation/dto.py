@@ -50,24 +50,6 @@ class ChangeContactPhoneRequest(DTO):
     contact_phone: str
 
 
-class VendorProfileResponse(DTO):
-    account_id: UUID
-    vendor_id: UUID
-    email: str
-    password_changed_at: datetime
-    is_verified: bool
-    contact_last_name: str
-    contact_first_name: str
-    contact_patronymic: str | None
-    contact_phone: str | None
-    legal_name: str
-    legal_address: str
-    tax_id: str
-    legal_form: LegalForm
-    shop_name: str | None
-    logotype: dict | None
-
-
 class VendorListingCardsResponse(DTO):
     listing_id: UUID
     subcategory: str

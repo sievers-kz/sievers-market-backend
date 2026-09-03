@@ -3,7 +3,6 @@ from dependency_injector import containers, providers
 from src.core.customer.application.services.customer_service import CustomerService
 from src.core.customer.application.usecases import ChangeCustomerFullnameUseCase
 from src.core.customer.application.usecases.create_customer import CreateCustomerUseCase
-from src.core.customer.infrastructure.query import CustomerQueryService
 from src.core.customer.infrastructure.repository import CustomerRepository
 from src.core.customer.infrastructure.uow import CustomerUnitOfWork
 
@@ -11,8 +10,6 @@ from src.core.customer.infrastructure.uow import CustomerUnitOfWork
 class CustomerContainer(containers.DeclarativeContainer):
     session_factory = providers.Dependency()
     database_session = providers.Dependency()
-
-    query_service = providers.Factory(CustomerQueryService, session=database_session)
 
     customer_repository = providers.Factory(
         CustomerRepository, session=database_session
