@@ -34,7 +34,6 @@ from src.core.vendor.presentation.dto import (
     CreateVendorRequest,
     TaxpayerResponse,
     VendorListingCardsResponse,
-    VendorProfileResponse,
 )
 
 vendor_router = APIRouter(prefix="/vendor", tags=["Vendor"])
@@ -122,18 +121,6 @@ async def change_logotype(
 ):
     await usecase.execute(current_vendor.id, dto)
     return {"message": "Logotype successfully changed"}
-
-
-@vendor_router.get("/me", response_model=VendorProfileResponse)
-@inject
-async def get_me(
-    service: Annotated[
-        VendorCabinetQueryService,
-        Depends(Provide[ApplicationContainer.vendor.vendor_cabinet_query_service]),
-    ],
-    current_vendor: CurrentVendor = Security(get_current_vendor),
-):
-    return await service.get_me(current_vendor.id)
 
 
 @vendor_router.get(
