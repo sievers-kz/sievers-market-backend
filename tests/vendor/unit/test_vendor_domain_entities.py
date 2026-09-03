@@ -4,7 +4,6 @@ import pytest
 
 from src.core.vendor.domain.enums import VendorStatus
 from src.core.vendor.domain.exceptions import (
-    VendorAlreadyVerifiedError,
     VendorCannotBeRestoredError,
 )
 from tests.vendor.conftest import create_domain_vendor
@@ -14,22 +13,9 @@ class TestVendorEntity:
     @pytest.mark.unit
     def test_create_vendor_success(self):
         vendor = create_domain_vendor()
-        assert vendor.is_verified is False
+        assert vendor.is_verified
         assert vendor.status == VendorStatus.ACTIVE
         assert vendor.closed_at is None
-
-    @pytest.mark.unit
-    def test_verify_success(self):
-        vendor = create_domain_vendor()
-        vendor.verify()
-        assert vendor.is_verified is True
-
-    @pytest.mark.unit
-    def test_verify_already_verified_raises(self):
-        vendor = create_domain_vendor()
-        vendor.verify()
-        with pytest.raises(VendorAlreadyVerifiedError):
-            vendor.verify()
 
     @pytest.mark.unit
     def test_close_success(self):

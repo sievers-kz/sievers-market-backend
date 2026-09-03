@@ -1,7 +1,7 @@
 from typing import Any
 from uuid import UUID
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, field_validator
 
 from src.core.listing.domain.entities import Listing
 from src.core.listing.domain.enums import ListingStatus
@@ -101,3 +101,34 @@ class ListingSearchQuery(DTO):
     attributes: dict[str, Any] = {}
     page: int = 1
     limit: int = 20
+
+
+class ListingCardResponse(DTO):
+    id: UUID
+    display_owner_name: str
+    subcategory: str
+    title: str
+    price: int
+    currency: str
+    city: str
+    preview_image: UUID
+
+
+class ListingDetailResponse(DTO):
+    id: UUID
+    owner_id: UUID
+    contact_phone: str | None
+    display_owner_name: str
+    subcategory: str
+    title: str
+    price: int
+    currency: str
+    city: str
+    description: str | None
+    gallery: list[UUID]
+    attributes: dict[str, Any]
+
+    @field_validator("gallery", mode="before")
+    @classmethod
+    def extract_media_ids(cls, v):
+        return [item["media_id"] for item in v]

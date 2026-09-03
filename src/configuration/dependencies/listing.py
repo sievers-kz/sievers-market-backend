@@ -12,6 +12,7 @@ from src.core.listing.application.usecases import (
     DeactivateListingUseCase,
     DeleteListingUseCase,
 )
+from src.core.listing.infrastructure.query import ListingQueryService
 from src.core.listing.infrastructure.repository import ListingRepository
 from src.core.listing.infrastructure.uow import ListingUnitOfWork
 
@@ -82,4 +83,9 @@ class ListingContainer(containers.DeclarativeContainer):
     delete_listing_usecase = providers.Factory(
         DeleteListingUseCase,
         uow=uow,
+    )
+
+    query_service = providers.Factory(
+        ListingQueryService,
+        session=database_session,
     )
