@@ -12,7 +12,7 @@ from src.core.vendor.application.usecases import (
     RestoreVendorUseCase,
 )
 from src.core.vendor.application.usecases.close_vendor import CloseVendorUseCase
-from src.core.vendor.infrastructure.query import VendorCabinetQueryService
+from src.core.vendor.infrastructure.query import VendorQueryService
 from src.core.vendor.infrastructure.repository import VendorRepository
 from src.core.vendor.infrastructure.taxpayer_gateway import (
     KGDTaxpayerGateway,
@@ -73,8 +73,8 @@ class VendorContainer(containers.DeclarativeContainer):
         uow=uow,
     )
 
-    vendor_cabinet_query_service = providers.Factory(
-        VendorCabinetQueryService,
+    query_service = providers.Factory(
+        VendorQueryService,
         session=database_session,
     )
 

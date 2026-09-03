@@ -1,4 +1,5 @@
 from typing import Annotated
+from uuid import UUID
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter
@@ -25,18 +26,20 @@ from src.core.vendor.application.usecases import (
     RestoreVendorUseCase,
 )
 from src.core.vendor.domain.enums import LegalForm
-from src.core.vendor.infrastructure.query import VendorCabinetQueryService
+from src.core.vendor.infrastructure.query import VendorQueryService
 from src.core.vendor.presentation.dto import (
     ChangeContactFullnameRequest,
     ChangeContactPhoneRequest,
     ChangeLogotypeRequest,
     ChangeShopNameRequest,
     CreateVendorRequest,
+    DetailVendorResponse,
     TaxpayerResponse,
+    VendorCardResponse,
     VendorListingCardsResponse,
 )
 
-vendor_router = APIRouter(prefix="/vendor", tags=["Vendor"])
+vendor_router = APIRouter(prefix="/api/v1/vendor", tags=["Vendor"])
 
 
 @vendor_router.get("/taxpayer/{tax_id}", response_model=TaxpayerResponse)
@@ -131,8 +134,8 @@ async def change_logotype(
 async def get_me_listings(
     status: ListingStatus,
     service: Annotated[
-        VendorCabinetQueryService,
-        Depends(Provide[ApplicationContainer.vendor.vendor_cabinet_query_service]),
+        VendorQueryService,
+        Depends(Provide[ApplicationContainer.vendor.query_service]),
     ],
     current_vendor: CurrentVendor = Security(get_current_vendor),
     page: int = Query(1, alias="page"),
@@ -167,3 +170,28 @@ async def restore_vendor(
 ):
     await usecase.execute(current_user.id)
     return {"message": "Аккаунт продавца восстановлен"}
+
+
+@vendor_router.get("/catalog", response_model=PaginatedResponse[VendorCardResponse])
+@inject
+async def get_vendor_cards(
+    service: Annotated[
+        VendorQueryService,
+        Depends(Provide[ApplicationContainer.vendor.query_service]),
+    ],
+    page: int = Query(1, alias="page"),
+    limit: int = Query(20, alias="limit"),
+):
+    return await service.get_vendors_card(page, limit)
+
+
+@vendor_router.get("/{vendor_id}", response_model=DetailVendorResponse)
+@inject
+async def get_vendor_details(
+    vendor_id: UUID,
+    service: Annotated[
+        VendorQueryService,
+        Depends(Provide[ApplicationContainer.vendor.query_service]),
+    ],
+):
+    return await service.get_vendor_details(vendor_id)

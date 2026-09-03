@@ -50,7 +50,7 @@ class Vendor(AggregateRoot):
             legal_address=legal_address,
             tax_id=TaxID(tax_id, legal_form),
             legal_form=legal_form,
-            is_verified=False,
+            is_verified=True,  # TODO: Replace auto-verify on eGov QR / admin review
             status=VendorStatus.ACTIVE,
         )
 

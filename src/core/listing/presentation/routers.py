@@ -3,7 +3,7 @@ from uuid import UUID
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter
-from fastapi.params import Depends, Security
+from fastapi.params import Depends, Query, Security
 
 from src.configuration.dependencies.container import ApplicationContainer
 from src.core.listing.application.services.listing_search import ListingSearchService
@@ -18,18 +18,21 @@ from src.core.listing.application.usecases import (
     DeactivateListingUseCase,
     DeleteListingUseCase,
 )
+from src.core.listing.infrastructure.query import ListingQueryService
 from src.core.listing.presentation.dto import (
     ChangeListingAttributeRequest,
     ChangeListingDescriptionRequest,
     ChangeListingLocationRequest,
     ChangeListingPriceRequest,
     CreateListingRequest,
+    ListingCardResponse,
+    ListingDetailResponse,
     ListingSearchQuery,
 )
-from src.core.shared.presentation.dto import CurrentVendor
+from src.core.shared.presentation.dto import CurrentVendor, PaginatedResponse
 from src.core.shared.presentation.security import get_current_vendor
 
-listing_router = APIRouter(prefix="/listing", tags=["Listing"])
+listing_router = APIRouter(prefix="/api/v1/listing", tags=["Listing"])
 
 
 @listing_router.post("/")
@@ -174,3 +177,30 @@ async def search_listing(
     ],
 ):
     return await service.search_listings(params)
+
+
+@listing_router.get("/catalog", response_model=PaginatedResponse[ListingCardResponse])
+@inject
+async def get_listings_card(
+    service: Annotated[
+        ListingQueryService,
+        Depends(Provide[ApplicationContainer.listing.query_service]),
+    ],
+    category_id: UUID = Query(alias="category_id"),
+    subcategory_id: UUID | None = Query(None, alias="subcategory_id"),
+    page: int = Query(1, alias="page"),
+    limit: int = Query(20, alias="limit"),
+):
+    return await service.get_listings_card(category_id, subcategory_id, page, limit)
+
+
+@listing_router.get("/{listing_id}", response_model=ListingDetailResponse | None)
+@inject
+async def get_listing_details(
+    listing_id: UUID,
+    service: Annotated[
+        ListingQueryService,
+        Depends(Provide[ApplicationContainer.listing.query_service]),
+    ],
+):
+    return await service.get_listing_details(listing_id)
