@@ -13,7 +13,7 @@ class TestVendorEntity:
     @pytest.mark.unit
     def test_create_vendor_success(self):
         vendor = create_domain_vendor()
-        assert vendor.is_verified is False
+        assert vendor.is_verified
         assert vendor.status == VendorStatus.ACTIVE
         assert vendor.closed_at is None
 
