@@ -7,6 +7,7 @@ from starlette.middleware.cors import CORSMiddleware
 from src.configuration.dependencies.container import ApplicationContainer
 from src.configuration.exception_handlers import setup_exception_handlers
 from src.configuration.logging import setup_logger
+from src.core.admin.presentation.router import admin_router
 from src.core.catalog.presentation.routers.catalog import catalog_router
 from src.core.customer.presentation.routers import customer_router
 from src.core.iam.presentation.routers import iam
@@ -54,6 +55,7 @@ class ApplicationFactory:
                 "src.core.shared.presentation.security",
                 "src.core.media.presentation.routers",
                 "src.core.listing.presentation.routers",
+                "src.core.admin.presentation.router",
             ],
             packages=[
                 "src.core.catalog.presentation.routers",
@@ -73,6 +75,7 @@ class ApplicationFactory:
             catalog_router,
             listing_router,
             media_router,
+            admin_router,
         ]
         for router in routers:
             self.app.include_router(router)

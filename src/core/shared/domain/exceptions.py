@@ -25,6 +25,10 @@ class RulesError(DomainException):
     pass
 
 
+class AccessDeniedError(DomainException):
+    pass
+
+
 class InvalidPhoneFormatError(ValidationError):
     def __init__(self):
         super().__init__(message="Некорректный формат номера телефона")

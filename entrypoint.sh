@@ -8,6 +8,7 @@ alembic upgrade head
 echo "Running Seeds ..."
 python -m scripts.seeds.seed
 python -m scripts.search
+python -m scripts.seeds.super_admin
 
 echo "Starting Server ..."
 
