@@ -62,9 +62,21 @@ jobs:
         env:
           RAW_VARS: ${{ toJSON(vars) }}
           RAW_SECRETS: ${{ toJSON(secrets) }}
+
+          SUPER_ADMIN_EMAIL: ${{ vars.SUPER_ADMIN_EMAIL }}
+          SUPER_ADMIN_FIRST_NAME: ${{ vars.SUPER_ADMIN_FIRST_NAME }}
+          SUPER_ADMIN_LAST_NAME: ${{ vars.SUPER_ADMIN_LAST_NAME }}
+          SUPER_ADMIN_PASSWORD: ${{ secrets.SUPER_ADMIN_PASSWORD }}
+
         run: |
           echo "$RAW_VARS" | jq -r 'to_entries | .[] | select(.key | startswith("DEPLOY_") | not) | "\(.key)=\(.value)"' > .env
           echo "$RAW_SECRETS" | jq -r 'to_entries | .[] | select(.key | startswith("DEPLOY_") | not) | "\(.key)=\(.value)"' >> .env
+
+          echo "SUPER_ADMIN_EMAIL=$SUPER_ADMIN_EMAIL" >> .env
+          echo "SUPER_ADMIN_FIRST_NAME=$SUPER_ADMIN_FIRST_NAME" >> .env
+          echo "SUPER_ADMIN_LAST_NAME=$SUPER_ADMIN_LAST_NAME" >> .env
+          echo "SUPER_ADMIN_PASSWORD=$SUPER_ADMIN_PASSWORD" >> .env
+
           echo "IMAGE_TAG=${{ github.ref_name == 'main' && 'production-latest' || 'staging-latest'}}" >> .env
 
       - name: Prepare deploy bundle
