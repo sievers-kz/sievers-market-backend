@@ -1,5 +1,6 @@
 from dependency_injector import containers, providers
 
+from src.configuration.dependencies.admin import AdminContainer
 from src.configuration.dependencies.catalog import CatalogContainer
 from src.configuration.dependencies.configuration import ConfigurationContainer
 from src.configuration.dependencies.customer import CustomerContainer
@@ -88,4 +89,11 @@ class ApplicationContainer(containers.DeclarativeContainer):
         customer_service=customer.customer_service,
         redis_service=shared.redis_service,
         kgd_settings=configurations.kgd_settings,
+    )
+
+    admin = providers.Container(
+        AdminContainer,
+        session_factory=gateways.session_factory,
+        database_session=gateways.database_session,
+        account_repository=iam.account_repository,
     )

@@ -52,7 +52,7 @@ RESTful B2B агромаркетплейс для автоматизации т�
 ### 1. Клонирование репозитория
 Склонируйте проект и перейдите в его корневую директорию:
 ```bash
-> git clone https://github.com/altum-kz/altum-market-backend
+> git clone https://github.com/sievers-kz/sievers-market-backend
 > cd sievers-market-backend
 ```
 

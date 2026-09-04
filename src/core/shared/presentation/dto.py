@@ -20,6 +20,10 @@ class CurrentVendor(DTO):
     id: UUID
 
 
+class CurrentAdmin(DTO):
+    id: UUID
+
+
 T = TypeVar("T")
 
 

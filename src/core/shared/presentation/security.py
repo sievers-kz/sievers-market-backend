@@ -8,6 +8,7 @@ from fastapi.security import HTTPAuthorizationCredentials as BearerCredentials
 from fastapi.security import HTTPBearer
 
 from src.configuration.dependencies.container import ApplicationContainer
+from src.core.admin.application.interfaces.uow import IAdminUnitOfWork
 from src.core.customer.application.interfaces.uow import ICustomerUnitOfWork
 from src.core.iam.application.interfaces.uow import IIAMUnitOfWork
 from src.core.iam.domain.enums import TokenType
@@ -20,7 +21,12 @@ from src.core.iam.infrastructure.services.pyjwt_token import ITokenService
 from src.core.shared.infrastructure.services.api_session_service import (
     APISessionService,
 )
-from src.core.shared.presentation.dto import CurrentCustomer, CurrentUser, CurrentVendor
+from src.core.shared.presentation.dto import (
+    CurrentAdmin,
+    CurrentCustomer,
+    CurrentUser,
+    CurrentVendor,
+)
 from src.core.vendor.application.interfaces.uow import IVendorUnitOfWork
 
 bearer_scheme = HTTPBearer(
@@ -134,3 +140,19 @@ async def get_current_vendor(
             )
 
         return CurrentVendor(id=vendor.id)
+
+
+@inject
+async def get_current_admin(
+    uow: Annotated[IAdminUnitOfWork, Depends(Provide[ApplicationContainer.admin.uow])],
+    account: CurrentUser = Depends(get_current_user),
+):
+    async with uow:
+        admin = await uow.admin.get_by_account_id(account.id)
+        if not admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access Denied. You are not registered as admin",
+            )
+
+        return CurrentAdmin(id=admin.id)

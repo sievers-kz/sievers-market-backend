@@ -20,6 +20,7 @@ from src.core.references.infrastructure.models import (
 )
 from src.core.shared.infrastructure.base_model import BaseModel
 from src.core.vendor.infrastructure.models import Vendor
+from src.core.admin.infrastructure.models import Admin
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

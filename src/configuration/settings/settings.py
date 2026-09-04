@@ -25,6 +25,13 @@ class BaseConfig(BaseSettings):
         return init_settings, env_settings, dotenv_settings
 
 
+class AdminSettings(BaseConfig):
+    super_admin_email: str = Field(alias="SUPER_ADMIN_EMAIL")
+    super_admin_password: str = Field(alias="SUPER_ADMIN_PASSWORD")
+    super_admin_last_name: str = Field(alias="SUPER_ADMIN_LAST_NAME")
+    super_admin_first_name: str = Field(alias="SUPER_ADMIN_FIRST_NAME")
+
+
 class PostgresSettings(BaseConfig):
     host: str = Field(alias="POSTGRES_HOST")
     port: int = Field(alias="POSTGRES_PORT")
