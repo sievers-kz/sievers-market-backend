@@ -58,9 +58,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Generate .env
+      - name: Generate .env inside bundle
         run: |
-          cat << 'EOF' > .env
+          cat << 'EOF' > deploy-bundle/.env
           ACCESS_TOKEN_LIFETIME=${{ vars.ACCESS_TOKEN_LIFETIME }}
           ALGORITHM=${{ vars.ALGORITHM }}
           APP_PORT=${{ vars.APP_PORT }}
@@ -108,7 +108,7 @@ jobs:
           host: ${{ vars.DEPLOY_HOST }}
           username: ${{ vars.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "deploy-bundle/*,.env"
+          source: "deploy-bundle/*,deploy-bundle/.env"
           target: ${{ vars.DEPLOY_PATH }}
           strip_components: 1
           rm: false
