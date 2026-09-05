@@ -63,9 +63,9 @@ jobs:
           RAW_VARS: ${{ toJSON(vars) }}
           RAW_SECRETS: ${{ toJSON(secrets) }}
           _SUPER_ADMIN_PASSWORD: ${{ secrets.SUPER_ADMIN_PASSWORD }}
-          _SUPER_ADMIN_EMAIL: ${{ vars.SUPER_ADMIN_EMAIL }}
-          _SUPER_ADMIN_LAST_NAME: ${{ vars.SUPER_ADMIN_LAST_NAME }}
-          _SUPER_ADMIN_FIRST_NAME: ${{ vars.SUPER_ADMIN_FIRST_NAME }}
+          _SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
+          _SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
+          _SUPER_ADMIN_FIRST_NAME: ${{ secrets.SUPER_ADMIN_FIRST_NAME }}
         run: |
           echo "$RAW_VARS" | jq -r 'to_entries | .[] | select(.key | startswith("DEPLOY_") | not) | "\(.key)=\(.value)"' > .env
           echo "$RAW_SECRETS" | jq -r 'to_entries | .[] | select(.key | startswith("DEPLOY_") | not) | "\(.key)=\(.value)"' >> .env
