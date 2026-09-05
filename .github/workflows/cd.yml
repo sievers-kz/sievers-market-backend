@@ -58,6 +58,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Prepare deploy bundle
+        run: |
+          mkdir -p deploy-bundle
+          cp docker-compose.yml Makefile deploy-bundle/
+          cp -r infra deploy-bundle/
+
       - name: Generate .env inside bundle
         run: |
           cat << 'EOF' > deploy-bundle/.env
@@ -95,12 +101,6 @@ jobs:
           SUPER_ADMIN_FIRST_NAME=${{ secrets.SUPER_ADMIN_FIRST_NAME }}
           IMAGE_TAG=${{ github.ref_name == 'main' && 'production-latest' || 'staging-latest' }}
           EOF
-
-      - name: Prepare deploy bundle
-        run: |
-          mkdir -p deploy-bundle
-          cp docker-compose.yml Makefile deploy-bundle/
-          cp -r infra deploy-bundle/
 
       - name: Copy files and .env to VPS
         uses: appleboy/scp-action@v0.1.7
