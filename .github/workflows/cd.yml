@@ -58,18 +58,43 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Auto-generate .env via jq
-        env:
-          RAW_VARS: ${{ toJSON(vars) }}
-          RAW_SECRETS: ${{ toJSON(secrets) }}
-          SUPER_ADMIN_PASSWORD: ${{ secrets.SUPER_ADMIN_PASSWORD }}
-          SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
-          SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
-          SUPER_ADMIN_FIRST_NAME: ${{ secrets.SUPER_ADMIN_FIRST_NAME }}
+      - name: Generate .env
         run: |
-          echo "$RAW_VARS" | jq -r 'to_entries | .[] | select(.key | startswith("DEPLOY_") | not) | "\(.key)=\(.value)"' > .env
-          echo "$RAW_SECRETS" | jq -r 'to_entries | .[] | select(.key | startswith("DEPLOY_") | not) | "\(.key)=\(.value)"' >> .env
-          echo "IMAGE_TAG=${{ github.ref_name == 'main' && 'production-latest' || 'staging-latest'}}" >> .env
+          cat << 'EOF' > .env
+          ACCESS_TOKEN_LIFETIME=${{ vars.ACCESS_TOKEN_LIFETIME }}
+          ALGORITHM=${{ vars.ALGORITHM }}
+          APP_PORT=${{ vars.APP_PORT }}
+          CORS_ORIGINS=${{ vars.CORS_ORIGINS }}
+          MEILISEARCH_URL=${{ vars.MEILISEARCH_URL }}
+          MEILI_ENV=${{ vars.MEILI_ENV }}
+          MINIO_BUCKET_NAME=${{ vars.MINIO_BUCKET_NAME }}
+          MINIO_ENDPOINT=${{ vars.MINIO_ENDPOINT }}
+          MINIO_SECURE_CONFIG=${{ vars.MINIO_SECURE_CONFIG }}
+          MODE=${{ vars.MODE }}
+          POSTGRES_HOST=${{ vars.POSTGRES_HOST }}
+          POSTGRES_NAME=${{ vars.POSTGRES_NAME }}
+          POSTGRES_PORT=${{ vars.POSTGRES_PORT }}
+          POSTGRES_USER=${{ vars.POSTGRES_USER }}
+          REDIS_DB=${{ vars.REDIS_DB }}
+          REDIS_HOST=${{ vars.REDIS_HOST }}
+          REDIS_PORT=${{ vars.REDIS_PORT }}
+          REFRESH_TOKEN_LIFETIME=${{ vars.REFRESH_TOKEN_LIFETIME }}
+          RESEND_FROM_EMAIL=${{ vars.RESEND_FROM_EMAIL }}
+          KGD_PORTAL_TOKEN=${{ secrets.KGD_PORTAL_TOKEN }}
+          MEILISEARCH_KEY=${{ secrets.MEILISEARCH_KEY }}
+          MINIO_ROOT_PASSWORD=${{ secrets.MINIO_ROOT_PASSWORD }}
+          MINIO_ROOT_USER=${{ secrets.MINIO_ROOT_USER }}
+          POSTGRES_PASS=${{ secrets.POSTGRES_PASS }}
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+          SUPER_ADMIN_EMAIL=${{ secrets.SUPER_ADMIN_EMAIL }}
+          SUPER_ADMIN_PASSWORD=${{ secrets.SUPER_ADMIN_PASSWORD }}
+          SUPER_ADMIN_LAST_NAME=${{ secrets.SUPER_ADMIN_LAST_NAME }}
+          SUPER_ADMIN_FIRST_NAME=${{ secrets.SUPER_ADMIN_FIRST_NAME }}
+          IMAGE_TAG=${{ github.ref_name == 'main' && 'production-latest' || 'staging-latest' }}
+          EOF
 
       - name: Prepare deploy bundle
         run: |
