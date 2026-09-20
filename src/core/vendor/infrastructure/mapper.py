@@ -41,9 +41,7 @@ class VendorMapper:
             tax_id=TaxID(orm_model.tax_id, orm_model.legal_form),
             legal_form=orm_model.legal_form,
             shop_name=orm_model.shop_name,
-            logotype=(
-                Logotype.from_dict(orm_model.logotype) if orm_model.logotype else None
-            ),
+            logotype=(Logotype.from_dict(orm_model.logotype) if orm_model.logotype else None),
             status=orm_model.status,
             closed_at=orm_model.closed_at,
         )

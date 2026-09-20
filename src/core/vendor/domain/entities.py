@@ -79,9 +79,7 @@ class Vendor(AggregateRoot):
     def ban(self):
         self.status = VendorStatus.BANNED
 
-    def change_contact_fullname(
-        self, contact_last_name: str, contact_first_name: str, contact_patronymic: str
-    ):
+    def change_contact_fullname(self, contact_last_name: str, contact_first_name: str, contact_patronymic: str):
         self.contact_fullname = ContactFullname(
             contact_last_name=contact_last_name,
             contact_first_name=contact_first_name,

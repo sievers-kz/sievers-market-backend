@@ -1,5 +1,6 @@
 from src.core.shared.domain.exceptions import (
-    AlreadyExistsError,
+    AccessDeniedError,
+    ConflictError,
     NotFoundError,
     RulesError,
     ValidationError,
@@ -7,47 +8,61 @@ from src.core.shared.domain.exceptions import (
 
 
 class VendorNotFoundError(NotFoundError):
-    def __init__(self):
-        super().__init__(message="Не удалось найти такого продавца")
+    message = "Не удалось найти профиль продавца"
+    error_code = "vendor_not_found_error"
 
 
-class VendorOnLiquidationError(RulesError):
-    def __init__(self):
-        super().__init__(message="Данный продавец находится на ликвидации")
+class TaxpayerNotFoundError(NotFoundError):
+    message = "Не удалось найти организацию"
+    error_code = "taxpayer_not_found_error"
 
 
-class VendorAlreadyExistsError(AlreadyExistsError):
-    def __init__(self):
-        super().__init__(message="Такой продавец уже зарегистрирован в системе")
+class TaxpayerOnLiquidationError(RulesError):
+    message = "Данная организация находится на ликвидации"
+    error_code = "taxpayer_on_liquidation_error"
+
+
+class VendorAlreadyExistsError(ConflictError):
+    message = "Такой продавец уже зарегистрирован в системе"
+    error_code = "vendor_already_exists_error"
 
 
 class ContactFullnameRequiredError(ValidationError):
+    message = "Обязательное поле не заполнено"
+    error_code = "contact_fullname_required_error"
+
     def __init__(self, field: str):
-        super().__init__(
-            message="Обязательное поле не заполнено", details={"field": field}
-        )
+        super().__init__(message=self.message, metadata={"field": field})
 
 
 class ContactFullnameFormatError(ValidationError):
+    message = "Неправильный формат поля"
+    error_code = "contact_fullname_format_error"
+
     def __init__(self, field: str):
-        super().__init__(message="Неправильный формат поля", details={"field": field})
+        super().__init__(message=self.message, metadata={"field": field})
 
 
 class InvalidTaxNumberError(ValidationError):
-    def __init__(self):
-        super().__init__(message="Некорректный формат ИН")
+    message = "Некорректный формат идентификационного номера"
+    error_code = "invalid_tax_number_error"
 
 
 class InvalidLogotypeSizeError(ValidationError):
-    def __init__(self):
-        super().__init__(message="Размер логотипа не должен превышать 2 МБ")
+    message = "Размер логотипа не должен превышать 2МB"
+    error_code = "invalid_logotype_size_error"
 
 
-class VendorAlreadyVerifiedError(RulesError):
-    def __init__(self):
-        super().__init__(message="Продавец уже верифицирован")
+class VendorAlreadyVerifiedError(ConflictError):
+    message = "Продавец уже верифицирован"
+    error_code = "vendor_already_verified_error"
 
 
-class VendorCannotBeRestoredError(ValidationError):
-    def __init__(self):
-        super().__init__(message="Невозможно восстановить аккаунт продавца")
+class VendorCannotBeRestoredError(RulesError):
+    message = "Невозможно восстановить аккаунт продавца"
+    error_code = "vendor_cannot_be_restored_error"
+
+
+class VendorProfileRequiredError(AccessDeniedError):
+    message = "Доступ запрещен. Необходимо иметь профиль продавца"
+    error_code = "vendor_profile_required_error"

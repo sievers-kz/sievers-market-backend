@@ -1,18 +1,21 @@
 from dependency_injector import containers, providers
 
-from src.core.references.infrastructure.repositories.brand import BrandRepository
-from src.core.references.infrastructure.repositories.city import CityRepository
-from src.core.references.infrastructure.repositories.color import ColorRepository
-from src.core.references.infrastructure.repositories.country import CountryRepository
-from src.core.references.infrastructure.repositories.region import RegionRepository
+from src.core.references.infrastructure.models import Brand, City, Color, OriginCountry
+from src.core.references.infrastructure.repositories import (
+    BrandRepository,
+    CityRepository,
+    ColorRepository,
+    OriginCountryRepository,
+)
 
 
 class ReferenceContainer(containers.DeclarativeContainer):
     session_factory = providers.Dependency()
     database_session = providers.Dependency()
 
-    brand_repository = providers.Factory(BrandRepository, session=database_session)
-    color_repository = providers.Factory(ColorRepository, session=database_session)
-    country_repository = providers.Factory(CountryRepository, session=database_session)
-    region_repository = providers.Factory(RegionRepository, session=database_session)
-    city_repository = providers.Factory(CityRepository, session=database_session)
+    brand_repository = providers.Factory(BrandRepository, model=Brand, session=database_session)
+    color_repository = providers.Factory(ColorRepository, model=Color, session=database_session)
+    origin_country_repository = providers.Factory(
+        OriginCountryRepository, model=OriginCountry, session=database_session
+    )
+    city_repository = providers.Factory(CityRepository, model=City, session=database_session)

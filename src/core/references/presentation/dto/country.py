@@ -3,14 +3,14 @@ from uuid import UUID
 from src.core.shared.presentation.dto import DTO
 
 
-class CountryResponse(DTO):
+class OriginCountryResponse(DTO):
     id: UUID
     name: str
 
 
-class CreateCountryRequest(DTO):
+class CreateOriginCountryRequest(DTO):
     name: str
 
 
-class UpdateCountryRequest(DTO):
+class UpdateOriginCountryRequest(DTO):
     name: str

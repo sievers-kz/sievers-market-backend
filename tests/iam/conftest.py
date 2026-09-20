@@ -12,9 +12,7 @@ from src.core.iam.presentation.dto import CreateAccountRequest
 from src.core.shared.infrastructure.services.arq_service import ArqService
 
 
-def create_domain_account(
-    is_active: bool | None = False, tokens: list | None = None
-) -> Account:
+def create_domain_account(is_active: bool | None = False, tokens: list | None = None) -> Account:
     return Account(
         id=uuid.uuid4(),
         email=Email("test@example.com"),

@@ -30,9 +30,7 @@ class CreateListingRequest(DTO):
 
     attributes: dict[str, Any] = Field(
         default_factory=dict,
-        json_schema_extra={
-            "example": {"engine_power": 300, "max_speed": 60, "weight": 4000}
-        },
+        json_schema_extra={"example": {"engine_power": 300, "max_speed": 60, "weight": 4000}},
         description="Динамические спецификации объявления",
     )
 
@@ -75,9 +73,7 @@ class ListingSearchDocument(DTO):
     model_config = ConfigDict(extra="allow")
 
     @classmethod
-    def from_listing(
-        cls, listing: Listing, attributes: dict
-    ) -> "ListingSearchDocument":
+    def from_listing(cls, listing: Listing, attributes: dict) -> "ListingSearchDocument":
         return cls.model_validate(
             {
                 "id": str(listing.id),

@@ -14,6 +14,6 @@ class ArchiveListingUseCase:
             if not listing or listing.owner_id != vendor_id:
                 raise ListingNotFoundError()
 
-            listing.archive()
+            listing.archive(vendor_id)
             await uow.listing.save(listing)
             await uow.commit()

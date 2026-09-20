@@ -14,6 +14,6 @@ class DeleteListingUseCase:
             if not listing or listing.owner_id != vendor_id:
                 raise ListingNotFoundError()
 
-            listing.delete()
+            listing.delete(vendor_id)
             await uow.listing.save(listing)
             await uow.commit()

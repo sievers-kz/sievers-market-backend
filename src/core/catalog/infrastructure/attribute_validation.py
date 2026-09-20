@@ -27,9 +27,7 @@ class AttributeValidationService:
         for link in links:
             py_type = self._map_type(link.attribute.type)
             fields[link.attribute.key] = (
-                (py_type, Field(...))
-                if link.required
-                else (py_type | None, Field(default=None))
+                (py_type, Field(...)) if link.required else (py_type | None, Field(default=None))
             )
 
         dynamic_model = create_model(f"Subcategory_{subcategory_id}_Model", **fields)
@@ -38,9 +36,7 @@ class AttributeValidationService:
             validated = dynamic_model(**raw_attributes)
             return validated.model_dump()
         except PydanticValidationError as e:
-            raise PydanticValidationError.from_exception_data(
-                e.title, e.errors()
-            ) from e
+            raise PydanticValidationError.from_exception_data(e.title, e.errors()) from e
 
     @staticmethod
     def _map_type(attr_type: AttributeType):

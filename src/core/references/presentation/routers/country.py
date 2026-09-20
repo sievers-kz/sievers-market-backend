@@ -1,82 +1,109 @@
-from typing import Annotated
 from uuid import UUID
 
-from dependency_injector.wiring import Provide, inject
+from dependency_injector.wiring import inject
 from fastapi import APIRouter, HTTPException, status
 from fastapi.params import Depends
 
-from src.configuration.dependencies.container import ApplicationContainer
 from src.core.admin.domain.entities import Admin
-from src.core.references.infrastructure.repositories.country import CountryRepository
+from src.core.references.presentation.dependencies import (
+    OriginCountryRepositoryDependency,
+)
+from src.core.references.presentation.documentation import (
+    CREATE_ORIGIN_COUNTRY_DOC,
+    DELETE_ORIGIN_COUNTRY_DOC,
+    GET_ALL_ORIGIN_COUNTRIES_DOC,
+    GET_ORIGIN_COUNTRY_BY_ID_DOC,
+    UPDATE_ORIGIN_COUNTRY_DOC,
+)
 from src.core.references.presentation.dto.country import (
-    CountryResponse,
-    CreateCountryRequest,
-    UpdateCountryRequest,
+    CreateOriginCountryRequest,
+    OriginCountryResponse,
+    UpdateOriginCountryRequest,
 )
 from src.core.shared.presentation.security import require_admin
 
-country_router = APIRouter(prefix="/country")
+origin_country_router = APIRouter(prefix="/country", tags=["Origin Country Reference"])
 
 
+@origin_country_router.get(
+    "/",
+    response_model=list[OriginCountryResponse],
+    operation_id=GET_ALL_ORIGIN_COUNTRIES_DOC.operation_id,
+    summary=GET_ALL_ORIGIN_COUNTRIES_DOC.summary,
+    responses=GET_ALL_ORIGIN_COUNTRIES_DOC.responses_doc,
+    description=GET_ALL_ORIGIN_COUNTRIES_DOC.description,
+)
 @inject
-async def get_repo(
-    repo: Annotated[
-        CountryRepository,
-        Depends(Provide[ApplicationContainer.reference.country_repository]),
-    ],
-) -> CountryRepository:
-    return repo
+async def get_all(repository: OriginCountryRepositoryDependency):
+    return await repository.get_all()
 
 
-@country_router.get("/", response_model=list[CountryResponse])
-async def get_all(repo: CountryRepository = Depends(get_repo)):
-    return await repo.get_all()
-
-
-@country_router.get("/{country_id}", response_model=CountryResponse)
-async def get_by_id(country_id: UUID, repo: CountryRepository = Depends(get_repo)):
-    country = await repo.get_by_id(country_id)
+@origin_country_router.get(
+    "/{country_id}",
+    response_model=OriginCountryResponse,
+    operation_id=GET_ORIGIN_COUNTRY_BY_ID_DOC.operation_id,
+    summary=GET_ORIGIN_COUNTRY_BY_ID_DOC.summary,
+    responses=GET_ORIGIN_COUNTRY_BY_ID_DOC.responses_doc,
+    description=GET_ORIGIN_COUNTRY_BY_ID_DOC.description,
+)
+@inject
+async def get_by_id(country_id: UUID, repository: OriginCountryRepositoryDependency):
+    country = await repository.get_by_id(country_id)
     if not country:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Страна не найдена"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Страна не найдена")
     return country
 
 
-@country_router.post(
-    "/", response_model=CountryResponse, status_code=status.HTTP_201_CREATED
+@origin_country_router.post(
+    "/",
+    response_model=OriginCountryResponse,
+    status_code=status.HTTP_201_CREATED,
+    operation_id=CREATE_ORIGIN_COUNTRY_DOC.operation_id,
+    summary=CREATE_ORIGIN_COUNTRY_DOC.summary,
+    responses=CREATE_ORIGIN_COUNTRY_DOC.responses_doc,
+    description=CREATE_ORIGIN_COUNTRY_DOC.description,
 )
 async def create(
-    dto: CreateCountryRequest,
-    repo: CountryRepository = Depends(get_repo),
+    dto: CreateOriginCountryRequest,
+    repository: OriginCountryRepositoryDependency,
     current_admin: Admin = Depends(require_admin("create:country")),
 ):
-    return await repo.create(dto.name)
+    return await repository.create(**dto.model_dump())
 
 
-@country_router.patch("/{country_id}", response_model=CountryResponse)
+@origin_country_router.patch(
+    "/{country_id}",
+    response_model=OriginCountryResponse,
+    operation_id=UPDATE_ORIGIN_COUNTRY_DOC.operation_id,
+    summary=UPDATE_ORIGIN_COUNTRY_DOC.summary,
+    responses=UPDATE_ORIGIN_COUNTRY_DOC.responses_doc,
+    description=UPDATE_ORIGIN_COUNTRY_DOC.description,
+)
 async def update(
     country_id: UUID,
-    dto: UpdateCountryRequest,
-    repo: CountryRepository = Depends(get_repo),
+    dto: UpdateOriginCountryRequest,
+    repository: OriginCountryRepositoryDependency,
     current_admin: Admin = Depends(require_admin("update:country")),
 ):
-    country = await repo.update(country_id, dto.name)
+    country = await repository.update(country_id, **dto.model_dump())
     if not country:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Страна не найдена"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Страна не найдена")
     return country
 
 
-@country_router.delete("/{country_id}", status_code=status.HTTP_204_NO_CONTENT)
+@origin_country_router.delete(
+    "/{country_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    operation_id=DELETE_ORIGIN_COUNTRY_DOC.operation_id,
+    summary=DELETE_ORIGIN_COUNTRY_DOC.summary,
+    responses=DELETE_ORIGIN_COUNTRY_DOC.responses_doc,
+    description=DELETE_ORIGIN_COUNTRY_DOC.description,
+)
 async def delete(
     country_id: UUID,
-    repo: CountryRepository = Depends(get_repo),
+    repository: OriginCountryRepositoryDependency,
     current_admin: Admin = Depends(require_admin("delete:country")),
 ):
-    deleted = await repo.delete(country_id)
+    deleted = await repository.delete(country_id)
     if not deleted:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Страна не найдена"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Страна не найдена")

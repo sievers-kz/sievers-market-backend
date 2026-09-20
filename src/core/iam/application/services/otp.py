@@ -24,15 +24,11 @@ class OTPService:
     async def send(self, account_id: UUID, email: str, otp_type: OTPType) -> None:
         cooldown_key = f"otp:cooldown:{otp_type.value}:{account_id}"
         if await self.cache.get(cooldown_key) is not None:
-            logger.warning(
-                "OTP COOLDOWN ACTIVE | account_id={} otp_type={}", account_id, otp_type
-            )
+            logger.warning("OTP COOLDOWN ACTIVE | account_id={} otp_type={}", account_id, otp_type)
             raise OTPCooldownError()
 
         otp_code = "".join(secrets.choice("0123456789") for _ in range(6))
-        await self.cache.set(
-            key=f"otp:{otp_type.value}:{account_id}", value=otp_code, ttl=300
-        )
+        await self.cache.set(key=f"otp:{otp_type.value}:{account_id}", value=otp_code, ttl=300)
         await self.cache.set(key=cooldown_key, value="1", ttl=60)
 
         await self.queue.enqueue(

@@ -24,12 +24,8 @@ class TestAccountConfirmationUsecase:
         unconfirmed_user = await account_repository.get_account_by_email(dto.email)
         assert unconfirmed_user.is_active is False
 
-        otp_code = await redis_service.get(
-            f"otp:{OTPType.CONFIRMATION.value}:{unconfirmed_user.id}"
-        )
-        confirmation_dto = AccountConfirmation(
-            email=unconfirmed_user.email.value, confirm_code=otp_code
-        )
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{unconfirmed_user.id}")
+        confirmation_dto = AccountConfirmation(email=unconfirmed_user.email.value, confirm_code=otp_code)
         await account_confirmation_usecase.execute(confirmation_dto)
 
         confirmed_user = await account_repository.get_account_by_email(dto.email)
@@ -37,9 +33,7 @@ class TestAccountConfirmationUsecase:
 
     @pytest.mark.asyncio
     @pytest.mark.integration
-    async def test_fails_with_invalid_code(
-        self, create_user_usecase, account_confirmation_usecase, account_repository
-    ):
+    async def test_fails_with_invalid_code(self, create_user_usecase, account_confirmation_usecase, account_repository):
         dto = CreateAccountRequest(
             email="test@example.com",
             raw_password="super_secret",
@@ -47,9 +41,7 @@ class TestAccountConfirmationUsecase:
         await create_user_usecase.execute(dto)
 
         account = await account_repository.get_account_by_email(dto.email)
-        confirmation_dto = AccountConfirmation(
-            email=account.email.value, confirm_code="123456"
-        )
+        confirmation_dto = AccountConfirmation(email=account.email.value, confirm_code="123456")
 
         with pytest.raises(InvalidOTPCodeError):
             await account_confirmation_usecase.execute(confirmation_dto)

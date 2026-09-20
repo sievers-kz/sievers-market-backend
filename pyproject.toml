@@ -56,3 +56,11 @@ cloc = "^0.2.5"
 
 [tool.poetry]
 package-mode = false
+
+[tool.black]
+line-length = 120
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
+line_length = 120

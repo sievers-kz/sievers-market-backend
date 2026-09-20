@@ -9,5 +9,5 @@ class Base(DeclarativeBase):
 
 
 async def get_database_session(session_factory: Callable[[], AsyncSession]):
-    async with session_factory() as session:
+    async with session_factory() as session:  # TODO: Implement rollback & session close
         yield session

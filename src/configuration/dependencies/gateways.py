@@ -21,16 +21,16 @@ class GatewaysContainer(containers.DeclarativeContainer):
     sentry_config = providers.Configuration()
     meilisearch_config = providers.Configuration()
 
-    async_engine = providers.Resource(
-        init_engine, url=database_config.database_url, echo=False
-    )
+    async_engine = providers.Resource(init_engine, url=database_config.database_url, echo=False)
 
     session_factory = providers.Singleton(
         async_sessionmaker, bind=async_engine, expire_on_commit=False, autoflush=False
     )
 
     database_session = providers.Resource(
-        get_database_session, session_factory=session_factory
+        # TODO: fix database_session provider from Resource to Factory
+        get_database_session,
+        session_factory=session_factory,
     )
 
     redis_client = providers.Singleton(

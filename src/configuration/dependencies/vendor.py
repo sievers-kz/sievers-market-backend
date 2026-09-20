@@ -30,9 +30,7 @@ class VendorContainer(containers.DeclarativeContainer):
     kgd_settings = providers.Configuration()
 
     mock_taxpayer_gateway = providers.Factory(MockTaxpayerGateway)
-    kgd_taxpayer_gateway = providers.Factory(
-        KGDTaxpayerGateway, portal_token=kgd_settings.portal_token
-    )
+    kgd_taxpayer_gateway = providers.Factory(KGDTaxpayerGateway, portal_token=kgd_settings.portal_token)
 
     uow = providers.Factory(VendorUnitOfWork, session_factory=session_factory)
 

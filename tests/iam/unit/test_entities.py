@@ -100,8 +100,6 @@ def test_reset_password_success():
     new_hashed_password = "new_hashed_password"
     account.reset_password(new_hashed_password)
 
-    revoked_refresh_tokens = [
-        token for token in account.tokens if token.type == TokenType.REFRESH
-    ]
+    revoked_refresh_tokens = [token for token in account.tokens if token.type == TokenType.REFRESH]
     for token in revoked_refresh_tokens:
         assert token.is_revoked is True

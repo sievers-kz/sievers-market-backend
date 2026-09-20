@@ -30,9 +30,7 @@ async def main():
         links = result.scalars().unique().all()
         dynamic_filterable = list({link.attribute.key for link in links})
 
-    async with AsyncClient(
-        url=meili_settings.url, api_key=meili_settings.key
-    ) as client:
+    async with AsyncClient(url=meili_settings.url, api_key=meili_settings.key) as client:
         search_service = MeilisearchService(client)
         listing_search_service = ListingSearchService(search_service)
         await listing_search_service.sync_schema(dynamic_filterable)
