@@ -1,8 +1,8 @@
-"""initial_migration
+"""initial
 
-Revision ID: 5131876a2bf4
+Revision ID: f9b9974d3411
 Revises: 
-Create Date: 2026-07-26 19:08:26.710190
+Create Date: 2026-09-19 09:30:23.941998
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '5131876a2bf4'
+revision: str = 'f9b9974d3411'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -37,6 +37,7 @@ def upgrade() -> None:
     sa.Column('label', sa.String(), nullable=False),
     sa.Column('type', sa.Enum('STRING', 'INTEGER', 'BOOLEAN', 'FLOAT', 'ENUMERATE', 'REFERENCE', name='attributetype'), nullable=False),
     sa.Column('options', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+    sa.Column('source', sa.String(), nullable=True),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -59,16 +60,16 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('colors',
+    op.create_table('cities',
     sa.Column('name', sa.String(length=50), nullable=False),
-    sa.Column('hex', sa.String(length=50), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('countries',
+    op.create_table('colors',
     sa.Column('name', sa.String(length=50), nullable=False),
+    sa.Column('hex', sa.String(length=50), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -84,8 +85,16 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('regions',
+    op.create_table('origin_countries',
     sa.Column('name', sa.String(length=50), nullable=False),
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('permissions',
+    sa.Column('codename', sa.String(), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -107,6 +116,19 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('admins',
+    sa.Column('account_id', sa.UUID(), nullable=False),
+    sa.Column('last_name', sa.String(), nullable=False),
+    sa.Column('first_name', sa.String(), nullable=False),
+    sa.Column('patronymic', sa.String(), nullable=True),
+    sa.Column('role', sa.Enum('SUPER_ADMIN', 'ADMIN', 'MODERATOR', name='adminroles'), nullable=False),
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('account_id')
+    )
     op.create_table('categories',
     sa.Column('rubric_id', sa.UUID(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
@@ -115,15 +137,6 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['rubric_id'], ['rubrics.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('cities',
-    sa.Column('name', sa.String(length=50), nullable=False),
-    sa.Column('region_id', sa.UUID(), nullable=False),
-    sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['region_id'], ['regions.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('customers',
@@ -172,6 +185,16 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('tax_id')
+    )
+    op.create_table('admin_permissions',
+    sa.Column('admin_id', sa.UUID(), nullable=False),
+    sa.Column('permission_id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['admin_id'], ['admins.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['permission_id'], ['permissions.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('admin_id', 'permission_id', 'id')
     )
     op.create_table('subcategories',
     sa.Column('category_id', sa.UUID(), nullable=False),
@@ -230,17 +253,19 @@ def downgrade() -> None:
     op.drop_table('subcategory_attributes')
     op.drop_table('listings')
     op.drop_table('subcategories')
+    op.drop_table('admin_permissions')
     op.drop_table('vendors')
     op.drop_table('tokens')
     op.drop_table('customers')
-    op.drop_table('cities')
     op.drop_table('categories')
+    op.drop_table('admins')
     op.drop_table('unit_of_measure')
     op.drop_table('rubrics')
-    op.drop_table('regions')
+    op.drop_table('permissions')
+    op.drop_table('origin_countries')
     op.drop_table('media')
-    op.drop_table('countries')
     op.drop_table('colors')
+    op.drop_table('cities')
     op.drop_table('brands')
     op.drop_table('attribute_groups')
     op.drop_table('attribute_definitions')

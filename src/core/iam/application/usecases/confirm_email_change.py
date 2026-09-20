@@ -15,23 +15,17 @@ from src.core.shared.infrastructure.services.redis_service import RedisService
 
 
 class ConfirmEmailChangeUseCase:
-    def __init__(
-        self, uow: IAMUnitOfWork, otp_service: OTPService, cache_service: RedisService
-    ):
+    def __init__(self, uow: IAMUnitOfWork, otp_service: OTPService, cache_service: RedisService):
         self.uow = uow
         self.otp_service = otp_service
         self.cache_service = cache_service
 
     async def execute(self, account_id: UUID, dto: ConfirmEmailChangeRequest):
-        pending_email = await self.cache_service.get(
-            f"email_change:pending:{account_id}"
-        )
+        pending_email = await self.cache_service.get(f"email_change:pending:{account_id}")
         if not pending_email:
             raise EmailChangeRequestNotFoundError()
 
-        await self.otp_service.verify(
-            account_id=account_id, otp_type=OTPType.CHANGE_EMAIL, otp_value=dto.otp_code
-        )
+        await self.otp_service.verify(account_id=account_id, otp_type=OTPType.CHANGE_EMAIL, otp_value=dto.otp_code)
 
         async with self.uow as uow:
             account = await uow.account.get_account_by_id(account_id)

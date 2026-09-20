@@ -32,13 +32,9 @@ def test_settings() -> ApplicationSettings:
 @pytest_asyncio.fixture(scope="session")
 async def test_engine(test_settings: ApplicationSettings):
     if test_settings.mode != "test":
-        pytest.exit(
-            f"СТОП! Попытка запустить тесты на рабочей БД: {test_settings.database.name}"  # noqa: E501
-        )
+        pytest.exit(f"СТОП! Попытка запустить тесты на рабочей БД: {test_settings.database.name}")  # noqa: E501
 
-    async_engine = create_async_engine(
-        url=test_settings.database.database_url, echo=False, poolclass=NullPool
-    )
+    async_engine = create_async_engine(url=test_settings.database.database_url, echo=False, poolclass=NullPool)
 
     yield async_engine
     await async_engine.dispose()
@@ -49,9 +45,7 @@ async def setup_database(test_engine):
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    async_session = async_sessionmaker(
-        bind=test_engine, expire_on_commit=False, class_=AsyncSession
-    )
+    async_session = async_sessionmaker(bind=test_engine, expire_on_commit=False, class_=AsyncSession)
     async with async_session() as session:
         seeder = DataSeeder(session=session)
         await seeder.seed_all()

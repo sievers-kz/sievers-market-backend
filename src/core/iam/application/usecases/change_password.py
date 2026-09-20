@@ -15,12 +15,8 @@ class ChangePasswordUseCase:
         async with self.uow as uow:
             account = await uow.account.get_account_by_id(account_id)
 
-            validated_plain = self.password_service.validate(
-                change_password_data.new_password
-            )
-            if not self.password_service.verify(
-                change_password_data.raw_password, account.password.value
-            ):
+            validated_plain = self.password_service.validate(change_password_data.new_password)
+            if not self.password_service.verify(change_password_data.raw_password, account.password.value):
                 raise PasswordMismatchError()
 
             new_hashed_password = self.password_service.hash(validated_plain)

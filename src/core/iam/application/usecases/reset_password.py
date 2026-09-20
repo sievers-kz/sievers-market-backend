@@ -31,9 +31,7 @@ class ResetPasswordUseCase:
                 otp_value=reset_password_data.password_reset_otp,
             )
 
-            validated_plain = self.password_service.validate(
-                reset_password_data.raw_password
-            )
+            validated_plain = self.password_service.validate(reset_password_data.raw_password)
             new_hashed_password = self.password_service.hash(validated_plain)
             account.reset_password(new_hashed_password)
 

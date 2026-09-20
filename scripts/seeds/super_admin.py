@@ -18,9 +18,7 @@ async def seed_super_admin():
     admin_settings = AdminSettings()
 
     engine = create_async_engine(url=db_settings.database_url, echo=False)
-    session_factory = async_sessionmaker(
-        bind=engine, autoflush=False, expire_on_commit=False
-    )
+    session_factory = async_sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
     async with session_factory() as session:
         stmt = select(Account).where(Account.email == admin_settings.super_admin_email)

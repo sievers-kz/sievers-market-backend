@@ -24,9 +24,7 @@ class TestGrantPermission:
         moderator = await admin_repository.get_by_account_id(prepared_account.id)
         permission = await permission_seed("verify:account")
 
-        grant_dto = GrantPermissionRequest(
-            admin_id=moderator.id, permission_id=permission.id
-        )
+        grant_dto = GrantPermissionRequest(admin_id=moderator.id, permission_id=permission.id)
         await admin_service.grant_permission(super_admin.account_id, grant_dto)
 
         moderator = await admin_repository.get_by_account_id(prepared_account.id)
@@ -51,9 +49,7 @@ class TestGrantPermission:
 
         moderator = await admin_repository.get_by_account_id(prepared_account.id)
         permission = await permission_seed("create:category")
-        grant_dto = GrantPermissionRequest(
-            admin_id=moderator.id, permission_id=permission.id
-        )
+        grant_dto = GrantPermissionRequest(admin_id=moderator.id, permission_id=permission.id)
 
         with pytest.raises(InsufficientPermissionsError):
             await admin_service.grant_permission(admin.account_id, grant_dto)

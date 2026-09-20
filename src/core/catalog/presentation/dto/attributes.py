@@ -51,6 +51,7 @@ class UnitOfMeasureResponse(DTO):
 
 
 class AttachAttributeRequest(DTO):
+    subcategory_id: UUID
     attribute_id: UUID
     group_id: UUID
     unit_id: UUID | None = None

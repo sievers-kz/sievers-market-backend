@@ -26,9 +26,7 @@ class CreateListingUseCase:
         self.listing_search_service = listing_search_service
 
     async def execute(self, owner_id: UUID, dto: CreateListingRequest):
-        validated_attributes = await self.attribute_validation.validate(
-            dto.subcategory_id, dto.attributes
-        )
+        validated_attributes = await self.attribute_validation.validate(dto.subcategory_id, dto.attributes)
 
         async with self.uow as uow:
             listing = Listing(
@@ -49,9 +47,7 @@ class CreateListingUseCase:
             await uow.listing.save(listing)
             await uow.commit()
 
-        await self.listing_search_service.index_listing(
-            listing=listing, attributes=listing.attributes
-        )
+        await self.listing_search_service.index_listing(listing=listing, attributes=listing.attributes)
 
         logger.info("Listing created | listing_id={} owner_id={}", listing.id, owner_id)
         return listing.id

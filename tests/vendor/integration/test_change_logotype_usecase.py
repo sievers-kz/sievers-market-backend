@@ -24,12 +24,8 @@ class TestChangeLogotypeUsecase:
         email = await create_user_usecase.execute(create_account_dto)
         account = await account_repository.get_account_by_email(email)
 
-        otp_code = await redis_service.get(
-            f"otp:{OTPType.CONFIRMATION.value}:{account.id}"
-        )
-        account_confirmation_dto = AccountConfirmation(
-            email=email, confirm_code=otp_code
-        )
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{account.id}")
+        account_confirmation_dto = AccountConfirmation(email=email, confirm_code=otp_code)
         await account_confirmation_usecase.execute(account_confirmation_dto)
 
         create_vendor_dto = create_vendor_request()

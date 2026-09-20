@@ -39,9 +39,7 @@ class VendorQueryService(QueryService):
                 Listing.currency,
                 Listing.updated_at,
                 City.name.label("city"),
-                cast(Listing.gallery[0]["media_id"].as_string(), PsqlUUID).label(
-                    "preview_image"
-                ),
+                cast(Listing.gallery[0]["media_id"].as_string(), PsqlUUID).label("preview_image"),
             )
             .select_from(Listing)
             .join(Subcategory, Listing.subcategory_id == Subcategory.id)
@@ -57,9 +55,7 @@ class VendorQueryService(QueryService):
             limit=limit,
         )
 
-    async def get_vendors_card(
-        self, page: int = 1, limit: int = 20
-    ) -> list[VendorCardResponse]:
+    async def get_vendors_card(self, page: int = 1, limit: int = 20) -> list[VendorCardResponse]:
         statement = select(
             Vendor.id.label("vendor_id"),
             Vendor.is_verified,

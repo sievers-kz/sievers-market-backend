@@ -62,9 +62,8 @@ class ColorSeed(DTO):
     hex: str
 
 
-class RegionSeed(DTO):
+class CitySeed(DTO):
     name: str
-    cities: list[str]
 
 
 class CountrySeed(DTO):

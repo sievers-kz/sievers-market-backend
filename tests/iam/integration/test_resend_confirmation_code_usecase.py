@@ -24,9 +24,7 @@ class TestResendConfirmationCodeUsecase:
         await create_user_usecase.execute(dto)
 
         user = await account_repository.get_account_by_email(dto.email)
-        await redis_service.delete(
-            f"otp:cooldown:{OTPType.CONFIRMATION.value}:{user.id}"
-        )
+        await redis_service.delete(f"otp:cooldown:{OTPType.CONFIRMATION.value}:{user.id}")
 
         resend_dto = ResendCodeRequest(email=dto.email)
         await resend_confirmation_code_usecase.execute(resend_dto)

@@ -9,9 +9,7 @@ from src.core.shared.infrastructure.base_model import BaseModel
 class Customer(BaseModel):
     __tablename__ = "customers"
 
-    account_id: Mapped[UUID] = mapped_column(
-        ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False, unique=True
-    )
+    account_id: Mapped[UUID] = mapped_column(ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False, unique=True)
 
     last_name: Mapped[str] = mapped_column(String(50), nullable=False)
 
@@ -19,6 +17,4 @@ class Customer(BaseModel):
 
     patronymic: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
-    avatar_url: Mapped[str | None] = mapped_column(
-        Text, nullable=True, server_default="default_avatar.png"
-    )
+    avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True, server_default="default_avatar.png")

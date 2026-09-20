@@ -11,9 +11,7 @@ from src.core.iam.domain.entities import Account
 from src.core.iam.domain.value_objects import Email, HashedPassword
 
 
-def create_domain_admin(
-    account_id: UUID | None = None, role: AdminRoles = AdminRoles.SUPER_ADMIN
-) -> Admin:
+def create_domain_admin(account_id: UUID | None = None, role: AdminRoles = AdminRoles.SUPER_ADMIN) -> Admin:
     return Admin(
         id=uuid.uuid4(),
         account_id=account_id or uuid.uuid4(),
@@ -59,9 +57,7 @@ async def prepared_account(account_repository):
 async def permission_seed(permission_repository):
     async def _get(code: str = "grant:permission"):
         permission = await permission_repository.get_by_code(code)
-        assert (
-            permission is not None
-        ), f"Permission '{code}' not found - проверь permissions.yml/seed"
+        assert permission is not None, f"Permission '{code}' not found - проверь permissions.yml/seed"
         return permission
 
     return _get

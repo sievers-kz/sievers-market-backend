@@ -13,9 +13,7 @@ class MediaContainer(containers.DeclarativeContainer):
 
     uow = providers.Factory(MediaUnitOfWork, session_factory=session_factory)
 
-    minio_service = providers.Factory(
-        MinioService, bucket_name=minio_config.bucket_name, client=minio_client
-    )
+    minio_service = providers.Factory(MinioService, bucket_name=minio_config.bucket_name, client=minio_client)
 
     media_service = providers.Factory(
         MediaService,

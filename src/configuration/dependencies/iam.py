@@ -50,12 +50,8 @@ class IAMContainer(containers.DeclarativeContainer):
         PyJWTTokenService,
         secret_key=auth_config.secret_key,
         algorithm=auth_config.algorithm,
-        access_token_lifetime=providers.Factory(
-            timedelta, minutes=auth_config.access_token_lifetime.as_int()
-        ),
-        refresh_token_lifetime=providers.Factory(
-            timedelta, days=auth_config.refresh_token_lifetime.as_int()
-        ),
+        access_token_lifetime=providers.Factory(timedelta, minutes=auth_config.access_token_lifetime.as_int()),
+        refresh_token_lifetime=providers.Factory(timedelta, days=auth_config.refresh_token_lifetime.as_int()),
     )
 
     otp_service = providers.Factory(

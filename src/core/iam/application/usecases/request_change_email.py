@@ -12,9 +12,7 @@ from src.core.shared.infrastructure.services.redis_service import RedisService
 
 
 class RequestEmailChangeUseCase:
-    def __init__(
-        self, uow: IAMUnitOfWork, otp_service: OTPService, cache_service: RedisService
-    ):
+    def __init__(self, uow: IAMUnitOfWork, otp_service: OTPService, cache_service: RedisService):
         self.uow = uow
         self.otp_service = otp_service
         self.cache_service = cache_service
@@ -30,10 +28,6 @@ class RequestEmailChangeUseCase:
                 )
                 raise AccountAlreadyExistsError()
 
-        await self.cache_service.set(
-            key=f"email_change:pending:{account_id}", value=email_vo.value, ttl=300
-        )
+        await self.cache_service.set(key=f"email_change:pending:{account_id}", value=email_vo.value, ttl=300)
 
-        await self.otp_service.send(
-            account_id=account_id, email=email_vo.value, otp_type=OTPType.CHANGE_EMAIL
-        )
+        await self.otp_service.send(account_id=account_id, email=email_vo.value, otp_type=OTPType.CHANGE_EMAIL)

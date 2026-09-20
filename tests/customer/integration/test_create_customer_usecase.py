@@ -22,9 +22,7 @@ class TestCreateCustomerUseCase:
         email = await create_user_usecase.execute(dto)
         account = await account_repository.get_account_by_email(email)
 
-        otp_code = await redis_service.get(
-            f"otp:{OTPType.CONFIRMATION.value}:{account.id}"
-        )
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{account.id}")
         confirmation_dto = AccountConfirmation(email=email, confirm_code=otp_code)
         await account_confirmation_usecase.execute(confirmation_dto)
 

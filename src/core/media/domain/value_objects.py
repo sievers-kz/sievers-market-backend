@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 
 from src.core.media.domain.exceptions import (
-    InvalidMediaSizeError,
-    MediaImageTooLargeError,
+    MediaSizeError,
 )
 
 
@@ -13,6 +12,6 @@ class MediaSize:
 
     def __post_init__(self):
         if self.value <= 0:
-            raise InvalidMediaSizeError()
+            raise MediaSizeError()
         if self.value > self.MAX_SIZE_BYTES:
-            raise MediaImageTooLargeError()
+            raise MediaSizeError()

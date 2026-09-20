@@ -37,9 +37,7 @@ class PyJWTTokenService:
             "exp": expires_at,
             "token_type": token_type.value,
         }
-        token_str = jwt.encode(
-            payload=payload, key=self._secret_key, algorithm=self._algorithm
-        )
+        token_str = jwt.encode(payload=payload, key=self._secret_key, algorithm=self._algorithm)
 
         return TokenData(type=token_type, value=token_str, expires_at=expires_at)
 

@@ -26,11 +26,9 @@ class TestListingRepository:
 
     @pytest.mark.asyncio
     @pytest.mark.integration
-    async def test_save_updates_existing_listing(
-        self, listing_repository, create_listing
-    ):
+    async def test_save_updates_existing_listing(self, listing_repository, create_listing):
         listing = create_listing
-        listing.change_price(9000000, listing.currency)
+        listing.change_price(listing.owner_id, 9000000, listing.currency)
         await listing_repository.save(listing)
 
         updated = await listing_repository.get_by_id(listing.id)
@@ -40,7 +38,7 @@ class TestListingRepository:
     @pytest.mark.integration
     async def test_save_updates_status(self, listing_repository, create_listing):
         listing = create_listing
-        listing.deactivate()
+        listing.deactivate(listing.owner_id)
         await listing_repository.save(listing)
 
         updated = await listing_repository.get_by_id(listing.id)

@@ -29,17 +29,13 @@ class ListingQueryService(QueryService):
         statement = (
             select(
                 Listing.id,
-                coalesce(Vendor.shop_name, Vendor.legal_name).label(
-                    "display_owner_name"
-                ),
+                coalesce(Vendor.shop_name, Vendor.legal_name).label("display_owner_name"),
                 Subcategory.name.label("subcategory"),
                 Listing.title,
                 Listing.price,
                 Listing.currency,
                 City.name.label("city"),
-                cast(Listing.gallery[0]["media_id"].as_string(), PsqlUUID).label(
-                    "preview_image"
-                ),
+                cast(Listing.gallery[0]["media_id"].as_string(), PsqlUUID).label("preview_image"),
             )
             .join(Vendor, Listing.owner_id == Vendor.id)
             .join(Subcategory, Listing.subcategory_id == Subcategory.id)
@@ -65,9 +61,7 @@ class ListingQueryService(QueryService):
             select(
                 Listing.id,
                 Listing.owner_id,
-                coalesce(Vendor.shop_name, Vendor.legal_name).label(
-                    "display_owner_name"
-                ),
+                coalesce(Vendor.shop_name, Vendor.legal_name).label("display_owner_name"),
                 Vendor.contact_phone,
                 Vendor.legal_address,
                 Vendor.logotype,

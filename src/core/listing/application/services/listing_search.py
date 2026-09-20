@@ -25,9 +25,7 @@ class ListingSearchService:
 
     async def index_listing(self, listing: Listing, attributes: dict) -> None:
         document = ListingSearchDocument.from_listing(listing, attributes)
-        await self.search_service.index_documents(
-            index_name=self.INDEX_NAME, documents=[document.model_dump()]
-        )
+        await self.search_service.index_documents(index_name=self.INDEX_NAME, documents=[document.model_dump()])
 
     async def remove_listing(self, listing_id: UUID) -> None:
         await self.search_service.delete_documents(

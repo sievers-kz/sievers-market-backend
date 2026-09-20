@@ -3,8 +3,7 @@ import uuid
 import pytest
 
 from src.core.listing.domain.exceptions import (
-    ListingGalleryEmptyError,
-    ListingGalleryTooManyImagesError,
+    ListingGallerySizeError,
     ListingLargeImageSizeError,
 )
 from src.core.listing.domain.value_objects import Gallery, Image
@@ -70,7 +69,7 @@ class TestGalleryValueObject:
 
     @pytest.mark.unit
     def test_gallery_empty_raises(self):
-        with pytest.raises(ListingGalleryEmptyError):
+        with pytest.raises(ListingGallerySizeError):
             Gallery(images=())
 
     @pytest.mark.unit
@@ -80,7 +79,7 @@ class TestGalleryValueObject:
 
     @pytest.mark.unit
     def test_gallery_too_many_images_raises(self):
-        with pytest.raises(ListingGalleryTooManyImagesError):
+        with pytest.raises(ListingGallerySizeError):
             Gallery(images=tuple(create_image() for _ in range(11)))
 
     @pytest.mark.unit

@@ -23,12 +23,8 @@ class AttributeDefinitionRepository:
         result = await self._session.execute(select(AttributeDefinition))
         return list(result.scalars().all())
 
-    async def create(
-        self, key: str, label: str, type, options: list, source: str
-    ) -> AttributeDefinition:
-        definition = AttributeDefinition(
-            key=key, label=label, type=type, options=options, source=source
-        )
+    async def create(self, key: str, label: str, type, options: list, source: str) -> AttributeDefinition:
+        definition = AttributeDefinition(key=key, label=label, type=type, options=options, source=source)
         self._session.add(definition)
         await self._session.commit()
         await self._session.refresh(definition)
@@ -84,9 +80,7 @@ class SubcategoryAttributeRepository:
     async def get_by_id(self, id: UUID) -> SubcategoryAttribute | None:
         return await self._session.get(SubcategoryAttribute, id)
 
-    async def get_with_definitions(
-        self, subcategory_id: UUID
-    ) -> list[SubcategoryAttribute]:
+    async def get_with_definitions(self, subcategory_id: UUID) -> list[SubcategoryAttribute]:
         statement = (
             select(SubcategoryAttribute)
             .where(SubcategoryAttribute.subcategory_id == subcategory_id)

@@ -12,9 +12,7 @@ async def catalog_query_service(container):
 
 
 @pytest_asyncio.fixture
-async def created_listing(
-    account_repository, vendor_repository, listing_repository, database_session
-):
+async def created_listing(account_repository, vendor_repository, listing_repository, database_session):
     account = create_domain_account(is_active=True)
     await account_repository.save(account)
 
@@ -22,20 +20,12 @@ async def created_listing(
     vendor.is_verified = True
     await vendor_repository.save(vendor)
 
-    city_id = (
-        await database_session.execute(
-            text("SELECT id FROM cities ORDER BY created_at LIMIT 1")
-        )
-    ).scalar_one()
+    city_id = (await database_session.execute(text("SELECT id FROM cities ORDER BY created_at LIMIT 1"))).scalar_one()
     category_id = (
-        await database_session.execute(
-            text("SELECT id FROM categories ORDER BY created_at LIMIT 1")
-        )
+        await database_session.execute(text("SELECT id FROM categories ORDER BY created_at LIMIT 1"))
     ).scalar_one()
     subcategory_id = (
-        await database_session.execute(
-            text("SELECT id FROM subcategories ORDER BY created_at LIMIT 1")
-        )
+        await database_session.execute(text("SELECT id FROM subcategories ORDER BY created_at LIMIT 1"))
     ).scalar_one()
 
     listing = create_domain_listing(

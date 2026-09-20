@@ -21,21 +21,15 @@ class TestForgotPasswordUsecase:
         await create_user_usecase.execute(dto)
 
         user = await account_repository.get_account_by_email(dto.email)
-        otp_code = await redis_service.get(
-            f"otp:{OTPType.CONFIRMATION.value}:{user.id}"
-        )
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user.id}")
 
-        confirmation_dto = AccountConfirmation(
-            email=user.email.value, confirm_code=otp_code
-        )
+        confirmation_dto = AccountConfirmation(email=user.email.value, confirm_code=otp_code)
         await account_confirmation_usecase.execute(confirmation_dto)
 
         forgot_password_data = ForgotPasswordData(email=dto.email)
         await forgot_password_usecase.execute(forgot_password_data)
 
-        user_after_forgot_request = await account_repository.get_account_by_email(
-            dto.email
-        )
+        user_after_forgot_request = await account_repository.get_account_by_email(dto.email)
         reset_password_otp_code = await redis_service.get(
             f"otp:{OTPType.PASSWORD_RESET.value}:{user_after_forgot_request.id}"
         )
@@ -44,9 +38,7 @@ class TestForgotPasswordUsecase:
 
     @pytest.mark.asyncio
     @pytest.mark.integration
-    async def test_does_not_reveal_non_existent_email(
-        self, forgot_password_usecase, redis_service
-    ):
+    async def test_does_not_reveal_non_existent_email(self, forgot_password_usecase, redis_service):
         fake_data = ForgotPasswordData(email="nonexistent@example.com")
         await forgot_password_usecase.execute(fake_data)
 
@@ -67,13 +59,9 @@ class TestForgotPasswordUsecase:
         await create_user_usecase.execute(dto)
 
         user = await account_repository.get_account_by_email(dto.email)
-        otp_code = await redis_service.get(
-            f"otp:{OTPType.CONFIRMATION.value}:{user.id}"
-        )
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user.id}")
 
-        confirmation_dto = AccountConfirmation(
-            email=user.email.value, confirm_code=otp_code
-        )
+        confirmation_dto = AccountConfirmation(email=user.email.value, confirm_code=otp_code)
         await account_confirmation_usecase.execute(confirmation_dto)
 
         forgot_password_data = ForgotPasswordData(email=dto.email)

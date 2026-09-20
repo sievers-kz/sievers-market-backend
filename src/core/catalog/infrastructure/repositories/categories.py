@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.catalog.infrastructure.enums import CatalogStatus
@@ -25,6 +25,10 @@ class RubricRepository:
         await self._session.refresh(rubric)
         return rubric
 
+    async def delete(self, rubric_id: UUID) -> None:
+        result = await self._session.execute(delete(Rubric).where(Rubric.id == rubric_id))
+        return result.rowcount > 0
+
     async def save(self, rubric: Rubric) -> None:
         self._session.add(rubric)
         await self._session.commit()
@@ -48,6 +52,10 @@ class CategoryRepository:
         await self._session.refresh(category)
         return category
 
+    async def delete(self, category_id: UUID) -> None:
+        result = await self._session.execute(delete(Category).where(Category.id == category_id))
+        return result.rowcount > 0
+
     async def save(self, category: Category) -> None:
         self._session.add(category)
         await self._session.commit()
@@ -65,13 +73,15 @@ class SubcategoryRepository:
         return list(result.scalars().all())
 
     async def create(self, category_id: UUID, name: str) -> Subcategory:
-        subcategory = Subcategory(
-            category_id=category_id, name=name, status=CatalogStatus.ACTIVE
-        )
+        subcategory = Subcategory(category_id=category_id, name=name, status=CatalogStatus.ACTIVE)
         self._session.add(subcategory)
         await self._session.commit()
         await self._session.refresh(subcategory)
         return subcategory
+
+    async def delete(self, subcategory_id: UUID) -> None:
+        result = await self._session.execute(delete(Subcategory).where(Subcategory.id == subcategory_id))
+        return result.rowcount > 0
 
     async def save(self, subcategory: Subcategory) -> None:
         self._session.add(subcategory)

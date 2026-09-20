@@ -1,87 +1,98 @@
 from src.core.shared.domain.exceptions import (
-    AlreadyExistsError,
+    ConflictError,
     NotFoundError,
     RulesError,
+    TooManyRequestsError,
     UnauthorizedError,
     ValidationError,
 )
 
 
 class AccountNotFoundError(NotFoundError):
-    def __init__(self):
-        super().__init__(message="Аккаунт не найден")
+    message = "Аккаунт не найден"
+    error_code = "account_not_found_error"
 
 
-class AccountAlreadyExistsError(AlreadyExistsError):
-    def __init__(self):
-        super().__init__(message="Такой аккаунт уже зарегистрирован")
+class AccountAlreadyExistsError(ConflictError):
+    message = "Такой аккаунт уже зарегистрирован"
+    error_code = "account_already_exists_error"
 
 
 class AccountNotConfirmedError(UnauthorizedError):
-    def __init__(self):
-        super().__init__(message="Аккаунт все еще не подтвержден")
+    message = "Аккаунт все еще не подтвержден"
+    error_code = "account_not_confirmed_error"
 
 
-class AccountAlreadyConfirmedError(RulesError):
-    def __init__(self):
-        super().__init__(message="Аккаунт уже был подтвержден")
+class AccountAlreadyConfirmedError(ConflictError):
+    message = "Аккаунт уже был подтвержден"
+    error_code = "account_already_confirmed_error"
 
 
-class OTPCooldownError(RulesError):
-    def __init__(self):
-        super().__init__(message="Подождите перед повторной отправкой кода")
+class OTPCooldownError(TooManyRequestsError):
+    message = "Подождите перед повторной отправкой кода"
+    error_code = "otp_cooldown_error"
 
 
 class InvalidOTPCodeError(RulesError):
-    def __init__(self):
-        super().__init__(message="Некорректный код подтверждения")
+    message = "Некорректный код подтверждения"
+    error_code = "invalid_otp_code_error"
 
 
 class InvalidLoginCredentialsError(UnauthorizedError):
-    def __init__(self):
-        super().__init__(message="Неправильный email или пароль")
+    message = "Неправильный email или пароль"
+    error_code = "invalid_login_credentials_error"
 
 
 class EmailChangeRequestNotFoundError(RulesError):
-    def __init__(self):
-        super().__init__(message="Запрос на смену email истек или не найден")
+    message = "Запрос на смену email истек или не найден"
+    error_code = "email_change_request_not_found_error"
 
 
 class PasswordMismatchError(RulesError):
-    def __init__(self):
-        super().__init__(message="Введенные вами пароли не совпадают")
+    message = "Введенные вами пароли не совпадают"
+    error_code = "password_mismatch_error"
 
 
 class EmailRequiredError(ValidationError):
-    def __init__(self):
-        super().__init__(message="Email обязателен")
+    message = "Email обязателен"
+    error_code = "email_required_error"
 
 
 class InvalidEmailFormatError(ValidationError):
-    def __init__(self):
-        super().__init__(message="Некорректный формат email")
+    message = "Некорректный формат email"
+    error_code = "invalid_email_format_error"
 
 
 class PasswordRequiredError(ValidationError):
-    def __init__(self):
-        super().__init__(message="Пароль обязателен")
+    message = "Пароль обязателен"
+    error_code = "password_required_error"
 
 
 class InvalidPasswordError(ValidationError):
-    def __init__(self, message: str = "Некорректный формат пароля"):
-        super().__init__(message=message)
+    message = "Некорректный формат пароля"
+    error_code = "invalid_password_error"
+
+
+class CompromisedPasswordError(RulesError):
+    message = "Пароль слишком распространен. Придумайте другой"
+    error_code = "compromised_password_error"
 
 
 class InvalidTokenTypeError(UnauthorizedError):
-    def __init__(self):
-        super().__init__("Неверный тип токена")
+    message = "Неверный тип токена"
+    error_code = "invalid_token_type_error"
 
 
 class TokenExpiredError(UnauthorizedError):
-    def __init__(self):
-        super().__init__("Сессия истекла, войдите снова")
+    message = "Сессия истекла. Войдите снова"
+    error_code = "token_expired_error"
 
 
 class InvalidTokenError(UnauthorizedError):
-    def __init__(self):
-        super().__init__("Недействительный токен")
+    message = "Недействительный токен"
+    error_code = "invalid_token_error"
+
+
+class RefreshTokenMissingError(UnauthorizedError):
+    message = "Рефреш-токен не найден в запросе"
+    error_code = "refresh_token_missing_error"

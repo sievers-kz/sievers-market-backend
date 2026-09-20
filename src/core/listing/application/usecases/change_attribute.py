@@ -11,25 +11,19 @@ from src.core.listing.presentation.dto import ChangeListingAttributeRequest
 
 
 class ChangeListingAttributeUseCase:
-    def __init__(
-        self, uow: ListingUnitOfWork, attribute_validation: AttributeValidationService
-    ):
+    def __init__(self, uow: ListingUnitOfWork, attribute_validation: AttributeValidationService):
         self.uow = uow
         self.attribute_validation = attribute_validation
 
-    async def execute(
-        self, vendor_id: UUID, listing_id: UUID, dto: ChangeListingAttributeRequest
-    ):
-        validated_attributes = await self.attribute_validation.validate(
-            dto.subcategory_id, dto.attributes
-        )
+    async def execute(self, vendor_id: UUID, listing_id: UUID, dto: ChangeListingAttributeRequest):
+        validated_attributes = await self.attribute_validation.validate(dto.subcategory_id, dto.attributes)
 
         async with self.uow as uow:
             listing = await uow.listing.get_by_id(listing_id)
             if not listing or listing.owner_id != vendor_id:
                 raise ListingNotFoundError()
 
-            listing.change_attributes(validated_attributes)
+            listing.change_attributes(vendor_id, validated_attributes)
             await uow.listing.save(listing)
             await uow.commit()
 
