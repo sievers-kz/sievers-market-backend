@@ -1,6 +1,6 @@
 [project]
 name = "sievers-market-backend"
-version = "1.0.0"
+version = "3.0.0"
 description = ""
 authors = [
     {name = "bissess",email = "bisenov2002@list.ru"}

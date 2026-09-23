@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from scalar_fastapi import Layout, Theme, get_scalar_api_reference
 from starlette.middleware.cors import CORSMiddleware
 
+from src import __version__
 from src.configuration.dependencies.container import ApplicationContainer
 from src.configuration.exception_handlers import setup_exception_handlers
 from src.configuration.logging import setup_logger
@@ -26,7 +27,7 @@ class ApplicationFactory:
 
         self.app = FastAPI(
             title="Sievers Market",
-            version="1.0.0",
+            version=__version__,
             lifespan=self._lifespan(),
         )
 
