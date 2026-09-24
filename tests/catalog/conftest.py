@@ -1,3 +1,4 @@
+import pytest
 import pytest_asyncio
 from sqlalchemy import text
 
@@ -6,9 +7,9 @@ from tests.listing.conftest import create_domain_listing
 from tests.vendor.conftest import create_domain_vendor
 
 
-@pytest_asyncio.fixture
-async def catalog_query_service(container):
-    return await container.catalog.query_service()
+@pytest.fixture
+def catalog_query_service(container):
+    return container.catalog.query_service()
 
 
 @pytest_asyncio.fixture

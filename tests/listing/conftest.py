@@ -73,9 +73,9 @@ async def create_listing_request(database_session):
     )
 
 
-@pytest_asyncio.fixture
-async def create_listing_usecase(container):
-    return await container.listing.create_listing_usecase()
+@pytest.fixture
+def create_listing_usecase(container):
+    return container.listing.create_listing_usecase()
 
 
 @pytest.fixture
@@ -113,14 +113,14 @@ def change_listing_description_usecase(container):
     return container.listing.change_listing_description_usecase()
 
 
-@pytest_asyncio.fixture
-async def change_listing_attribute_usecase(container):
-    return await container.listing.change_listing_attribute_usecase()
+@pytest.fixture
+def change_listing_attribute_usecase(container):
+    return container.listing.change_listing_attribute_usecase()
 
 
-@pytest_asyncio.fixture
-async def listing_repository(container):
-    return await container.listing.listing_repository()
+@pytest.fixture
+def listing_repository(container):
+    return container.listing.listing_repository()
 
 
 @pytest_asyncio.fixture

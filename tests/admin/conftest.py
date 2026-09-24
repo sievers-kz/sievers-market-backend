@@ -32,8 +32,8 @@ def create_admin_dto():
 
 
 @pytest.fixture
-async def admin_repository(container):
-    return await container.admin.admin_repository()
+def admin_repository(container):
+    return container.admin.admin_repository()
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -90,10 +90,10 @@ async def admin_seed(account_repository, admin_repository):
 
 
 @pytest.fixture
-async def admin_service(container):
-    return await container.admin.admin_service()
+def admin_service(container):
+    return container.admin.admin_service()
 
 
 @pytest.fixture
-async def permission_repository(container):
-    return await container.admin.permission_repository()
+def permission_repository(container):
+    return container.admin.permission_repository()

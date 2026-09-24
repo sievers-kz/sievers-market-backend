@@ -6,7 +6,7 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from scripts.bloom.load_bloom import load_bloom
-from src.configuration.database.connection import get_database_session
+from src.configuration.database.session import get_current_session
 from src.configuration.dependencies.resources import (
     init_engine,
     init_meilisearch,
@@ -27,11 +27,7 @@ class GatewaysContainer(containers.DeclarativeContainer):
         async_sessionmaker, bind=async_engine, expire_on_commit=False, autoflush=False
     )
 
-    database_session = providers.Resource(
-        # TODO: fix database_session provider from Resource to Factory
-        get_database_session,
-        session_factory=session_factory,
-    )
+    database_session = providers.Callable(get_current_session)
 
     redis_client = providers.Singleton(
         Redis,
