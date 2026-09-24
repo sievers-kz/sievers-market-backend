@@ -69,9 +69,9 @@ def restore_vendor_usecase(container):
     return container.vendor.restore_vendor_usecase()
 
 
-@pytest_asyncio.fixture
-async def vendor_repository(container):
-    return await container.vendor.vendor_repository()
+@pytest.fixture
+def vendor_repository(container):
+    return container.vendor.vendor_repository()
 
 
 def create_domain_vendor(account_id=None) -> Vendor:

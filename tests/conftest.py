@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from scripts.seeds.seed import DataSeeder
 from src.configuration.database.connection import Base
+from src.configuration.database.session import _session_ctx
 from src.configuration.dependencies.container import ApplicationContainer
 from src.configuration.settings.settings import ApplicationSettings
 from src.core.shared.infrastructure.services.meilisearch_service import (
@@ -74,12 +75,6 @@ async def session_factory(test_engine):
         await transaction.rollback()
 
 
-@pytest_asyncio.fixture
-async def database_session(session_factory):
-    async with session_factory() as session:
-        yield session
-
-
 @pytest.fixture(scope="function")
 def mock_bloom():
     bloom = MagicMock()
@@ -100,8 +95,18 @@ def mock_search_service(container):
         yield mock
 
 
+@pytest_asyncio.fixture(scope="function", autouse=True)
+async def database_session(session_factory):
+    async with session_factory() as session:
+        token = _session_ctx.set(session)
+        try:
+            yield session
+        finally:
+            _session_ctx.reset(token)
+
+
 @pytest_asyncio.fixture(scope="function")
-async def container(session_factory, test_settings, mock_bloom):
+async def container(session_factory, test_settings, mock_bloom, database_session):
     container = ApplicationContainer()
     container.configurations.configuration.from_pydantic(test_settings)
     container.gateways.session_factory.override(session_factory)

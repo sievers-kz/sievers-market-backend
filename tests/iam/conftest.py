@@ -103,8 +103,8 @@ def change_password_usecase(container):
 
 
 @pytest.fixture
-async def account_repository(container):
-    return await container.iam.account_repository()
+def account_repository(container):
+    return container.iam.account_repository()
 
 
 @pytest.fixture

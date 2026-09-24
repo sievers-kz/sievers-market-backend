@@ -1,10 +1,11 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from scalar_fastapi import Layout, Theme, get_scalar_api_reference
 from starlette.middleware.cors import CORSMiddleware
 
 from src import __version__
+from src.configuration.database.session import provide_database_session
 from src.configuration.dependencies.container import ApplicationContainer
 from src.configuration.exception_handlers import setup_exception_handlers
 from src.configuration.logging import setup_logger
@@ -29,6 +30,7 @@ class ApplicationFactory:
             title="Sievers Market",
             version=__version__,
             lifespan=self._lifespan(),
+            dependencies=[Depends(provide_database_session)],
         )
 
         setup_exception_handlers(self.app)
@@ -57,6 +59,7 @@ class ApplicationFactory:
                 "src.core.media.presentation.routers",
                 "src.core.listing.presentation.routers",
                 "src.core.admin.presentation.router",
+                "src.configuration.database.session",
             ],
             packages=[
                 "src.core.catalog.presentation.routers",
