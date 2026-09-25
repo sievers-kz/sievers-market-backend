@@ -8,8 +8,8 @@ from src.core.iam.domain.exceptions import RefreshTokenMissingError
 from src.core.iam.presentation.dependencies import (
     AccountConfirmationUseCaseDependency,
     APISessionServiceDependency,
-    ChangePasswordUseCaseDependency,
     ConfirmEmailChangeUseCaseDependency,
+    ConfirmPassworChangeUseCaseDependency,
     CreateAccountUseCaseDependency,
     ForgotPasswordUseCaseDependency,
     GetMeQueryServiceDependency,
@@ -17,13 +17,14 @@ from src.core.iam.presentation.dependencies import (
     LogoutUserUseCaseDependency,
     RefreshTokenUseCaseDependency,
     RequestEmailChangeUseCaseDependency,
+    RequestPasswordChangeUseCaseDependency,
     ResendConfirmationCodeUseCaseDependency,
     ResetPasswordUseCaseDependency,
 )
 from src.core.iam.presentation.documentation import (
-    CHANGE_PASSWORD_DOC,
     CONFIRM_ACCOUNT_DOC,
     CONFIRM_EMAIL_CHANGE_DOC,
+    CONFIRM_PASSWORD_CHANGE_DOC,
     CREATE_NEW_USER_DOC,
     GET_ME_DOC,
     LOGIN_USER_DOC,
@@ -31,20 +32,22 @@ from src.core.iam.presentation.documentation import (
     REFRESH_TOKEN_DOC,
     REQUEST_EMAIL_CHANGE_DOC,
     REQUEST_FORGOT_PASSWORD_DOC,
+    REQUEST_PASSWORD_CHANGE_DOC,
     RESEND_CONFIRMATION_CODE_DOC,
     RESET_USER_PASSWORD_DOC,
 )
 from src.core.iam.presentation.dto import (
     AccountConfirmation,
     ChangeEmailRequest,
-    ChangePasswordData,
     ConfirmEmailChangeRequest,
+    ConfirmPasswordChange,
     CreateAccountRequest,
     ForgotPasswordData,
     LoginAccount,
     LoginResponse,
     MeResponse,
     RefreshData,
+    RequestPasswordChange,
     ResendCodeRequest,
     ResetPasswordData,
 )
@@ -233,25 +236,41 @@ async def reset_user_password(
     return {"message": "Пароль успешно изменён! Пожалуйста, " "войдите систему с новым паролем."}
 
 
-@iam.post(
-    "/password/change",
-    operation_id=CHANGE_PASSWORD_DOC.operation_id,
-    summary=CHANGE_PASSWORD_DOC.summary,
-    responses=CHANGE_PASSWORD_DOC.responses_doc,
-    description=CHANGE_PASSWORD_DOC.description,
+@iam.patch(
+    "/password/change/request",
+    operation_id=REQUEST_PASSWORD_CHANGE_DOC.operation_id,
+    summary=REQUEST_PASSWORD_CHANGE_DOC.summary,
+    responses=REQUEST_PASSWORD_CHANGE_DOC.responses_doc,
+    description=REQUEST_PASSWORD_CHANGE_DOC.description,
 )
 @inject
-async def change_password(
-    respone: Response,
-    dto: ChangePasswordData,
-    usecase: ChangePasswordUseCaseDependency,
+async def request_password_change(
+    dto: RequestPasswordChange,
+    usecase: RequestPasswordChangeUseCaseDependency,
+    current_user: CurrentUser = Security(get_current_user),
+):
+    await usecase.execute(current_user.id, dto)
+    return {"message": "Мы отправили на вашу почту код-подтверждения. Подтвердите изменение пароля"}
+
+
+@iam.patch(
+    "/password/change/confirm",
+    operation_id=CONFIRM_PASSWORD_CHANGE_DOC.operation_id,
+    summary=CONFIRM_PASSWORD_CHANGE_DOC.summary,
+    responses=CONFIRM_PASSWORD_CHANGE_DOC.responses_doc,
+    description=CONFIRM_PASSWORD_CHANGE_DOC.description,
+)
+@inject
+async def confirm_password_change(
+    response: Response,
+    dto: ConfirmPasswordChange,
+    usecase: ConfirmPassworChangeUseCaseDependency,
     api_session_service: APISessionServiceDependency,
     current_user: CurrentUser = Security(get_current_user),
 ):
     await usecase.execute(current_user.id, dto)
-    api_session_service.clear_session(respone)
-
-    return {"message": "Пароль успешно изменён! Пожалуйста, " "войдите систему с новым паролем."}
+    api_session_service.clear_session(response)
+    return {"message": "Пароль успешно изменен! Пожалуйста, войдите в аккаунт повторно"}
 
 
 @iam.patch(

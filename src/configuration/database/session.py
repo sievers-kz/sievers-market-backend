@@ -3,6 +3,7 @@ from typing import AsyncGenerator
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import Depends
+from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 _session_ctx: ContextVar[AsyncSession] = ContextVar("database_session")
@@ -24,4 +25,7 @@ async def provide_database_session(
         try:
             yield
         finally:
-            _session_ctx.reset(token)
+            try:
+                _session_ctx.reset(token)
+            except ValueError:
+                logger.debug("Запрос отменен клиентом, контекст изменен. Пропускаем reset.")

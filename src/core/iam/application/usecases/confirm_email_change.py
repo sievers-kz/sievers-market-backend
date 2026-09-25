@@ -5,7 +5,6 @@ from loguru import logger
 from src.core.iam.application.services.otp import OTPService
 from src.core.iam.domain.enums import OTPType
 from src.core.iam.domain.exceptions import (
-    AccountNotFoundError,
     EmailChangeRequestNotFoundError,
 )
 from src.core.iam.domain.value_objects import Email
@@ -29,10 +28,8 @@ class ConfirmEmailChangeUseCase:
 
         async with self.uow as uow:
             account = await uow.account.get_account_by_id(account_id)
-            if not account:
-                raise AccountNotFoundError()
-
             account.change_email(Email(pending_email))
+
             await uow.account.save(account)
             await uow.commit()
 

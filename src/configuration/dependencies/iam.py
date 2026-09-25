@@ -5,7 +5,6 @@ from dependency_injector import containers, providers
 from src.core.iam.application.services.otp import OTPService
 from src.core.iam.application.usecases import (
     AccountConfirmationUseCase,
-    ChangePasswordUseCase,
     ConfirmEmailChangeUseCase,
     CreateAccountUseCase,
     ForgotPasswordUseCase,
@@ -16,6 +15,8 @@ from src.core.iam.application.usecases import (
     ResendConfirmationCodeUseCase,
     ResetPasswordUseCase,
 )
+from src.core.iam.application.usecases.confirm_password_change import ConfirmPasswordChangeUseCase
+from src.core.iam.application.usecases.request_password_change import RequestPasswordChangeUseCase
 from src.core.iam.infrastructure.repository import AccountRepository
 from src.core.iam.infrastructure.services.password_service import PasswordService
 from src.core.iam.infrastructure.services.pyjwt_token import PyJWTTokenService
@@ -111,10 +112,19 @@ class IAMContainer(containers.DeclarativeContainer):
         otp_service=otp_service,
     )
 
-    change_password_usecase = providers.Factory(
-        ChangePasswordUseCase,
+    request_password_change_usecase = providers.Factory(
+        RequestPasswordChangeUseCase,
         uow=uow,
         password_service=password_service,
+        otp_service=otp_service,
+        cache_service=redis_service,
+    )
+
+    confirm_password_change_usecase = providers.Factory(
+        ConfirmPasswordChangeUseCase,
+        uow=uow,
+        otp_service=otp_service,
+        cache_service=redis_service,
     )
 
     request_email_change_usecase = providers.Factory(
