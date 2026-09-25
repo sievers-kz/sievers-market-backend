@@ -133,11 +133,29 @@ RESET_USER_PASSWORD_DOC = RouteDocs(
     ),
 )
 
-CHANGE_PASSWORD_DOC = RouteDocs(
-    operation_id="changePassword",
-    summary="Смена пароля",
+REQUEST_PASSWORD_CHANGE_DOC = RouteDocs(
+    operation_id="requestPasswordChange",
+    summary="Запрос на смену пароля",
     description="""
-        Меняет пароль аутентифицированного пользователя. Требует ввода текущего пароля.
+        Инициирует запрос на изменение пароля: отправляет код подтверждения на почту пользователя.
+        Пароль не меняется до подтверждения действия.
+    """,
+    responses=(
+        InvalidTokenError,
+        InvalidTokenTypeError,
+        TokenExpiredError,
+        PasswordRequiredError,
+        InvalidPasswordError,
+        CompromisedPasswordError,
+        PasswordMismatchError,
+    ),
+)
+
+CONFIRM_PASSWORD_CHANGE_DOC = RouteDocs(
+    operation_id="confirmPasswordChange",
+    summary="Подтверждение смены пароля",
+    description="""
+        Подтверждает изменение пароля одноразовым кодом, отправленным на почту пользователя.
     """,
     responses=(
         InvalidTokenError,

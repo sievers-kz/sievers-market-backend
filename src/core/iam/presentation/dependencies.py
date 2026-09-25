@@ -6,14 +6,15 @@ from fastapi import Depends
 from src.configuration.dependencies.container import ApplicationContainer
 from src.core.iam.application.usecases import (
     AccountConfirmationUseCase,
-    ChangePasswordUseCase,
     ConfirmEmailChangeUseCase,
+    ConfirmPasswordChangeUseCase,
     CreateAccountUseCase,
     ForgotPasswordUseCase,
     LoginUserUseCase,
     LogoutUserUseCase,
     RefreshTokenUseCase,
     RequestEmailChangeUseCase,
+    RequestPasswordChangeUseCase,
     ResendConfirmationCodeUseCase,
     ResetPasswordUseCase,
 )
@@ -66,9 +67,13 @@ ResetPasswordUseCaseDependency = Annotated[
     Depends(Provide[ApplicationContainer.iam.reset_password_usecase]),
 ]
 
-ChangePasswordUseCaseDependency = Annotated[
-    ChangePasswordUseCase,
-    Depends(Provide[ApplicationContainer.iam.change_password_usecase]),
+RequestPasswordChangeUseCaseDependency = Annotated[
+    RequestPasswordChangeUseCase,
+    Depends(Provide[ApplicationContainer.iam.request_password_change_usecase]),
+]
+
+ConfirmPassworChangeUseCaseDependency = Annotated[
+    ConfirmPasswordChangeUseCase, Depends(Provide[ApplicationContainer.iam.confirm_password_change_usecase])
 ]
 
 RequestEmailChangeUseCaseDependency = Annotated[

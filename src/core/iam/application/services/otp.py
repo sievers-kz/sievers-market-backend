@@ -15,6 +15,7 @@ class OTPService:
         OTPType.CONFIRMATION: TaskNames.SEND_OTP_EMAIL,
         OTPType.PASSWORD_RESET: TaskNames.SEND_OTP_PASSWORD_RESET,
         OTPType.CHANGE_EMAIL: TaskNames.SEND_OTP_CHANGE_EMAIL,
+        OTPType.CHANGE_PASSWORD: TaskNames.SEND_OTP_CHANGE_PASSWORD,
     }
 
     def __init__(self, cache: RedisService, queue: ArqService):

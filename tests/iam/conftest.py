@@ -98,11 +98,6 @@ def reset_password_usecase(container):
 
 
 @pytest.fixture
-def change_password_usecase(container):
-    return container.iam.change_password_usecase()
-
-
-@pytest.fixture
 def account_repository(container):
     return container.iam.account_repository()
 
@@ -110,3 +105,13 @@ def account_repository(container):
 @pytest.fixture
 def redis_service(container):
     return container.shared.redis_service()
+
+
+@pytest.fixture
+def request_password_change_usecase(container):
+    return container.iam.request_password_change_usecase()
+
+
+@pytest.fixture
+def confirm_password_change_usecase(container):
+    return container.iam.confirm_password_change_usecase()

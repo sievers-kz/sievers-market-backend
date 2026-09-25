@@ -48,6 +48,11 @@ class EmailChangeRequestNotFoundError(RulesError):
     error_code = "email_change_request_not_found_error"
 
 
+class PasswordChangeRequestNotFoundError(RulesError):
+    message = "Запрос на смену пароля истек или не найден"
+    error_code = "password_change_request_not_found_error"
+
+
 class PasswordMismatchError(RulesError):
     message = "Введенные вами пароли не совпадают"
     error_code = "password_mismatch_error"

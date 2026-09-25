@@ -66,6 +66,15 @@ class ChangePasswordData(BaseModel):
     new_password: str
 
 
+class RequestPasswordChange(BaseModel):
+    raw_password: str
+    new_password: str
+
+
+class ConfirmPasswordChange(BaseModel):
+    otp_code: str
+
+
 class TokenData(BaseModel):
     type: TokenType
     value: str
