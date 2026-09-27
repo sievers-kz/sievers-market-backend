@@ -24,7 +24,7 @@ from src.core.catalog.presentation.dto.attributes import (
 )
 from src.core.shared.presentation.security import require_admin
 
-attributes_router = APIRouter(tags=["Catalog Configuration"])
+attributes_router = APIRouter()
 
 
 # =============================================================================

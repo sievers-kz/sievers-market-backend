@@ -17,7 +17,7 @@ from src.core.catalog.presentation.dto.catalog import (
 from src.core.catalog.presentation.routers.attributes import attributes_router
 from src.core.catalog.presentation.routers.categories import categories_router
 
-catalog_router = APIRouter(prefix="/api/v1/catalog")
+catalog_router = APIRouter(prefix="/api/v1/catalog", tags=["Catalog"])
 catalog_router.include_router(categories_router)
 catalog_router.include_router(attributes_router)
 

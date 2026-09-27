@@ -40,7 +40,7 @@ from src.core.catalog.presentation.dto.subcategory import (
 )
 from src.core.shared.presentation.security import require_admin
 
-categories_router = APIRouter(tags=["Catalog Categories"])
+categories_router = APIRouter()
 
 
 # =============================================================================
