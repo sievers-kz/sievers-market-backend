@@ -27,7 +27,7 @@ class ApplicationFactory:
         self.container.gateways.sentry.init()
 
         self.app = FastAPI(
-            title="Sievers Market",
+            title="Sievers Market API",
             version=__version__,
             lifespan=self._lifespan(),
             dependencies=[Depends(provide_database_session)],
@@ -90,8 +90,9 @@ class ApplicationFactory:
             return get_scalar_api_reference(
                 openapi_url=self.app.openapi_url,
                 title=self.app.title,
-                theme=Theme.MARS,
-                layout=Layout.MODERN,
+                theme=Theme.BLUE_PLANET,
+                layout=Layout.CLASSIC,
+                show_sidebar=True,
             )
 
     def _setup_cors(self):
