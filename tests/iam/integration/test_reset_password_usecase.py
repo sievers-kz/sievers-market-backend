@@ -27,16 +27,10 @@ class TestResetPasswordUsecase:
         dto = create_user_request()
         await create_user_usecase.execute(dto)
 
-        user_after_registration = await account_repository.get_account_by_email(
-            dto.email
-        )
-        otp_code = await redis_service.get(
-            f"otp:{OTPType.CONFIRMATION.value}:{user_after_registration.id}"
-        )
+        user_after_registration = await account_repository.get_account_by_email(dto.email)
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{user_after_registration.id}")
 
-        confirmation_dto = AccountConfirmation(
-            email=user_after_registration.email.value, confirm_code=otp_code
-        )
+        confirmation_dto = AccountConfirmation(email=user_after_registration.email.value, confirm_code=otp_code)
         await account_confirmation_usecase.execute(confirmation_dto)
 
         login_dto = LoginAccount(email=dto.email, raw_password=dto.raw_password)
@@ -46,9 +40,7 @@ class TestResetPasswordUsecase:
         await forgot_password_usecase.execute(forgot_password_data)
 
         user = await account_repository.get_account_by_email(dto.email)
-        password_reset_otp_code = await redis_service.get(
-            f"otp:{OTPType.PASSWORD_RESET.value}:{user.id}"
-        )
+        password_reset_otp_code = await redis_service.get(f"otp:{OTPType.PASSWORD_RESET.value}:{user.id}")
 
         reset_password_data = ResetPasswordData(
             email=dto.email,
@@ -57,19 +49,11 @@ class TestResetPasswordUsecase:
         )
         await reset_password_usecase.execute(reset_password_data)
 
-        otp_after_reset = await redis_service.get(
-            f"otp:{OTPType.PASSWORD_RESET.value}:{user.id}"
-        )
+        otp_after_reset = await redis_service.get(f"otp:{OTPType.PASSWORD_RESET.value}:{user.id}")
         assert otp_after_reset is None
 
-        user_after_reset_password = await account_repository.get_account_by_email(
-            dto.email
-        )
-        refresh_tokens = [
-            token
-            for token in user_after_reset_password.tokens
-            if token.type == TokenType.REFRESH
-        ]
+        user_after_reset_password = await account_repository.get_account_by_email(dto.email)
+        refresh_tokens = [token for token in user_after_reset_password.tokens if token.type == TokenType.REFRESH]
 
         for token in refresh_tokens:
             assert token.is_revoked is True
@@ -95,9 +79,7 @@ class TestResetPasswordUsecase:
         forgot_password_data = ForgotPasswordData(email=dto.email)
         await forgot_password_usecase.execute(forgot_password_data)
 
-        otp_code = await redis_service.get(
-            f"otp:{OTPType.PASSWORD_RESET.value}:{user.id}"
-        )
+        otp_code = await redis_service.get(f"otp:{OTPType.PASSWORD_RESET.value}:{user.id}")
         reset_password_data = ResetPasswordData(
             email=dto.email, raw_password="supersecret", password_reset_otp=otp_code
         )

@@ -45,15 +45,9 @@ def create_domain_listing(
 
 @pytest_asyncio.fixture
 async def create_listing_request(database_session):
-    city_id = (
-        await database_session.execute(text("SELECT id FROM cities LIMIT 1"))
-    ).scalar_one()
-    category_id = (
-        await database_session.execute(text("SELECT id FROM categories LIMIT 1"))
-    ).scalar_one()
-    subcategory_id = (
-        await database_session.execute(text("SELECT id FROM subcategories LIMIT 1"))
-    ).scalar_one()
+    city_id = (await database_session.execute(text("SELECT id FROM cities LIMIT 1"))).scalar_one()
+    category_id = (await database_session.execute(text("SELECT id FROM categories LIMIT 1"))).scalar_one()
+    subcategory_id = (await database_session.execute(text("SELECT id FROM subcategories LIMIT 1"))).scalar_one()
 
     return CreateListingRequest(
         category_id=category_id,
@@ -79,9 +73,9 @@ async def create_listing_request(database_session):
     )
 
 
-@pytest_asyncio.fixture
-async def create_listing_usecase(container):
-    return await container.listing.create_listing_usecase()
+@pytest.fixture
+def create_listing_usecase(container):
+    return container.listing.create_listing_usecase()
 
 
 @pytest.fixture
@@ -119,20 +113,18 @@ def change_listing_description_usecase(container):
     return container.listing.change_listing_description_usecase()
 
 
-@pytest_asyncio.fixture
-async def change_listing_attribute_usecase(container):
-    return await container.listing.change_listing_attribute_usecase()
+@pytest.fixture
+def change_listing_attribute_usecase(container):
+    return container.listing.change_listing_attribute_usecase()
+
+
+@pytest.fixture
+def listing_repository(container):
+    return container.listing.listing_repository()
 
 
 @pytest_asyncio.fixture
-async def listing_repository(container):
-    return await container.listing.listing_repository()
-
-
-@pytest_asyncio.fixture
-async def create_listing(
-    listing_repository, account_repository, vendor_repository, database_session
-):
+async def create_listing(listing_repository, account_repository, vendor_repository, database_session):
     account = create_domain_account(is_active=True)
     await account_repository.save(account)
 
@@ -141,15 +133,9 @@ async def create_listing(
 
     from sqlalchemy import text
 
-    city_id = (
-        await database_session.execute(text("SELECT id FROM cities LIMIT 1"))
-    ).scalar_one()
-    category_id = (
-        await database_session.execute(text("SELECT id FROM categories LIMIT 1"))
-    ).scalar_one()
-    subcategory_id = (
-        await database_session.execute(text("SELECT id FROM subcategories LIMIT 1"))
-    ).scalar_one()
+    city_id = (await database_session.execute(text("SELECT id FROM cities LIMIT 1"))).scalar_one()
+    category_id = (await database_session.execute(text("SELECT id FROM categories LIMIT 1"))).scalar_one()
+    subcategory_id = (await database_session.execute(text("SELECT id FROM subcategories LIMIT 1"))).scalar_one()
 
     listing = create_domain_listing(
         owner_id=vendor.id,

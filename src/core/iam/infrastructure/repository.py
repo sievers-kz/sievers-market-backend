@@ -22,11 +22,7 @@ class AccountRepository:
         await self._session.flush()
 
     async def get_account_by_id(self, account_id: UUID) -> DomainAccount:
-        statement = (
-            select(self._model)
-            .options(selectinload(self._model.tokens))
-            .where(self._model.id == account_id)
-        )
+        statement = select(self._model).options(selectinload(self._model.tokens)).where(self._model.id == account_id)
 
         query_result = await self._session.execute(statement)
         orm_model = query_result.unique().scalar_one_or_none()
@@ -53,11 +49,7 @@ class AccountRepository:
         return AccountMapper.to_domain(orm_model)
 
     async def get_account_by_email(self, email: str) -> DomainAccount:
-        statement = (
-            select(self._model)
-            .options(selectinload(self._model.tokens))
-            .where(self._model.email == email)
-        )
+        statement = select(self._model).options(selectinload(self._model.tokens)).where(self._model.email == email)
 
         query_result = await self._session.execute(statement)
         orm_model = query_result.unique().scalar_one_or_none()

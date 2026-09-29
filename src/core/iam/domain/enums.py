@@ -28,3 +28,4 @@ class OTPType(str, enum.Enum):
     PASSWORD_RESET = "password_reset"
     CHANGE_EMAIL = "change_email"
     CHANGE_PHONE = "change_phone"
+    CHANGE_PASSWORD = "change_password"

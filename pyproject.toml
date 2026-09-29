@@ -1,6 +1,6 @@
 [project]
 name = "sievers-market-backend"
-version = "1.0.0"
+version = "3.0.0"
 description = ""
 authors = [
     {name = "bissess",email = "bisenov2002@list.ru"}
@@ -56,3 +56,11 @@ cloc = "^0.2.5"
 
 [tool.poetry]
 package-mode = false
+
+[tool.black]
+line-length = 120
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
+line_length = 120

@@ -35,9 +35,7 @@ class MockTaxpayerGateway(ITaxpayerGateway):
             },
         }
 
-    async def fetch(
-        self, tax_id: str, legal_form: LegalForm = LegalForm.LLP
-    ) -> Optional[TaxpayerResponse]:
+    async def fetch(self, tax_id: str, legal_form: LegalForm = LegalForm.LLP) -> Optional[TaxpayerResponse]:
         taxpayer = self._taxpayers_database.get(tax_id)
         if not taxpayer or taxpayer["type"] != KGD_TAXPAYER_TYPE_MAP[legal_form]:
             return None
@@ -51,16 +49,12 @@ class MockTaxpayerGateway(ITaxpayerGateway):
 
 
 class KGDTaxpayerGateway(ITaxpayerGateway):
-    TAXPAYER_URL = (
-        "https://portal.kgd.gov.kz/services/isnaportalsync/public/taxpayer-data"
-    )
+    TAXPAYER_URL = "https://portal.kgd.gov.kz/services/isnaportalsync/public/taxpayer-data"
 
     def __init__(self, portal_token: str):
         self._portal_token = portal_token
 
-    async def fetch(
-        self, tax_id: str, legal_form: LegalForm
-    ) -> TaxpayerResponse | None:
+    async def fetch(self, tax_id: str, legal_form: LegalForm) -> TaxpayerResponse | None:
         params = {
             "taxpayerCode": tax_id,
             "taxpayerType": KGD_TAXPAYER_TYPE_MAP[legal_form],
@@ -78,9 +72,7 @@ class KGDTaxpayerGateway(ITaxpayerGateway):
                 data = response.json()
 
         except httpx.HTTPStatusError as exc:
-            logger.error(
-                "KGD HTTP error | status={} tax_id={}", exc.response.status_code, tax_id
-            )
+            logger.error("KGD HTTP error | status={} tax_id={}", exc.response.status_code, tax_id)
             return None
         except httpx.RequestError as exc:
             logger.error("KGD request error | tax_id={} error={}", tax_id, exc)
@@ -98,9 +90,7 @@ class KGDTaxpayerGateway(ITaxpayerGateway):
         if not legal_name:
             return None
 
-        is_liquidation = (
-            entry.get("endDate") is not None or entry.get("endReason") is not None
-        )
+        is_liquidation = entry.get("endDate") is not None or entry.get("endReason") is not None
 
         return TaxpayerResponse(
             tax_id=entry["code"],

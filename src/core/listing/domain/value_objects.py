@@ -3,8 +3,7 @@ from typing import Any
 from uuid import UUID
 
 from src.core.listing.domain.exceptions import (
-    ListingGalleryEmptyError,
-    ListingGalleryTooManyImagesError,
+    ListingGallerySizeError,
     ListingLargeImageSizeError,
 )
 
@@ -45,9 +44,13 @@ class Gallery:
 
     def __post_init__(self):
         if not self.images:
-            raise ListingGalleryEmptyError()
+            raise ListingGallerySizeError(count=self.count)
         if len(self.images) > 10:
-            raise ListingGalleryTooManyImagesError()
+            raise ListingGallerySizeError(count=self.count)
+
+    @property
+    def count(self):
+        return len(self.images)
 
     @classmethod
     def from_dicts(cls, data: list[dict[str, Any]]) -> "Gallery":

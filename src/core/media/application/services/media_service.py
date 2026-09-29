@@ -20,9 +20,7 @@ class MediaService:
         self.uow = uow
         self.storage = storage
 
-    async def generate_upload_url(
-        self, dto: GenerateUploadUrlRequest
-    ) -> list[UploadUrlResponse]:
+    async def generate_upload_url(self, dto: GenerateUploadUrlRequest) -> list[UploadUrlResponse]:
         response = []
 
         for file in dto.files:
@@ -40,9 +38,7 @@ class MediaService:
 
         return response
 
-    async def confirm_upload(
-        self, account_id: UUID, dto: ConfirmUploadRequest
-    ) -> list[ConfirmUploadResponse]:
+    async def confirm_upload(self, account_id: UUID, dto: ConfirmUploadRequest) -> list[ConfirmUploadResponse]:
         async with self.uow as uow:
             media_list = [
                 Media.create(

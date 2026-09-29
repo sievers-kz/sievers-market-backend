@@ -36,6 +36,6 @@ def change_customer_fullname_usecase(container):
     return container.customer.change_customer_fullname_usecase()
 
 
-@pytest_asyncio.fixture
-async def customer_repository(container):
-    return await container.customer.customer_repository()
+@pytest.fixture
+def customer_repository(container):
+    return container.customer.customer_repository()

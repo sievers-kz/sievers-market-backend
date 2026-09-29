@@ -13,10 +13,10 @@ from scripts.seeds.schemas import (
     AttributeDefinitionSeed,
     AttributeGroupSeed,
     BrandSeed,
+    CitySeed,
     ColorSeed,
     CountrySeed,
     PermissionSeed,
-    RegionSeed,
     RubricSeed,
     SubcategoryAttributesSeed,
     UnitSeed,
@@ -37,8 +37,7 @@ from src.core.references.infrastructure.models import (
     Brand,
     City,
     Color,
-    Country,
-    Region,
+    OriginCountry,
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -90,21 +89,17 @@ class DataSeeder:
             return
         countries = TypeAdapter(list[CountrySeed]).validate_python(raw_data)
         for dto in countries:
-            self.session.add(Country(name=dto.name))
+            self.session.add(OriginCountry(name=dto.name))
         logger.info("✅ Countries seeded")
 
     async def seed_locations(self):
         raw_data = self._load_yaml("references/locations.yaml")
         if not raw_data:
             return
-        regions = TypeAdapter(list[RegionSeed]).validate_python(raw_data)
-        for r_dto in regions:
-            region = Region(name=r_dto.name)
-            self.session.add(region)
-            await self.session.flush()
-            for city_name in r_dto.cities:
-                self.session.add(City(name=city_name, region_id=region.id))
-        logger.info("✅ Regions and Cities seeded")
+        cities = TypeAdapter(list[CitySeed]).validate_python(raw_data)
+        for city in cities:
+            self.session.add(City(name=city.name))
+        logger.info("✅ Cities successfully seeded")
 
     async def seed_attribute_groups(self) -> dict[str, UUID]:
         raw_data = self._load_yaml("attributes/groups.yaml")
@@ -136,9 +131,7 @@ class DataSeeder:
 
     async def seed_attribute_definitions(self) -> dict[str, UUID]:
         raw_data = self._load_yaml("attributes/definitions.yaml")
-        definitions = TypeAdapter(list[AttributeDefinitionSeed]).validate_python(
-            raw_data or []
-        )
+        definitions = TypeAdapter(list[AttributeDefinitionSeed]).validate_python(raw_data or [])
 
         key_to_id = {}
         for dto in definitions:
@@ -167,9 +160,7 @@ class DataSeeder:
             await self.session.flush()
 
             for c_dto in r_dto.categories:
-                category = Category(
-                    rubric_id=rubric.id, name=c_dto.name, status=CatalogStatus.ACTIVE
-                )
+                category = Category(rubric_id=rubric.id, name=c_dto.name, status=CatalogStatus.ACTIVE)
                 self.session.add(category)
                 await self.session.flush()
 
@@ -194,16 +185,12 @@ class DataSeeder:
         unit_key_to_id: dict[str, UUID],
     ):
         raw_data = self._load_yaml("attributes/links.yaml")
-        links_data = TypeAdapter(list[SubcategoryAttributesSeed]).validate_python(
-            raw_data or []
-        )
+        links_data = TypeAdapter(list[SubcategoryAttributesSeed]).validate_python(raw_data or [])
 
         for entry in links_data:
             subcategory_id = subcategory_name_to_id.get(entry.subcategory)
             if not subcategory_id:
-                logger.error(
-                    f"❌ Subcategory not found for attributes seed: {entry.subcategory}"
-                )
+                logger.error(f"❌ Subcategory not found for attributes seed: {entry.subcategory}")
                 continue
 
             for link_dto in entry.attributes:
@@ -281,9 +268,7 @@ class DataSeeder:
 async def main():
     db_settings = PostgresSettings()
     engine = create_async_engine(url=db_settings.database_url, echo=False)
-    session_factory = async_sessionmaker(
-        bind=engine, autoflush=False, expire_on_commit=False
-    )
+    session_factory = async_sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
     async with session_factory() as session:
         seeder = DataSeeder(session)

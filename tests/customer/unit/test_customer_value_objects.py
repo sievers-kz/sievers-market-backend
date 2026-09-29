@@ -10,9 +10,7 @@ from src.core.customer.domain.value_objects import Fullname
 class TestCustomerFullnameValueObject:
     @pytest.mark.unit
     def test_success_fullname_creation(self):
-        fullname = Fullname(
-            last_name="Testov", first_name="Test", patronymic="Testovich"
-        )
+        fullname = Fullname(last_name="Testov", first_name="Test", patronymic="Testovich")
         assert fullname.last_name == "Testov"
         assert fullname.patronymic is not None
 
@@ -24,6 +22,4 @@ class TestCustomerFullnameValueObject:
     @pytest.mark.unit
     def test_fullname_with_wrong_format(self):
         with pytest.raises(InvalidFullnameFormatError):
-            Fullname(
-                last_name="Testov123", first_name="Test321", patronymic="Testovich"
-            )
+            Fullname(last_name="Testov123", first_name="Test321", patronymic="Testovich")

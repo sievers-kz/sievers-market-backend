@@ -58,11 +58,7 @@ class CatalogQueryService(QueryService):
                     type=link.attribute.type,
                     required=link.required,
                     filterable=link.filterable,
-                    unit=(
-                        {"key": link.unit.key, "label": link.unit.label}
-                        if link.unit
-                        else None
-                    ),
+                    unit=({"key": link.unit.key, "label": link.unit.label} if link.unit else None),
                     options=link.attribute.options,
                     source=link.attribute.source,
                 )
@@ -94,11 +90,7 @@ class CatalogQueryService(QueryService):
                 type=link.attribute.type,
                 required=link.required,
                 filterable=link.filterable,
-                unit=(
-                    {"key": link.unit.key, "label": link.unit.label}
-                    if link.unit
-                    else None
-                ),
+                unit=({"key": link.unit.key, "label": link.unit.label} if link.unit else None),
                 options=link.attribute.options,
                 source=link.attribute.source,
             )
@@ -114,9 +106,7 @@ class CatalogQueryService(QueryService):
                 joinedload(Rubric.categories).options(
                     load_only(Category.id, Category.rubric_id, Category.name),
                     joinedload(Category.subcategories).options(
-                        load_only(
-                            Subcategory.id, Subcategory.category_id, Subcategory.name
-                        ),
+                        load_only(Subcategory.id, Subcategory.category_id, Subcategory.name),
                     ),
                 ),
             )

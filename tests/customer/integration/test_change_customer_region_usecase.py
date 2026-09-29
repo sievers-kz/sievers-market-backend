@@ -26,9 +26,7 @@ class TestChangeCustomerFullnameUseCase:
         email = await create_user_usecase.execute(dto)
         account = await account_repository.get_account_by_email(email)
 
-        otp_code = await redis_service.get(
-            f"otp:{OTPType.CONFIRMATION.value}:{account.id}"
-        )
+        otp_code = await redis_service.get(f"otp:{OTPType.CONFIRMATION.value}:{account.id}")
         confirmation_dto = AccountConfirmation(email=email, confirm_code=otp_code)
         await account_confirmation_usecase.execute(confirmation_dto)
 
@@ -39,9 +37,7 @@ class TestChangeCustomerFullnameUseCase:
         change_customer_fullname_dto = ChangeCustomerFullname(
             last_name="Bissenov", first_name="Meirzhan", patronymic="Basqaryly"
         )
-        await change_customer_fullname_usecase.execute(
-            customer.id, change_customer_fullname_dto
-        )
+        await change_customer_fullname_usecase.execute(customer.id, change_customer_fullname_dto)
 
         updated_customer = await customer_repository.get_by_id(customer.id)
         assert updated_customer.fullname.last_name == "Bissenov"

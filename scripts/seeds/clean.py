@@ -7,8 +7,7 @@ from src.core.references.infrastructure.models import (
     Brand,
     City,
     Color,
-    Country,
-    Region,
+    OriginCountry,
 )
 
 
@@ -18,7 +17,7 @@ async def clean_all():
     session_factory = async_sessionmaker(bind=engine, autoflush=False)
 
     async with session_factory() as session:
-        tables = [City, Region, Color, Brand, Country]
+        tables = [City, Color, Brand, OriginCountry]
 
         for table in tables:
             await session.execute(table.__table__.delete())

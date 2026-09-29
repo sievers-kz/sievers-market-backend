@@ -15,13 +15,9 @@ class TestCatalogQueryService:
 
     @pytest.mark.asyncio
     @pytest.mark.integration
-    async def test_get_subcategory_attributes_success(
-        self, catalog_query_service, database_session
-    ):
+    async def test_get_subcategory_attributes_success(self, catalog_query_service, database_session):
         subcategory_id = (
-            await database_session.execute(
-                text("SELECT id FROM subcategories ORDER BY created_at LIMIT 1")
-            )
+            await database_session.execute(text("SELECT id FROM subcategories ORDER BY created_at LIMIT 1"))
         ).scalar_one()
 
         result = await catalog_query_service.get_subcategory_attributes(subcategory_id)

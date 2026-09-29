@@ -53,9 +53,7 @@ def test_successful_grant_permission():
 
     super_admin.grant_permission(
         target=new_admin,
-        permission=Permission(
-            id=uuid.uuid4(), code="create:admin", description="Grant permission"
-        ),
+        permission=Permission(id=uuid.uuid4(), code="create:admin", description="Grant permission"),
     )
 
     new_admin_permissions = [p for p in new_admin.permissions]
@@ -70,9 +68,7 @@ def test_grant_permission_failure():
     with pytest.raises(InsufficientPermissionsError):
         admin.grant_permission(
             target=moderator,
-            permission=Permission(
-                id=uuid.uuid4(), code="create:admin", description="Grant permission"
-            ),
+            permission=Permission(id=uuid.uuid4(), code="create:admin", description="Grant permission"),
         )
 
     moderator_permissions = [p for p in moderator.permissions]
@@ -93,9 +89,7 @@ def test_moderator_can_execute_action():
 
     super_admin.grant_permission(
         target=moderator,
-        permission=Permission(
-            id=uuid.uuid4(), code="create:category", description="Granted permission"
-        ),
+        permission=Permission(id=uuid.uuid4(), code="create:category", description="Granted permission"),
     )
 
     has_access = moderator.can("create:category")
@@ -109,9 +103,7 @@ def test_moderator_cannot_execute_action():
 
     super_admin.grant_permission(
         target=moderator,
-        permission=Permission(
-            id=uuid.uuid4(), code="create:category", description="Granted permission"
-        ),
+        permission=Permission(id=uuid.uuid4(), code="create:category", description="Granted permission"),
     )
 
     has_access = moderator.can("verify:account")

@@ -22,25 +22,13 @@ class CatalogContainer(containers.DeclarativeContainer):
     database_session = providers.Dependency()
 
     rubric_repository = providers.Factory(RubricRepository, session=database_session)
-    category_repository = providers.Factory(
-        CategoryRepository, session=database_session
-    )
-    subcategory_repository = providers.Factory(
-        SubcategoryRepository, session=database_session
-    )
+    category_repository = providers.Factory(CategoryRepository, session=database_session)
+    subcategory_repository = providers.Factory(SubcategoryRepository, session=database_session)
 
-    attribute_definition_repository = providers.Factory(
-        AttributeDefinitionRepository, session=database_session
-    )
-    subcategory_attribute_repository = providers.Factory(
-        SubcategoryAttributeRepository, session=database_session
-    )
-    attribute_group_repository = providers.Factory(
-        AttributeGroupRepository, session=database_session
-    )
-    unit_of_measure_repository = providers.Factory(
-        UnitOfMeasureRepository, session=database_session
-    )
+    attribute_definition_repository = providers.Factory(AttributeDefinitionRepository, session=database_session)
+    subcategory_attribute_repository = providers.Factory(SubcategoryAttributeRepository, session=database_session)
+    attribute_group_repository = providers.Factory(AttributeGroupRepository, session=database_session)
+    unit_of_measure_repository = providers.Factory(UnitOfMeasureRepository, session=database_session)
 
     query_service = providers.Factory(CatalogQueryService, session=database_session)
 

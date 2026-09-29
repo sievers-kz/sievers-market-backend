@@ -9,21 +9,17 @@ from src.core.listing.presentation.dto import ChangeListingLocationRequest
 
 
 class ChangeListingLocationUseCase:
-    def __init__(
-        self, uow: ListingUnitOfWork, listing_search_service: ListingSearchService
-    ):
+    def __init__(self, uow: ListingUnitOfWork, listing_search_service: ListingSearchService):
         self.uow = uow
         self.listing_search_service = listing_search_service
 
-    async def execute(
-        self, vendor_id: UUID, listing_id: UUID, dto: ChangeListingLocationRequest
-    ):
+    async def execute(self, vendor_id: UUID, listing_id: UUID, dto: ChangeListingLocationRequest):
         async with self.uow as uow:
             listing = await uow.listing.get_by_id(listing_id)
             if not listing or listing.owner_id != vendor_id:
                 raise ListingNotFoundError()
 
-            listing.change_location(dto.city_id)
+            listing.change_location(vendor_id, dto.city_id)
             await uow.listing.save(listing)
             await uow.commit()
 

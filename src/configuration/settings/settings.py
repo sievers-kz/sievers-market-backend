@@ -9,9 +9,7 @@ from pydantic_settings import (
 
 
 class BaseConfig(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     @classmethod
     def settings_customise_sources(
@@ -42,11 +40,7 @@ class PostgresSettings(BaseConfig):
     @computed_field(return_type=str)
     @property
     def database_url(self):
-        return (
-            f"postgresql+asyncpg://{self.user}:"
-            f"{self.password}@{self.host}:"
-            f"{self.port}/{self.name}"
-        )
+        return f"postgresql+asyncpg://{self.user}:" f"{self.password}@{self.host}:" f"{self.port}/{self.name}"
 
 
 class AuthenticationSettings(BaseConfig):
@@ -92,14 +86,10 @@ class MeilisearchConfig(BaseConfig):
 
 class ApplicationSettings(BaseConfig):
     mode: str = Field(default="dev", alias="MODE")
-    cors_origins: list[str] = Field(
-        default=["http://localhost:3000"], alias="CORS_ORIGINS"
-    )
+    cors_origins: list[str] = Field(default=["http://localhost:3000"], alias="CORS_ORIGINS")
 
     database: PostgresSettings = Field(default_factory=PostgresSettings)
-    authentication: AuthenticationSettings = Field(
-        default_factory=AuthenticationSettings
-    )
+    authentication: AuthenticationSettings = Field(default_factory=AuthenticationSettings)
     minio_config: MinioConfig = Field(default_factory=MinioConfig)
     redis_config: RedisConfig = Field(default_factory=RedisConfig)
     resend_config: ResendSettings = Field(default_factory=ResendSettings)

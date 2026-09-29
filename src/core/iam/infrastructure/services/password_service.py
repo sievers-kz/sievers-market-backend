@@ -2,7 +2,9 @@ from pwdlib import PasswordHash
 from pwdlib.hashers.argon2 import Argon2Hasher
 from rbloom import Bloom
 
-from src.core.iam.domain.exceptions import InvalidPasswordError
+from src.core.iam.domain.exceptions import (
+    CompromisedPasswordError,
+)
 from src.core.iam.domain.value_objects import HashedPassword, PlainPassword
 
 
@@ -15,7 +17,7 @@ class PasswordService:
         validated_plain = PlainPassword(plain_password)
 
         if self._bloom is not None and plain_password in self._bloom:
-            raise InvalidPasswordError("Ненадежный пароль. Придумайте другой")
+            raise CompromisedPasswordError()
 
         return validated_plain
 

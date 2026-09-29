@@ -9,7 +9,12 @@ from fastapi.security import HTTPBearer
 
 from src.configuration.dependencies.container import ApplicationContainer
 from src.core.admin.domain.entities import Admin
+from src.core.admin.domain.exceptions import (
+    AdminProfileRequiredError,
+    InsufficientPermissionsError,
+)
 from src.core.admin.infrastructure.uow import AdminUnitOfWork
+from src.core.customer.domain.exceptions import CustomerProfileRequiredError
 from src.core.customer.infrastructure.uow import CustomerUnitOfWork
 from src.core.iam.domain.enums import TokenType
 from src.core.iam.domain.exceptions import (
@@ -27,6 +32,7 @@ from src.core.shared.presentation.dto import (
     CurrentUser,
     CurrentVendor,
 )
+from src.core.vendor.domain.exceptions import VendorProfileRequiredError
 from src.core.vendor.infrastructure.uow import VendorUnitOfWork
 
 bearer_scheme = HTTPBearer(
@@ -44,26 +50,18 @@ cookie_scheme = APIKeyCookie(
 
 @inject
 def get_from_auth_scheme(
-    token_from_bearer: Annotated[
-        BearerCredentials | None, Depends(bearer_scheme)
-    ] = None,
+    token_from_bearer: Annotated[BearerCredentials | None, Depends(bearer_scheme)] = None,
     token_from_cookie: Annotated[str | None, Depends(cookie_scheme)] = None,
     client_type: Annotated[str | None, Header(alias="X-Client-Type")] = None,
-    api_session_service: APISessionService = Depends(
-        Provide[ApplicationContainer.shared.api_session_service]
-    ),
+    api_session_service: APISessionService = Depends(Provide[ApplicationContainer.shared.api_session_service]),
 ) -> str:
-    return api_session_service.extract_token(
-        token_from_bearer, token_from_cookie, client_type
-    )
+    return api_session_service.extract_token(token_from_bearer, token_from_cookie, client_type)
 
 
 @inject
 async def get_current_user_id(
     token: Annotated[str, Depends(get_from_auth_scheme)],
-    token_service: PyJWTTokenService = Depends(
-        Provide[ApplicationContainer.iam.pyjwt_token_service]
-    ),
+    token_service: PyJWTTokenService = Depends(Provide[ApplicationContainer.iam.pyjwt_token_service]),
 ) -> UUID:
     try:
         payload = token_service.verify_token(token, TokenType.ACCESS)
@@ -97,7 +95,7 @@ async def get_current_user(
         if not account:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User not found",
+                detail="Аккаунт не найден",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
@@ -106,18 +104,13 @@ async def get_current_user(
 
 @inject
 async def get_current_customer(
-    unit_of_work: Annotated[
-        CustomerUnitOfWork, Depends(Provide[ApplicationContainer.customer.uow])
-    ],
+    unit_of_work: Annotated[CustomerUnitOfWork, Depends(Provide[ApplicationContainer.customer.uow])],
     account: CurrentUser = Depends(get_current_user),
 ):
     async with unit_of_work as uow:
         customer = await uow.customer.get_by_account_id(account.id)
         if not customer:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found"
-            )
-
+            raise CustomerProfileRequiredError()
         return CurrentCustomer(id=customer.id)
 
 
@@ -129,12 +122,7 @@ async def get_current_vendor(
     async with uow:
         vendor = await uow.vendor.get_by_account_id(account.id)
         if not vendor:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You are not registered as a vendor"
-                " or your status is pending moderation",
-            )
-
+            raise VendorProfileRequiredError()
         return CurrentVendor(id=vendor.id)
 
 
@@ -146,11 +134,7 @@ async def get_current_admin(
     async with uow:
         admin = await uow.admin.get_by_account_id(account.id)
         if not admin:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="У вас недостаточно прав доступа.",
-            )
-
+            raise AdminProfileRequiredError()
         return admin
 
 
@@ -159,10 +143,7 @@ def require_admin(permission_code: str):
         admin: Admin = Depends(get_current_admin),
     ) -> Admin:
         if not admin.can(permission_code):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="У вас недостаточно прав доступа.",
-            )
+            raise InsufficientPermissionsError()
         return admin
 
     return dependency

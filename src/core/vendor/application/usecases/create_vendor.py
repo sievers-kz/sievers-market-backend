@@ -28,9 +28,7 @@ class RegisterVendorUseCase:
         if cached_taxpayer:
             taxpayer = TaxpayerResponse.model_validate_json(cached_taxpayer)
         else:
-            taxpayer = await self.taxpayer_validation_service.validate(
-                dto.tax_id, dto.legal_form
-            )
+            taxpayer = await self.taxpayer_validation_service.validate(dto.tax_id, dto.legal_form)
 
         async with self.uow as uow:
             current_vendor = await uow.vendor.get_by_tax_id(dto.tax_id)

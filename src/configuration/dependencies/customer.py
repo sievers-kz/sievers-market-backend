@@ -11,16 +11,12 @@ class CustomerContainer(containers.DeclarativeContainer):
     session_factory = providers.Dependency()
     database_session = providers.Dependency()
 
-    customer_repository = providers.Factory(
-        CustomerRepository, session=database_session
-    )
+    customer_repository = providers.Factory(CustomerRepository, session=database_session)
 
     uow = providers.Factory(CustomerUnitOfWork, session_factory=session_factory)
 
     customer_service = providers.Factory(CustomerService, uow=uow)
 
-    change_customer_fullname_usecase = providers.Factory(
-        ChangeCustomerFullnameUseCase, uow=uow
-    )
+    change_customer_fullname_usecase = providers.Factory(ChangeCustomerFullnameUseCase, uow=uow)
 
     create_customer_usecase = providers.Factory(CreateCustomerUseCase, uow=uow)

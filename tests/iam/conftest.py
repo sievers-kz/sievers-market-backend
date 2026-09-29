@@ -12,9 +12,7 @@ from src.core.iam.presentation.dto import CreateAccountRequest
 from src.core.shared.infrastructure.services.arq_service import ArqService
 
 
-def create_domain_account(
-    is_active: bool | None = False, tokens: list | None = None
-) -> Account:
+def create_domain_account(is_active: bool | None = False, tokens: list | None = None) -> Account:
     return Account(
         id=uuid.uuid4(),
         email=Email("test@example.com"),
@@ -100,15 +98,20 @@ def reset_password_usecase(container):
 
 
 @pytest.fixture
-def change_password_usecase(container):
-    return container.iam.change_password_usecase()
-
-
-@pytest.fixture
-async def account_repository(container):
-    return await container.iam.account_repository()
+def account_repository(container):
+    return container.iam.account_repository()
 
 
 @pytest.fixture
 def redis_service(container):
     return container.shared.redis_service()
+
+
+@pytest.fixture
+def request_password_change_usecase(container):
+    return container.iam.request_password_change_usecase()
+
+
+@pytest.fixture
+def confirm_password_change_usecase(container):
+    return container.iam.confirm_password_change_usecase()

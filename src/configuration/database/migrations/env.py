@@ -15,8 +15,7 @@ from src.core.references.infrastructure.models import (
     Brand,
     City,
     Color,
-    Country,
-    Region,
+    OriginCountry,
 )
 from src.core.shared.infrastructure.base_model import BaseModel
 from src.core.vendor.infrastructure.models import Vendor

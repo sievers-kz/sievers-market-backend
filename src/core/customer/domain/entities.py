@@ -30,6 +30,4 @@ class Customer(AggregateRoot):
         )
 
     def change_fullname(self, last_name: str, first_name: str, patronymic: str | None):
-        self.fullname = Fullname(
-            last_name=last_name, first_name=first_name, patronymic=patronymic
-        )
+        self.fullname = Fullname(last_name=last_name, first_name=first_name, patronymic=patronymic)

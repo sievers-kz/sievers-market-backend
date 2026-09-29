@@ -10,9 +10,7 @@ from src.core.shared.infrastructure.base_model import BaseModel
 class Admin(BaseModel):
     __tablename__ = "admins"
 
-    account_id: Mapped[UUID] = mapped_column(
-        ForeignKey("accounts.id", ondelete="CASCADE"), unique=True
-    )
+    account_id: Mapped[UUID] = mapped_column(ForeignKey("accounts.id", ondelete="CASCADE"), unique=True)
 
     last_name: Mapped[str] = mapped_column(String, nullable=False)
     first_name: Mapped[str] = mapped_column(String, nullable=False)
@@ -35,9 +33,5 @@ class Permission(BaseModel):
 class AdminPermission(BaseModel):
     __tablename__ = "admin_permissions"
 
-    admin_id: Mapped[UUID] = mapped_column(
-        ForeignKey("admins.id", ondelete="CASCADE"), primary_key=True
-    )
-    permission_id: Mapped[UUID] = mapped_column(
-        ForeignKey("permissions.id", ondelete="CASCADE"), primary_key=True
-    )
+    admin_id: Mapped[UUID] = mapped_column(ForeignKey("admins.id", ondelete="CASCADE"), primary_key=True)
+    permission_id: Mapped[UUID] = mapped_column(ForeignKey("permissions.id", ondelete="CASCADE"), primary_key=True)

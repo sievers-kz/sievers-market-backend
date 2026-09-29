@@ -35,9 +35,7 @@ class ContactFullname:
             raise ContactFullnameFormatError(field="Фамилия")
         if not re.match(fullname_format, self.contact_first_name):
             raise ContactFullnameFormatError(field="Имя")
-        if self.contact_patronymic and not re.match(
-            fullname_format, self.contact_patronymic
-        ):
+        if self.contact_patronymic and not re.match(fullname_format, self.contact_patronymic):
             raise ContactFullnameFormatError(field="Отчество")
 
 

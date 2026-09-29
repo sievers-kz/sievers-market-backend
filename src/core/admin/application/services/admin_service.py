@@ -17,9 +17,7 @@ class AdminService:
         self.account_repository = account_repository
 
     async def create_admin(self, account_id: UUID, dto: CreateAdminRequest) -> None:
-        target_account = await self.account_repository.get_account_by_email(
-            dto.target_email
-        )
+        target_account = await self.account_repository.get_account_by_email(dto.target_email)
         if not target_account:
             raise AccountNotFoundError()
 
@@ -43,9 +41,7 @@ class AdminService:
             await uow.admin.save(admin)
             await uow.commit()
 
-    async def grant_permission(
-        self, initiator_account_id: UUID, dto: GrantPermissionRequest
-    ) -> None:
+    async def grant_permission(self, initiator_account_id: UUID, dto: GrantPermissionRequest) -> None:
         async with self.uow as uow:
             initiator = await uow.admin.get_by_account_id(initiator_account_id)
             if not initiator:

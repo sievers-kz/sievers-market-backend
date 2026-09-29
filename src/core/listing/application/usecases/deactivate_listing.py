@@ -14,6 +14,6 @@ class DeactivateListingUseCase:
             if not listing or listing.owner_id != vendor_id:
                 raise ListingNotFoundError()
 
-            listing.deactivate()
+            listing.deactivate(vendor_id)
             await uow.listing.save(listing)
             await uow.commit()

@@ -32,13 +32,9 @@ class AccountConfirmationUseCase:
             )
 
             access_token = self.token_service.create_token(account.id, TokenType.ACCESS)
-            refresh_token = self.token_service.create_token(
-                account.id, TokenType.REFRESH
-            )
+            refresh_token = self.token_service.create_token(account.id, TokenType.REFRESH)
 
-            account.add_new_token(
-                refresh_token.type, refresh_token.value, refresh_token.expires_at
-            )
+            account.add_new_token(refresh_token.type, refresh_token.value, refresh_token.expires_at)
 
             account.confirm_account()
             await uow.account.save(account)
@@ -46,6 +42,4 @@ class AccountConfirmationUseCase:
 
             logger.info("ACCOUNT VERIFIED | account_id={}", account.id)
 
-            return LoginResponse(
-                access_token=access_token.value, refresh_token=refresh_token.value
-            )
+            return LoginResponse(access_token=access_token.value, refresh_token=refresh_token.value)
