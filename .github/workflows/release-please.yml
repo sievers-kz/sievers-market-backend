@@ -17,5 +17,4 @@ jobs:
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          release-type: python
-          package-name: sievers-market-backend
+          target_branch: main
