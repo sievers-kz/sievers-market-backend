@@ -42,6 +42,9 @@ CREATE_NEW_USER_DOC = RouteDocs(
         Создает аккаунт по email и паролю.
         Пароль проверяется на вхождение в базу скомпроментированных (`Bloom Filter`).
         После создания на email отправляется код подтверждения.
+
+        Регистрация состоит из нескольких шагов: подтверждение почты, выбор роли и создание профиля покупателя или продавца.
+        Подробнее о порядке вызовов см. [диаграмму процесса регистрации](https://github.com/sievers-kz/sievers-market-backend/blob/HEAD/docs/diagrams/registration-flow.md).
     """,
     responses=(
         AccountAlreadyExistsError,
