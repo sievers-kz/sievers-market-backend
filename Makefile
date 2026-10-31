@@ -3,7 +3,7 @@ MODE ?= dev
 ifeq ($(MODE), dev)
     COMPOSE = docker compose -f docker-compose.yml -f docker-compose.dev.yml
 else
-    COMPOSE = docker compose -f docker-compose.yml
+    COMPOSE = docker compose -f docker-compose.yml -f docker-compose.proxy.yml
 endif
 
 COMPOSE_TEST = docker compose --env-file .env.test -f docker-compose.yml -f docker-compose.test.yml

@@ -1,0 +1,11 @@
+services:
+  backend:
+    networks:
+      default: {}
+      proxy:
+        aliases:
+          - ${PROXY_ALIAS:?PROXY_ALIAS is not set}
+
+networks:
+  proxy:
+    external: true
