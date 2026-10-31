@@ -61,12 +61,13 @@ jobs:
       - name: Prepare deploy bundle
         run: |
           mkdir -p deploy-bundle
-          cp docker-compose.yml Makefile deploy-bundle/
+          cp docker-compose.yml docker-compose.proxy.yml Makefile deploy-bundle/
           cp -r infra deploy-bundle/
 
       - name: Generate .env inside bundle
         run: |
           cat << 'EOF' > deploy-bundle/.env
+          PROXY_ALIAS=${{ vars.PROXY_ALIAS }}
           ACCESS_TOKEN_LIFETIME=${{ vars.ACCESS_TOKEN_LIFETIME }}
           ALGORITHM=${{ vars.ALGORITHM }}
           APP_PORT=${{ vars.APP_PORT }}
