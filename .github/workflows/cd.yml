@@ -124,4 +124,3 @@ jobs:
             cd ${{ vars.DEPLOY_PATH }}
             make deploy MODE=${{ vars.MODE }}
             docker image prune -af --filter "until=24h"
-            sudo /usr/local/bin/deploy-nginx.sh ${{ vars.DEPLOY_PATH }}
