@@ -45,82 +45,19 @@ jobs:
             ghcr.io/sievers-kz/sievers-market-backend:${{ steps.meta.outputs.tag }}
             ghcr.io/sievers-kz/sievers-market-backend:${{ github.ref_name == 'main' && 'production-latest' || 'staging-latest'}}
 
-  deploy:
-    name: Deploy Application
+  trigger-deploy:
+    name: Trigger deploy in infra
     needs: build-and-push
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'main' && 'production' || 'staging'}}
-    concurrency:
-      group: deploy-${{ github.ref_name == 'main' && 'production' || 'staging'}}
-      cancel-in-progress: false
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Prepare deploy bundle
+      - name: Dispatch infra workflow
+        env:
+          GH_TOKEN: ${{ secrets.INFRA_DISPATCH_TOKEN }}
+          TARGET: ${{ github.ref_name == 'main' && 'production' || 'staging'}}
+          TAG: ${{ needs.build-and-push.outputs.image_tag }}
         run: |
-          mkdir -p deploy-bundle
-          cp docker-compose.yml docker-compose.proxy.yml Makefile deploy-bundle/
-          cp -r infra deploy-bundle/
-
-      - name: Generate .env inside bundle
-        run: |
-          cat << 'EOF' > deploy-bundle/.env
-          PROXY_ALIAS=${{ vars.PROXY_ALIAS }}
-          ACCESS_TOKEN_LIFETIME=${{ vars.ACCESS_TOKEN_LIFETIME }}
-          ALGORITHM=${{ vars.ALGORITHM }}
-          APP_PORT=${{ vars.APP_PORT }}
-          CORS_ORIGINS=${{ vars.CORS_ORIGINS }}
-          MEILISEARCH_URL=${{ vars.MEILISEARCH_URL }}
-          MEILI_ENV=${{ vars.MEILI_ENV }}
-          MINIO_BUCKET_NAME=${{ vars.MINIO_BUCKET_NAME }}
-          MINIO_ENDPOINT=${{ vars.MINIO_ENDPOINT }}
-          MINIO_SECURE_CONFIG=${{ vars.MINIO_SECURE_CONFIG }}
-          MODE=${{ vars.MODE }}
-          POSTGRES_HOST=${{ vars.POSTGRES_HOST }}
-          POSTGRES_NAME=${{ vars.POSTGRES_NAME }}
-          POSTGRES_PORT=${{ vars.POSTGRES_PORT }}
-          POSTGRES_USER=${{ vars.POSTGRES_USER }}
-          REDIS_DB=${{ vars.REDIS_DB }}
-          REDIS_HOST=${{ vars.REDIS_HOST }}
-          REDIS_PORT=${{ vars.REDIS_PORT }}
-          REFRESH_TOKEN_LIFETIME=${{ vars.REFRESH_TOKEN_LIFETIME }}
-          RESEND_FROM_EMAIL=${{ vars.RESEND_FROM_EMAIL }}
-          KGD_PORTAL_TOKEN=${{ secrets.KGD_PORTAL_TOKEN }}
-          MEILISEARCH_KEY=${{ secrets.MEILISEARCH_KEY }}
-          MINIO_ROOT_PASSWORD=${{ secrets.MINIO_ROOT_PASSWORD }}
-          MINIO_ROOT_USER=${{ secrets.MINIO_ROOT_USER }}
-          POSTGRES_PASS=${{ secrets.POSTGRES_PASS }}
-          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
-          RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
-          SECRET_KEY=${{ secrets.SECRET_KEY }}
-          SENTRY_DSN=${{ secrets.SENTRY_DSN }}
-          SUPER_ADMIN_EMAIL=${{ secrets.SUPER_ADMIN_EMAIL }}
-          SUPER_ADMIN_PASSWORD=${{ secrets.SUPER_ADMIN_PASSWORD }}
-          SUPER_ADMIN_LAST_NAME=${{ secrets.SUPER_ADMIN_LAST_NAME }}
-          SUPER_ADMIN_FIRST_NAME=${{ secrets.SUPER_ADMIN_FIRST_NAME }}
-          IMAGE_TAG=${{ github.ref_name == 'main' && 'production-latest' || 'staging-latest' }}
-          EOF
-
-      - name: Copy files and .env to VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ vars.DEPLOY_HOST }}
-          username: ${{ vars.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "deploy-bundle/*,deploy-bundle/.env"
-          target: ${{ vars.DEPLOY_PATH }}
-          strip_components: 1
-          rm: false
-
-      - name: Deploy on VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ vars.DEPLOY_HOST }}
-          username: ${{ vars.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: |
-            cd ${{ vars.DEPLOY_PATH }}
-            make deploy MODE=${{ vars.MODE }}
-            docker image prune -af --filter "until=24h"
+          gh workflow run market-backend-deploy.yml \
+          --repo sievers-kz/sievers-infra \
+          --ref main \
+          -f environment="$TARGET" \
+          -f tag="$TAG"
