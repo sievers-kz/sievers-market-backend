@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.1.0](https://github.com/sievers-kz/sievers-market-backend/compare/v4.0.0...v4.1.0) (2026-11-03)
+
+
+### Features
+
+* add trigger-deploy job to cd.yml to trigger CD workflow in siev… ([be33400](https://github.com/sievers-kz/sievers-market-backend/commit/be33400160bfe6e2327c393b18db8cd6050c9430))
+* add trigger-deploy job to cd.yml to trigger CD workflow in sievers-infra repo ([fd8d887](https://github.com/sievers-kz/sievers-market-backend/commit/fd8d8879321fa135b4c58737a84cb406c94811c9))
+* **cd:** remove deploy job from cd.yml and migrate to trigger deploy ([9a2565f](https://github.com/sievers-kz/sievers-market-backend/commit/9a2565f07116144ad702518f97ddff876b5d4b4c))
+* **cd:** remove deploy job from cd.yml and migrate to trigger deploy ([9d7827c](https://github.com/sievers-kz/sievers-market-backend/commit/9d7827cb7d2c2fbcb699ae2e519f2369667de1b9))
+* migrate to trigger deploy ([4ede029](https://github.com/sievers-kz/sievers-market-backend/commit/4ede029b01fc7ced2d6ebd45d51a3d3d1ce7b700))
+
 ## [4.0.0](https://github.com/sievers-kz/sievers-market-backend/compare/v3.0.0...v4.0.0) (2026-09-29)
 
 
