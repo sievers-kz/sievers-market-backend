@@ -1,19 +1,9 @@
-MODE ?= dev
-
-ifeq ($(MODE), dev)
-    COMPOSE = docker compose -f docker-compose.yml -f docker-compose.dev.yml
-else
-    COMPOSE = docker compose -f docker-compose.yml -f docker-compose.proxy.yml
-endif
+COMPOSE = docker compose -f docker-compose.yml -f docker-compose.dev.yml
 
 COMPOSE_TEST = docker compose --env-file .env.test -f docker-compose.yml -f docker-compose.test.yml
 CI_SERVICES = db redis minio meilisearch sut
 
-.PHONY: up build start stop destroy logs restart shell db cache test coverage coverage-html ci deploy
-
-deploy:
-	$(COMPOSE) pull
-	$(COMPOSE) up -d --remove-orphans
+.PHONY: up build start stop destroy logs restart shell db cache test coverage coverage-html ci
 
 up:
 	$(COMPOSE) up -d --build --remove-orphans
