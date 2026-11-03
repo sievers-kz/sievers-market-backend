@@ -48,6 +48,7 @@ jobs:
   deploy:
     name: Deploy Application
     needs: build-and-push
+    if: github.ref_name == 'main'
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'main' && 'production' || 'staging'}}
     concurrency:
@@ -124,3 +125,21 @@ jobs:
             cd ${{ vars.DEPLOY_PATH }}
             make deploy MODE=${{ vars.MODE }}
             docker image prune -af --filter "until=24h"
+
+  trigger-deploy:
+    name: Trigger deploy in infra
+    needs: build-and-push
+    if: github.ref_name == 'development'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch infra workflow
+        env:
+          GH_TOKEN: ${{ secrets.INFRA_DISPATCH_TOKEN }}
+          TARGET: ${{ github.ref_name == 'main' && 'production' || 'staging'}}
+          TAG: ${{ needs.build-and-push.outputs.image_tag }}
+        run: |
+          gh workflow run market-backend-deploy.yml \
+          --repo sievers-kz/sievers-infra \
+          --ref main \
+          -f environment="$TARGET" \
+          -f tag="$TAG"
