@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.3.0](https://github.com/sievers-kz/sievers-market-backend/compare/v4.2.0...v4.3.0) (2026-11-04)
+
+
+### Features
+
+* add healthcheck endpoint ([ab56de8](https://github.com/sievers-kz/sievers-market-backend/commit/ab56de82e9fc6bb997293f2860634cbe5117fdcf))
+* add healthcheck endpoint ([faeebd6](https://github.com/sievers-kz/sievers-market-backend/commit/faeebd6db9221821d24dc301a22a08206cbb816a))
+* add healthcheck endpoint ([ba4f87a](https://github.com/sievers-kz/sievers-market-backend/commit/ba4f87a0ba3307d35018bdda1018e184b3003f37))
+
 ## [4.2.0](https://github.com/sievers-kz/sievers-market-backend/compare/v4.1.0...v4.2.0) (2026-11-04)
 
 
