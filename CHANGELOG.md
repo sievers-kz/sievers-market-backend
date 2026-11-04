@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.0](https://github.com/sievers-kz/sievers-market-backend/compare/v4.1.0...v4.2.0) (2026-11-04)
+
+
+### Features
+
+* remove legacy deploy ([e974225](https://github.com/sievers-kz/sievers-market-backend/commit/e974225b7a5091d82e2053cc9a3d5d67193567f9))
+
 ## [4.1.0](https://github.com/sievers-kz/sievers-market-backend/compare/v4.0.0...v4.1.0) (2026-11-03)
 
 
