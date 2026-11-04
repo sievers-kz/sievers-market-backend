@@ -84,6 +84,11 @@ class ApplicationFactory:
         for router in routers:
             self.app.include_router(router)
 
+    def _setup_health(self):
+        @self.app.get("/health", include_in_schema=False)
+        async def health():
+            return {"status": "ok"}
+
     def _setup_docs(self):
         @self.app.get("/scalar", include_in_schema=False)
         async def scalar_html():
@@ -107,6 +112,7 @@ class ApplicationFactory:
     def build(self) -> FastAPI:
         self._wire_dependency()
         self._include_routers()
+        self._setup_health()
         self._setup_docs()
         self._setup_cors()
         return self.app
