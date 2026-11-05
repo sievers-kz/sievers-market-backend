@@ -16,6 +16,21 @@ from src.core.shared.domain.exceptions import (
 )
 
 
+def _error_response(exc: DomainException) -> JSONResponse:
+    """
+    Единый формат ответа на доменные ошибки: {"error_code", "message"}, как в OpenAPI.
+    Поле "detail" оставлено для обратной совместимости со старыми клиентами.
+    """
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error_code": exc.error_code,
+            "message": exc.message,
+            "detail": exc.message,
+        },
+    )
+
+
 def setup_exception_handlers(app: FastAPI) -> None:
     """
     Регистрируем хэндлеры на базовые классы исключений.
@@ -34,12 +49,12 @@ def setup_exception_handlers(app: FastAPI) -> None:
             exc.message,
         )
 
-        return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+        return _error_response(exc)
 
     @app.exception_handler(NotFoundError)
     async def not_found_handler(request: Request, exc: NotFoundError):
         logger.warning("NotFoundError | {} {} | {}", request.method, request.url.path, exc.message)
-        return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+        return _error_response(exc)
 
     @app.exception_handler(AlreadyExistsError)
     async def already_exists_handler(request: Request, exc: AlreadyExistsError):
@@ -49,7 +64,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
             request.url.path,
             exc.message,
         )
-        return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+        return _error_response(exc)
 
     @app.exception_handler(UnauthorizedError)
     async def unauthorized_handler(request: Request, exc: UnauthorizedError):
@@ -59,7 +74,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
             request.url.path,
             exc.message,
         )
-        return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+        return _error_response(exc)
 
     @app.exception_handler(ValidationError)
     async def validation_handler(request: Request, exc: ValidationError):
@@ -69,12 +84,12 @@ def setup_exception_handlers(app: FastAPI) -> None:
             request.url.path,
             exc.message,
         )
-        return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+        return _error_response(exc)
 
     @app.exception_handler(RulesError)
     async def rules_handler(request: Request, exc: RulesError):
         logger.warning("RulesError | {} {} | {}", request.method, request.url.path, exc.message)
-        return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+        return _error_response(exc)
 
     @app.exception_handler(AccessDeniedError)
     async def access_denied_error(request: Request, exc: AccessDeniedError):
@@ -84,10 +99,10 @@ def setup_exception_handlers(app: FastAPI) -> None:
             request.url.path,
             exc.message,
         )
-        return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+        return _error_response(exc)
 
     @app.exception_handler(DomainException)
     async def unexpected_error_handler(request: Request, exc: DomainException):
         logger.exception("Unexpected error | {} {}", request.method, request.url.path)
 
-        return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+        return _error_response(exc)
