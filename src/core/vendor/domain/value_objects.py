@@ -25,18 +25,18 @@ class ContactFullname:
 
     def validate_required_fields(self):
         if not self.contact_last_name:
-            raise ContactFullnameRequiredError(field="Фамилия")
+            raise ContactFullnameRequiredError(field="contact_last_name")
         if not self.contact_first_name:
-            raise ContactFullnameRequiredError(field="Имя")
+            raise ContactFullnameRequiredError(field="contact_first_name")
 
     def validate_fields_format(self):
-        fullname_format = r"^[a-zA-Zа-яА-ЯёЁ\s-]+$"
+        fullname_format = r"^[a-zA-Zа-яА-ЯёЁӘәҒғҚқҢңӨөҰұҮүҺһІі\s-]+$"
         if not re.match(fullname_format, self.contact_last_name):
-            raise ContactFullnameFormatError(field="Фамилия")
+            raise ContactFullnameFormatError(field="contact_last_name")
         if not re.match(fullname_format, self.contact_first_name):
-            raise ContactFullnameFormatError(field="Имя")
+            raise ContactFullnameFormatError(field="contact_first_name")
         if self.contact_patronymic and not re.match(fullname_format, self.contact_patronymic):
-            raise ContactFullnameFormatError(field="Отчество")
+            raise ContactFullnameFormatError(field="contact_patronymic")
 
 
 @dataclass(frozen=True)

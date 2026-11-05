@@ -19,15 +19,15 @@ class Fullname:
 
     def validate_required_fields(self):
         if not self.first_name:
-            raise FullnameRequiredError(field="Имя")
+            raise FullnameRequiredError(field="first_name")
         if not self.last_name:
-            raise FullnameRequiredError(field="Фамилия")
+            raise FullnameRequiredError(field="last_name")
 
     def validate_fields_format(self):
-        fullname_format = r"^[a-zA-Zа-яА-ЯёЁ\s-]+$"
+        fullname_format = r"^[a-zA-Zа-яА-ЯёЁӘәҒғҚқҢңӨөҰұҮүҺһІі\s-]+$"
         if not re.match(fullname_format, self.first_name):
-            raise InvalidFullnameFormatError(field="Имя")
+            raise InvalidFullnameFormatError(field="first_name")
         if not re.match(fullname_format, self.last_name):
-            raise InvalidFullnameFormatError(field="Фамилия")
+            raise InvalidFullnameFormatError(field="last_name")
         if self.patronymic and not re.match(fullname_format, self.patronymic):
-            raise InvalidFullnameFormatError(field="Отчество")
+            raise InvalidFullnameFormatError(field="patronymic")

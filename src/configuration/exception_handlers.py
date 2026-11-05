@@ -18,7 +18,8 @@ from src.core.shared.domain.exceptions import (
 
 def _error_response(exc: DomainException) -> JSONResponse:
     """
-    Единый формат ответа на доменные ошибки: {"error_code", "message"}, как в OpenAPI.
+    Единый формат ответа на доменные ошибки: {"error_code", "message", "metadata"}.
+    В "metadata" лежат данные ошибки (например, "field" с именем поля запроса).
     Поле "detail" оставлено для обратной совместимости со старыми клиентами.
     """
     return JSONResponse(
@@ -27,6 +28,7 @@ def _error_response(exc: DomainException) -> JSONResponse:
             "error_code": exc.error_code,
             "message": exc.message,
             "detail": exc.message,
+            "metadata": exc.metadata,
         },
     )
 

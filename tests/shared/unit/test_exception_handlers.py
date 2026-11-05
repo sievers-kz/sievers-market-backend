@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.configuration.exception_handlers import setup_exception_handlers
+from src.core.customer.domain.exceptions import FullnameRequiredError
 from src.core.iam.domain.exceptions import (
     AccountAlreadyExistsError,
     AccountNotFoundError,
@@ -16,13 +17,13 @@ from src.core.shared.domain.exceptions import AccessDeniedError
 
 @pytest.fixture
 def client_factory():
-    def make(exc_cls):
+    def make(exc_cls, *args):
         app = FastAPI()
         setup_exception_handlers(app)
 
         @app.get("/boom")
         async def boom():
-            raise exc_cls()
+            raise exc_cls(*args)
 
         return TestClient(app)
 
@@ -48,3 +49,11 @@ def test_domain_error_response_contains_error_code_and_message(client_factory, e
     body = response.json()
     assert body["error_code"] == exc_cls.error_code
     assert body["message"] == exc_cls.message
+    assert body["metadata"] == {}
+
+
+def test_domain_error_response_contains_metadata(client_factory):
+    response = client_factory(FullnameRequiredError, "first_name").get("/boom")
+
+    assert response.status_code == 422
+    assert response.json()["metadata"] == {"field": "first_name"}

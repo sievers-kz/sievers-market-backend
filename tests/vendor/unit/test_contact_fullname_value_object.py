@@ -44,3 +44,32 @@ class TestContactFullnameValueObject:
                 contact_first_name=contact_first_name,
                 contact_patronymic=contact_patronymic,
             )
+
+    @pytest.mark.unit
+    def test_contact_fullname_accepts_kazakh_letters(self):
+        fullname = ContactFullname(
+            contact_last_name="Нұрсұлтанов",
+            contact_first_name="Қайрат",
+            contact_patronymic="Әліұлы",
+        )
+        assert fullname.contact_first_name == "Қайрат"
+
+    @pytest.mark.parametrize(
+        "contact_last_name, contact_first_name, contact_patronymic, field",
+        [
+            ("Test1", "Test", None, "contact_last_name"),
+            ("Test", "Test1", None, "contact_first_name"),
+            ("Test", "Test", "Test1", "contact_patronymic"),
+        ],
+    )
+    @pytest.mark.unit
+    def test_format_error_names_the_request_field(
+        self, contact_last_name, contact_first_name, contact_patronymic, field
+    ):
+        with pytest.raises(ContactFullnameFormatError) as exc_info:
+            ContactFullname(
+                contact_last_name=contact_last_name,
+                contact_first_name=contact_first_name,
+                contact_patronymic=contact_patronymic,
+            )
+        assert exc_info.value.metadata == {"field": field}
