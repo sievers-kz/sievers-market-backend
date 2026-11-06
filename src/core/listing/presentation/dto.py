@@ -1,3 +1,4 @@
+import math
 from typing import Any
 from uuid import UUID
 
@@ -90,13 +91,22 @@ class ListingSearchDocument(DTO):
 
 class ListingSearchQuery(DTO):
     text: str | None = None
-    subcategory_id: str | None = None
-    city_id: str | None = None
+    subcategory_id: UUID | None = None
+    city_id: UUID | None = None
     price_min: int | None = None
     price_max: int | None = None
-    attributes: dict[str, Any] = {}
+    attributes: dict[str, str | int | float | bool] = {}
     page: int = 1
     limit: int = 20
+
+    @field_validator("attributes")
+    @classmethod
+    def reject_non_finite_numbers(cls, value: dict[str, str | int | float | bool]):
+        # NaN и Infinity не имеют записи в выражении фильтра Meilisearch.
+        for key, item in value.items():
+            if isinstance(item, float) and not math.isfinite(item):
+                raise ValueError(f"Значение атрибута {key} должно быть конечным числом")
+        return value
 
 
 class ListingCardResponse(DTO):
