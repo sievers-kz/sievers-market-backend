@@ -25,6 +25,14 @@ class ListingGallerySizeError(ValidationError):
         super().__init__(message=self.message, metadata={"count": count, "min": 1, "max": 10})
 
 
+class ListingInvalidFilterKeyError(ValidationError):
+    message = "Недопустимое имя фильтра по атрибуту"
+    error_code = "listing_invalid_filter_key_error"
+
+    def __init__(self, key: str):
+        super().__init__(message=self.message, metadata={"field": "attributes", "key": key})
+
+
 class ListingActivationError(RulesError):
     message = "Невозможно активировать объявление"
     error_code = "listing_activation_error"

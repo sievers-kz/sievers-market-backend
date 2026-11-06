@@ -1,4 +1,8 @@
-from src.core.listing.domain.exceptions import ListingDeletedError, ListingNotFoundError
+from src.core.listing.domain.exceptions import (
+    ListingDeletedError,
+    ListingInvalidFilterKeyError,
+    ListingNotFoundError,
+)
 from src.core.shared.presentation.documentation import RouteDocs
 from src.core.vendor.domain.exceptions import VendorProfileRequiredError
 
@@ -101,7 +105,7 @@ SEARCH_LISTING_DOC = RouteDocs(
     description="""
         Полнотекстовый поиск объявлений через Meilisearch с фильтрами и пагинацией.
     """,
-    responses=(),
+    responses=(ListingInvalidFilterKeyError,),
 )
 
 GET_LISTINGS_CATALOG_DOC = RouteDocs(
