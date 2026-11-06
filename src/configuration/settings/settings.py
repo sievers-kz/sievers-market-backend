@@ -1,6 +1,6 @@
 from typing import Tuple, Type
 
-from pydantic import Field, computed_field
+from pydantic import Field, computed_field, model_validator
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -55,7 +55,21 @@ class MinioConfig(BaseConfig):
     access_key: str = Field(alias="MINIO_ROOT_USER")
     secret_key: str = Field(alias="MINIO_ROOT_PASSWORD")
     bucket_name: str = Field(alias="MINIO_BUCKET_NAME")
+    # Только для внутреннего соединения бэкенда с MinIO (внутри Docker-сети обычно false).
     secure_config: bool = Field(alias="MINIO_SECURE_CONFIG")
+    # Адрес для подписи ссылок, которые открывает браузер. Если не задан, берётся внутренний.
+    public_endpoint: str | None = Field(None, alias="MINIO_PUBLIC_ENDPOINT")
+    public_secure: bool | None = Field(None, alias="MINIO_PUBLIC_SECURE")
+    # Регион нужен, чтобы подпись ссылки считалась локально, без сетевого запроса к MinIO.
+    region: str = Field("us-east-1", alias="MINIO_REGION")
+
+    @model_validator(mode="after")
+    def _fill_public_from_internal(self) -> "MinioConfig":
+        if self.public_endpoint is None:
+            self.public_endpoint = self.endpoint
+        if self.public_secure is None:
+            self.public_secure = self.secure_config
+        return self
 
 
 class RedisConfig(BaseConfig):

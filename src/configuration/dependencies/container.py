@@ -78,6 +78,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         session_factory=gateways.session_factory,
         database_session=gateways.database_session,
         minio_client=gateways.minio_client,
+        minio_public_client=gateways.minio_public_client,
         minio_config=configurations.minio_config,
     )
 

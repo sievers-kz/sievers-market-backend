@@ -59,6 +59,17 @@ class GatewaysContainer(containers.DeclarativeContainer):
         secure=minio_config.secure_config,
     )
 
+    # Клиент только для подписи ссылок под публичный адрес. Сеть не использует:
+    # регион задан, поэтому подпись считается локально.
+    minio_public_client = providers.Singleton(
+        Minio,
+        endpoint=minio_config.public_endpoint,
+        access_key=minio_config.access_key,
+        secret_key=minio_config.secret_key,
+        secure=minio_config.public_secure,
+        region=minio_config.region,
+    )
+
     bloom_filter = providers.Singleton(load_bloom)
 
     sentry = providers.Resource(
