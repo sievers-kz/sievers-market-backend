@@ -15,9 +15,9 @@ class TestArchiveListingUseCase:
         create_listing_request,
     ):
         dto = create_listing_request
-        listing_id = await create_listing_usecase.execute(create_organization.id, dto)
+        listing_id = await create_listing_usecase.execute(create_organization.owner_id, dto)
 
-        await archive_listing_usecase.execute(create_organization.id, listing_id)
+        await archive_listing_usecase.execute(create_organization.owner_id, listing_id)
         listing = await listing_repository.get_by_id(listing_id)
 
         assert listing is not None

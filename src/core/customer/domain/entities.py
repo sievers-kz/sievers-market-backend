@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from src.core.customer.domain.enums import Kind, RegistryStatus
+from src.core.customer.domain.exceptions import OrganizationCannotPublishError, OrganizationNotFoundError
 from src.core.customer.domain.value_objects import Fullname
 from src.core.shared.domain.entities import AggregateRoot
 
@@ -67,5 +68,15 @@ class Organization(AggregateRoot):
     def mark_registry_not_found(self) -> None:
         self.registry_status = RegistryStatus.NOT_FOUND
 
+    def is_owned_by(self, owner_id: UUID) -> bool:
+        return self.owner_id == owner_id
+
     def can_publish(self) -> bool:
         return self.registry_status == RegistryStatus.VERIFIED
+
+    def ensure_can_publish(self, owner_id: UUID) -> None:
+        # A foreign organization is reported as missing, so its existence is not revealed.
+        if not self.is_owned_by(owner_id):
+            raise OrganizationNotFoundError()
+        if not self.can_publish():
+            raise OrganizationCannotPublishError()

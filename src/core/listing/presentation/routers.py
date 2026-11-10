@@ -41,8 +41,8 @@ from src.core.listing.presentation.dto import (
     ListingDetailResponse,
     ListingSearchQuery,
 )
-from src.core.shared.presentation.dto import CurrentOrganization, PaginatedResponse
-from src.core.shared.presentation.security import get_current_organization
+from src.core.shared.presentation.dto import CurrentCustomer, PaginatedResponse
+from src.core.shared.presentation.security import get_current_customer
 
 listing_router = APIRouter(prefix="/api/v1/listing", tags=["Listing"])
 
@@ -58,9 +58,9 @@ listing_router = APIRouter(prefix="/api/v1/listing", tags=["Listing"])
 async def create_listing(
     dto: CreateListingRequest,
     usecase: CreateListingUseCaseDependency,
-    current_organization: CurrentOrganization = Security(get_current_organization),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    respone = await usecase.execute(current_organization.id, dto)
+    respone = await usecase.execute(current_customer.id, dto)
     return {"message": "Объявление создано", "response": respone}
 
 
@@ -76,9 +76,9 @@ async def change_listing_price(
     listing_id: UUID,
     dto: ChangeListingPriceRequest,
     usecase: ChangeListingPriceUseCaseDependency,
-    current_organization: CurrentOrganization = Security(get_current_organization),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_organization.id, listing_id, dto)
+    await usecase.execute(current_customer.id, listing_id, dto)
     return {"message": "Цена объявления обновлена"}
 
 
@@ -94,9 +94,9 @@ async def change_listing_location(
     listing_id: UUID,
     dto: ChangeListingLocationRequest,
     usecase: ChangeListingLocationUseCaseDependency,
-    current_organization: CurrentOrganization = Security(get_current_organization),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_organization.id, listing_id, dto)
+    await usecase.execute(current_customer.id, listing_id, dto)
     return {"message": "Местоположение объявления изменены"}
 
 
@@ -112,9 +112,9 @@ async def change_listing_description(
     listing_id: UUID,
     dto: ChangeListingDescriptionRequest,
     usecase: ChangeListingDescriptionUseCaseDependency,
-    current_organization: CurrentOrganization = Security(get_current_organization),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_organization.id, listing_id, dto)
+    await usecase.execute(current_customer.id, listing_id, dto)
     return {"message": "Описание объявления изменено"}
 
 
@@ -130,9 +130,9 @@ async def change_listing_attribute(
     listing_id: UUID,
     dto: ChangeListingAttributeRequest,
     usecase: ChangeListingAttributeUseCaseDependency,
-    current_organization: CurrentOrganization = Security(get_current_organization),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_organization.id, listing_id, dto)
+    await usecase.execute(current_customer.id, listing_id, dto)
     return {"message": "Атрибуты объявления обновлены"}
 
 
@@ -147,9 +147,9 @@ async def change_listing_attribute(
 async def activate_listing(
     listing_id: UUID,
     usecase: ActivateListingUseCaseDependency,
-    current_organization: CurrentOrganization = Security(get_current_organization),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_organization.id, listing_id)
+    await usecase.execute(current_customer.id, listing_id)
     return {"message": "Объявление активировано"}
 
 
@@ -164,9 +164,9 @@ async def activate_listing(
 async def deactivate_listing(
     listing_id: UUID,
     usecase: DeactivateListingUseCaseDependency,
-    current_organization: CurrentOrganization = Security(get_current_organization),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_organization.id, listing_id)
+    await usecase.execute(current_customer.id, listing_id)
     return {"message": "Объявление деактивировано"}
 
 
@@ -181,9 +181,9 @@ async def deactivate_listing(
 async def archive_listing(
     listing_id: UUID,
     usecase: ArchiveListingUseCaseDependency,
-    current_organization: CurrentOrganization = Security(get_current_organization),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_organization.id, listing_id)
+    await usecase.execute(current_customer.id, listing_id)
     return {"message": "Объявление архивировано"}
 
 
@@ -198,9 +198,9 @@ async def archive_listing(
 async def delete_listing(
     listing_id: UUID,
     usecase: DeleteListingUseCaseDependency,
-    current_organization: CurrentOrganization = Security(get_current_organization),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_organization.id, listing_id)
+    await usecase.execute(current_customer.id, listing_id)
     return {"message": "Объявление удалено"}
 
 

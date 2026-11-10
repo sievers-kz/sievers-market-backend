@@ -73,6 +73,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         database_session=gateways.database_session,
         attribute_validation=catalog.attribute_validation,
         meilisearch_service=shared.meilisearch_service,
+        organization_service=customer.organization_service,
     )
 
     media = providers.Container(

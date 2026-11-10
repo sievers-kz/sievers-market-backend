@@ -42,12 +42,13 @@ def create_domain_listing(
 
 
 @pytest_asyncio.fixture
-async def create_listing_request(database_session):
+async def create_listing_request(database_session, create_organization):
     city_id = (await database_session.execute(text("SELECT id FROM cities LIMIT 1"))).scalar_one()
     category_id = (await database_session.execute(text("SELECT id FROM categories LIMIT 1"))).scalar_one()
     subcategory_id = (await database_session.execute(text("SELECT id FROM subcategories LIMIT 1"))).scalar_one()
 
     return CreateListingRequest(
+        organization_id=create_organization.id,
         category_id=category_id,
         subcategory_id=subcategory_id,
         title="Трактор John Deere",

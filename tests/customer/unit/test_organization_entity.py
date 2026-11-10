@@ -4,6 +4,7 @@ import pytest
 
 from src.core.customer.domain.entities import Organization
 from src.core.customer.domain.enums import Kind, RegistryStatus
+from src.core.customer.domain.exceptions import OrganizationCannotPublishError, OrganizationNotFoundError
 
 
 def make_organization() -> Organization:
@@ -57,3 +58,34 @@ class TestOrganizationEntity:
         organization.registry_status = status
 
         assert organization.can_publish() is expected
+
+    @pytest.mark.unit
+    def test_is_owned_by(self):
+        organization = make_organization()
+
+        assert organization.is_owned_by(organization.owner_id) is True
+        assert organization.is_owned_by(uuid.uuid4()) is False
+
+    @pytest.mark.unit
+    def test_ensure_can_publish_passes_for_owner_of_verified(self):
+        organization = make_organization()
+        organization.mark_registry_verified("ТОО")
+
+        organization.ensure_can_publish(organization.owner_id)
+
+    @pytest.mark.unit
+    def test_ensure_can_publish_hides_foreign_organization(self):
+        organization = make_organization()
+        organization.mark_registry_verified("ТОО")
+
+        with pytest.raises(OrganizationNotFoundError):
+            organization.ensure_can_publish(uuid.uuid4())
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize("status", [RegistryStatus.PENDING, RegistryStatus.NOT_FOUND])
+    def test_ensure_can_publish_rejects_unverified(self, status):
+        organization = make_organization()
+        organization.registry_status = status
+
+        with pytest.raises(OrganizationCannotPublishError):
+            organization.ensure_can_publish(organization.owner_id)

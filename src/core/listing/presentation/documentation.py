@@ -1,4 +1,4 @@
-from src.core.customer.domain.exceptions import CustomerProfileRequiredError
+from src.core.customer.domain.exceptions import OrganizationCannotPublishError, OrganizationNotFoundError
 from src.core.listing.domain.exceptions import (
     ListingDeletedError,
     ListingInvalidFilterKeyError,
@@ -10,9 +10,16 @@ CREATE_LISTING_DOC = RouteDocs(
     operation_id="createListing",
     summary="Создание объявления",
     description="""
-        Создаёт новое объявление продавца со статичными полями, галереей и динамическими атрибутами подкатегории.
+        Создаёт новое объявление со статичными полями, галереей и динамическими атрибутами подкатегории.
+
+        Объявление размещается от имени организации из `organization_id`. Организация должна принадлежать
+        текущему покупателю (иначе `404`) и быть подтверждённой в реестре, `registry_status: verified`
+        (иначе `403`). Список организаций для выбора — `GET /api/v1/customer/organizations`.
     """,
-    responses=(CustomerProfileRequiredError,),
+    responses=(
+        OrganizationNotFoundError,
+        OrganizationCannotPublishError,
+    ),
 )
 
 CHANGE_LISTING_PRICE_DOC = RouteDocs(
@@ -21,7 +28,7 @@ CHANGE_LISTING_PRICE_DOC = RouteDocs(
     description="""
         Обновляет цену и валюту объявления.
     """,
-    responses=(CustomerProfileRequiredError,),
+    responses=(ListingNotFoundError,),
 )
 
 CHANGE_LISTING_LOCATION_DOC = RouteDocs(
@@ -30,7 +37,7 @@ CHANGE_LISTING_LOCATION_DOC = RouteDocs(
     description="""
         Обновляет город объявления.
     """,
-    responses=(CustomerProfileRequiredError,),
+    responses=(ListingNotFoundError,),
 )
 
 CHANGE_LISTING_DESCRIPTION_DOC = RouteDocs(
@@ -39,7 +46,7 @@ CHANGE_LISTING_DESCRIPTION_DOC = RouteDocs(
     description="""
         Обновляет текстовое описание объявления.
     """,
-    responses=(CustomerProfileRequiredError,),
+    responses=(ListingNotFoundError,),
 )
 
 CHANGE_LISTING_ATTRIBUTE_DOC = RouteDocs(
@@ -48,7 +55,7 @@ CHANGE_LISTING_ATTRIBUTE_DOC = RouteDocs(
     description="""
         Обновляет значения динамических атрибутов объявления в рамках подкатегории.
     """,
-    responses=(CustomerProfileRequiredError,),
+    responses=(ListingNotFoundError,),
 )
 
 ACTIVATE_LISTING_DOC = RouteDocs(
@@ -58,7 +65,7 @@ ACTIVATE_LISTING_DOC = RouteDocs(
         Переводит объявление в статус `active` — делает его видимым в публичном каталоге.
     """,
     responses=(
-        CustomerProfileRequiredError,
+        ListingNotFoundError,
         ListingDeletedError,
     ),
 )
@@ -70,7 +77,7 @@ DEACTIVATE_LISTING_DOC = RouteDocs(
         Переводит объявление в статус `inactive` — скрывает из каталога без удаления.
     """,
     responses=(
-        CustomerProfileRequiredError,
+        ListingNotFoundError,
         ListingDeletedError,
     ),
 )
@@ -82,7 +89,7 @@ ARCHIVE_LISTING_DOC = RouteDocs(
         Переводит объявление в статус `archived`.
     """,
     responses=(
-        CustomerProfileRequiredError,
+        ListingNotFoundError,
         ListingDeletedError,
     ),
 )
@@ -94,7 +101,7 @@ DELETE_LISTING_DOC = RouteDocs(
         Переводит объявление в статус `deleted` (мягкое удаление).
     """,
     responses=(
-        CustomerProfileRequiredError,
+        ListingNotFoundError,
         ListingDeletedError,
     ),
 )

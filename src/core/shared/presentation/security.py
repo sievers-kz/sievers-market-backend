@@ -15,8 +15,6 @@ from src.core.admin.domain.exceptions import (
 )
 from src.core.admin.infrastructure.uow import AdminUnitOfWork
 from src.core.customer.application.usecases import GetOrCreateCustomerUseCase
-from src.core.customer.domain.exceptions import OrganizationRequiredError
-from src.core.customer.infrastructure.uow import CustomerUnitOfWork
 from src.core.iam.domain.enums import TokenType
 from src.core.iam.domain.exceptions import (
     InvalidTokenError,
@@ -30,7 +28,6 @@ from src.core.shared.infrastructure.services.api_session_service import (
 )
 from src.core.shared.presentation.dto import (
     CurrentCustomer,
-    CurrentOrganization,
     CurrentUser,
 )
 
@@ -110,18 +107,6 @@ async def get_current_customer(
 ):
     customer = await usecase.execute(account.id)
     return CurrentCustomer(id=customer.id)
-
-
-@inject
-async def get_current_organization(
-    uow: Annotated[CustomerUnitOfWork, Depends(Provide[ApplicationContainer.customer.uow])],
-    customer: CurrentCustomer = Depends(get_current_customer),
-):
-    async with uow:
-        organization = await uow.organization.get_by_owner_id(customer.id)
-        if not organization:
-            raise OrganizationRequiredError()
-        return CurrentOrganization(id=organization.id)
 
 
 @inject

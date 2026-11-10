@@ -1,6 +1,7 @@
 from dependency_injector import containers, providers
 
 from src.core.customer.application.services.customer_service import CustomerService
+from src.core.customer.application.services.organization_service import OrganizationService
 from src.core.customer.application.services.taxpayer_service import TaxpayerService
 from src.core.customer.application.usecases import (
     ChangeCustomerFullnameUseCase,
@@ -44,6 +45,8 @@ class CustomerContainer(containers.DeclarativeContainer):
     query_service = providers.Factory(CustomerQueryService, session=database_session)
 
     customer_service = providers.Factory(CustomerService, uow=uow)
+
+    organization_service = providers.Factory(OrganizationService, uow=uow)
 
     change_customer_fullname_usecase = providers.Factory(ChangeCustomerFullnameUseCase, uow=uow)
 

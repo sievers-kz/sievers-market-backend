@@ -1,4 +1,5 @@
 import random
+from dataclasses import replace
 from unittest.mock import AsyncMock
 
 import pytest
@@ -8,6 +9,7 @@ from src.core.customer.application.interfaces.taxpayer_gateway import ITaxpayerG
 from src.core.customer.domain.entities import Customer, Organization
 from src.core.customer.domain.enums import Kind, RegistryStatus
 from src.core.customer.presentation.dto import TaxpayerResponse
+from src.core.iam.domain.value_objects import Email
 from tests.iam.conftest import create_domain_account
 
 
@@ -41,16 +43,30 @@ def customer_uow(container):
 
 
 @pytest_asyncio.fixture
-async def create_customer(account_repository, customer_uow) -> Customer:
-    account = create_domain_account(is_active=True)
-    await account_repository.save(account)
+async def make_customer(account_repository, customer_uow):
+    """Creates an account plus a customer profile; pass a distinct email for every extra customer."""
 
-    customer = Customer.create(account_id=account.id)
-    async with customer_uow as uow:
-        await uow.customer.save(customer)
-        await uow.commit()
+    async def _make(email: str = "test@example.com") -> Customer:
+        account = replace(create_domain_account(is_active=True), email=Email(email))
+        await account_repository.save(account)
 
-    return customer
+        customer = Customer.create(account_id=account.id)
+        async with customer_uow as uow:
+            await uow.customer.save(customer)
+            await uow.commit()
+        return customer
+
+    return _make
+
+
+@pytest_asyncio.fixture
+async def create_customer(make_customer) -> Customer:
+    return await make_customer()
+
+
+@pytest_asyncio.fixture
+async def other_customer(make_customer) -> Customer:
+    return await make_customer("other@example.com")
 
 
 @pytest_asyncio.fixture
@@ -104,3 +120,8 @@ def verify_organization_registry_usecase(container, mock_taxpayer_gateway):
     # No `await` here, unlike in the worker: tests override session_factory with a plain factory,
     # while in production it depends on the async engine Resource and the provider returns a Future.
     return container.customer.verify_organization_registry_usecase()
+
+
+@pytest.fixture
+def organization_service(container):
+    return container.customer.organization_service()
