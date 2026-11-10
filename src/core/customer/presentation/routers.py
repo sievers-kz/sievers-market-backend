@@ -12,6 +12,11 @@ from src.core.customer.presentation.dependencies import (
 )
 from src.core.customer.presentation.documentation import (
     CHANGE_CUSTOMER_FULLNAME_DOC,
+    CREATE_ORGANIZATION_DOC,
+    DELETE_ORGANIZATION_DOC,
+    GET_CUSTOMER_ME_DOC,
+    GET_ORGANIZATION_DOC,
+    GET_ORGANIZATIONS_DOC,
 )
 from src.core.customer.presentation.dto import (
     ChangeCustomerFullname,
@@ -27,7 +32,14 @@ from src.core.shared.presentation.security import get_current_customer
 customer_router = APIRouter(prefix="/api/v1/customer", tags=["Customer"])
 
 
-@customer_router.get("/me", response_model=CustomerMeResponse)
+@customer_router.get(
+    "/me",
+    response_model=CustomerMeResponse,
+    operation_id=GET_CUSTOMER_ME_DOC.operation_id,
+    summary=GET_CUSTOMER_ME_DOC.summary,
+    responses=GET_CUSTOMER_ME_DOC.responses_doc,
+    description=GET_CUSTOMER_ME_DOC.description,
+)
 @inject
 async def get_me(
     service: CustomerQueryServiceDependency,
@@ -36,7 +48,14 @@ async def get_me(
     return await service.get_me(current_customer.id)
 
 
-@customer_router.get("/organization/{organization_id}", response_model=OrganizationResponse)
+@customer_router.get(
+    "/organization/{organization_id}",
+    response_model=OrganizationResponse,
+    operation_id=GET_ORGANIZATION_DOC.operation_id,
+    summary=GET_ORGANIZATION_DOC.summary,
+    responses=GET_ORGANIZATION_DOC.responses_doc,
+    description=GET_ORGANIZATION_DOC.description,
+)
 @inject
 async def get_organization(
     organization_id: UUID,
@@ -46,7 +65,14 @@ async def get_organization(
     return await service.get_organization(current_customer.id, organization_id)
 
 
-@customer_router.get("/organizations", response_model=list[OrganizationListResponse])
+@customer_router.get(
+    "/organizations",
+    response_model=list[OrganizationListResponse],
+    operation_id=GET_ORGANIZATIONS_DOC.operation_id,
+    summary=GET_ORGANIZATIONS_DOC.summary,
+    responses=GET_ORGANIZATIONS_DOC.responses_doc,
+    description=GET_ORGANIZATIONS_DOC.description,
+)
 @inject
 async def get_organizations(
     service: CustomerQueryServiceDependency,
@@ -76,6 +102,10 @@ async def change_customer_fullname(
     "/organization",
     response_model=CreateOrganizationResponse,
     status_code=status.HTTP_201_CREATED,
+    operation_id=CREATE_ORGANIZATION_DOC.operation_id,
+    summary=CREATE_ORGANIZATION_DOC.summary,
+    responses=CREATE_ORGANIZATION_DOC.responses_doc,
+    description=CREATE_ORGANIZATION_DOC.description,
 )
 @inject
 async def create_organization(
@@ -89,6 +119,10 @@ async def create_organization(
 @customer_router.delete(
     "/organization/{organization_id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    operation_id=DELETE_ORGANIZATION_DOC.operation_id,
+    summary=DELETE_ORGANIZATION_DOC.summary,
+    responses=DELETE_ORGANIZATION_DOC.responses_doc,
+    description=DELETE_ORGANIZATION_DOC.description,
 )
 @inject
 async def delete_organization(
