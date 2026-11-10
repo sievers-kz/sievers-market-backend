@@ -11,8 +11,8 @@ from src.core.customer.domain.exceptions import TaxpayerRegistryUnavailableError
 
 async def startup(ctx):
     container = ApplicationContainer()
+    ctx["container"] = container
     ctx["resend_sender"] = container.shared.resend_sender()
-    ctx["verify_organization_registry_usecase"] = container.customer.verify_organization_registry_usecase()
 
 
 async def send_otp_email(ctx, to: str, code: str):
@@ -52,7 +52,9 @@ async def send_otp_change_password(ctx, to: str, code: str):
 
 
 async def verify_organization_registry(ctx: dict, organization_id: str) -> None:
-    usecase = await ctx["verify_organization_registry_usecase"]
+    # Use case is built per job: its UoW keeps the session on self,
+    # so sharing one instance between concurrent jobs would mix their sessions.
+    usecase = await ctx["container"].customer.verify_organization_registry_usecase()
     try:
         await usecase.execute(UUID(organization_id))
     except TaxpayerRegistryUnavailableError:

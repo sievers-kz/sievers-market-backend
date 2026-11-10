@@ -8,11 +8,11 @@ class TestCreateListingUseCase:
         self,
         create_listing_usecase,
         listing_repository,
-        create_vendor,
+        create_organization,
         create_listing_request,
     ):
         dto = create_listing_request
-        listing_id = await create_listing_usecase.execute(create_vendor.id, dto)
+        listing_id = await create_listing_usecase.execute(create_organization.id, dto)
 
         listing = await listing_repository.get_by_id(listing_id)
         assert listing is not None

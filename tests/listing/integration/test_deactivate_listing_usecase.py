@@ -10,14 +10,14 @@ class TestDeactivateListingUseCase:
         self,
         create_listing_usecase,
         deactivate_listing_usecase,
-        create_vendor,
+        create_organization,
         listing_repository,
         create_listing_request,
     ):
         dto = create_listing_request
-        listing_id = await create_listing_usecase.execute(create_vendor.id, dto)
+        listing_id = await create_listing_usecase.execute(create_organization.id, dto)
 
-        await deactivate_listing_usecase.execute(create_vendor.id, listing_id)
+        await deactivate_listing_usecase.execute(create_organization.id, listing_id)
         listing = await listing_repository.get_by_id(listing_id)
 
         assert listing is not None
