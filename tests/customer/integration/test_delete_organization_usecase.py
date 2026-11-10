@@ -1,15 +1,11 @@
 import uuid
-from dataclasses import replace
 
 import pytest
 
-from src.core.customer.domain.entities import Customer
 from src.core.customer.domain.enums import Kind, RegistryStatus
 from src.core.customer.domain.exceptions import OrganizationCannotBeDeletedError, OrganizationNotFoundError
 from src.core.customer.presentation.dto import CreateOrganizationRequest
-from src.core.iam.domain.value_objects import Email
 from tests.customer.conftest import create_domain_organization
-from tests.iam.conftest import create_domain_account
 
 
 class TestDeleteOrganizationUseCase:
@@ -51,17 +47,9 @@ class TestDeleteOrganizationUseCase:
         create_customer,
         save_organization,
         get_organization,
-        account_repository,
-        customer_uow,
+        other_customer,
     ):
         organization = await save_organization(create_domain_organization(owner_id=create_customer.id))
-
-        other_account = replace(create_domain_account(is_active=True), email=Email("other@example.com"))
-        await account_repository.save(other_account)
-        other_customer = Customer.create(account_id=other_account.id)
-        async with customer_uow as uow:
-            await uow.customer.save(other_customer)
-            await uow.commit()
 
         with pytest.raises(OrganizationNotFoundError):
             await delete_organization_usecase.execute(other_customer.id, organization.id)

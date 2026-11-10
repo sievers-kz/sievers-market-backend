@@ -65,3 +65,8 @@ class TaxpayerRegistryUnavailableError(Exception):
 class OrganizationCannotBeDeletedError(RulesError):
     message = "Нельзя удалить активную организацию"
     error_code = "organization_cannot_be_deleted"
+
+
+class OrganizationCannotPublishError(AccessDeniedError):
+    message = "Организация ещё не подтверждена и не может размещать объявления"
+    error_code = "organization_cannot_publish_error"

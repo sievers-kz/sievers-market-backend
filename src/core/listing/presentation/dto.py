@@ -20,6 +20,7 @@ class ListingImage(DTO):
 
 
 class CreateListingRequest(DTO):
+    organization_id: UUID
     category_id: UUID
     subcategory_id: UUID
     title: str
