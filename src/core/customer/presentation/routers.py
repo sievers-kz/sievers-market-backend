@@ -1,40 +1,84 @@
+from uuid import UUID
+
 from dependency_injector.wiring import inject
-from fastapi import APIRouter
+from fastapi import APIRouter, status
 from fastapi.params import Security
 
 from src.core.customer.presentation.dependencies import (
     ChangeCustomerFullnameUseCaseDependency,
-    CreateCustomerUseCaseDependency,
+    CreateOrganizationUseCaseDependency,
+    CustomerQueryServiceDependency,
+    DeleteOrganizationUseCaseDependency,
 )
 from src.core.customer.presentation.documentation import (
     CHANGE_CUSTOMER_FULLNAME_DOC,
-    CREATE_CUSTOMER_DOC,
+    CREATE_ORGANIZATION_DOC,
+    DELETE_ORGANIZATION_DOC,
+    GET_CUSTOMER_ME_DOC,
+    GET_ORGANIZATION_DOC,
+    GET_ORGANIZATIONS_DOC,
 )
 from src.core.customer.presentation.dto import (
     ChangeCustomerFullname,
-    CreateCustomerRequest,
+    CreateOrganizationRequest,
+    CreateOrganizationResponse,
+    CustomerMeResponse,
+    OrganizationListResponse,
+    OrganizationResponse,
 )
-from src.core.shared.presentation.dto import CurrentCustomer, CurrentUser
-from src.core.shared.presentation.security import get_current_customer, get_current_user
+from src.core.shared.presentation.dto import CurrentCustomer
+from src.core.shared.presentation.security import get_current_customer
 
 customer_router = APIRouter(prefix="/api/v1/customer", tags=["Customer"])
 
 
-@customer_router.post(
-    "/",
-    operation_id=CREATE_CUSTOMER_DOC.operation_id,
-    summary=CREATE_CUSTOMER_DOC.summary,
-    responses=CREATE_CUSTOMER_DOC.responses_doc,
-    description=CREATE_CUSTOMER_DOC.description,
+@customer_router.get(
+    "/me",
+    response_model=CustomerMeResponse,
+    operation_id=GET_CUSTOMER_ME_DOC.operation_id,
+    summary=GET_CUSTOMER_ME_DOC.summary,
+    responses=GET_CUSTOMER_ME_DOC.responses_doc,
+    description=GET_CUSTOMER_ME_DOC.description,
 )
 @inject
-async def create_customer(
-    dto: CreateCustomerRequest,
-    usecase: CreateCustomerUseCaseDependency,
-    current_user: CurrentUser = Security(get_current_user),
+async def get_me(
+    service: CustomerQueryServiceDependency,
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_user.id, dto)
-    return {"message": "Профиль покупателя успешно создан"}
+    return await service.get_me(current_customer.id)
+
+
+@customer_router.get(
+    "/organization/{organization_id}",
+    response_model=OrganizationResponse,
+    operation_id=GET_ORGANIZATION_DOC.operation_id,
+    summary=GET_ORGANIZATION_DOC.summary,
+    responses=GET_ORGANIZATION_DOC.responses_doc,
+    description=GET_ORGANIZATION_DOC.description,
+)
+@inject
+async def get_organization(
+    organization_id: UUID,
+    service: CustomerQueryServiceDependency,
+    current_customer: CurrentCustomer = Security(get_current_customer),
+):
+    return await service.get_organization(current_customer.id, organization_id)
+
+
+@customer_router.get(
+    "/organizations",
+    response_model=list[OrganizationListResponse],
+    operation_id=GET_ORGANIZATIONS_DOC.operation_id,
+    summary=GET_ORGANIZATIONS_DOC.summary,
+    responses=GET_ORGANIZATIONS_DOC.responses_doc,
+    description=GET_ORGANIZATIONS_DOC.description,
+)
+@inject
+async def get_organizations(
+    service: CustomerQueryServiceDependency,
+    current_customer: CurrentCustomer = Security(get_current_customer),
+):
+    return await service.get_organizations(current_customer.id)
 
 
 @customer_router.patch(
@@ -52,3 +96,38 @@ async def change_customer_fullname(
 ):
     await usecase.execute(current_customer.id, dto)
     return {"message": "ФИО успешно изменены"}
+
+
+@customer_router.post(
+    "/organization",
+    response_model=CreateOrganizationResponse,
+    status_code=status.HTTP_201_CREATED,
+    operation_id=CREATE_ORGANIZATION_DOC.operation_id,
+    summary=CREATE_ORGANIZATION_DOC.summary,
+    responses=CREATE_ORGANIZATION_DOC.responses_doc,
+    description=CREATE_ORGANIZATION_DOC.description,
+)
+@inject
+async def create_organization(
+    dto: CreateOrganizationRequest,
+    usecase: CreateOrganizationUseCaseDependency,
+    current_customer: CurrentCustomer = Security(get_current_customer),
+):
+    return await usecase.execute(current_customer.id, dto)
+
+
+@customer_router.delete(
+    "/organization/{organization_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    operation_id=DELETE_ORGANIZATION_DOC.operation_id,
+    summary=DELETE_ORGANIZATION_DOC.summary,
+    responses=DELETE_ORGANIZATION_DOC.responses_doc,
+    description=DELETE_ORGANIZATION_DOC.description,
+)
+@inject
+async def delete_organization(
+    organization_id: UUID,
+    usecase: DeleteOrganizationUseCaseDependency,
+    current_customer: CurrentCustomer = Security(get_current_customer),
+) -> None:
+    await usecase.execute(current_customer.id, organization_id)

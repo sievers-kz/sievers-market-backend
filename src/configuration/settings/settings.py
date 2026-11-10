@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import Tuple, Type
 
 from pydantic import Field, computed_field, model_validator
@@ -89,8 +90,16 @@ class SentryConfig(BaseConfig):
     mode: str = Field(alias="MODE")
 
 
-class KGDSettings(BaseConfig):
-    portal_token: str = Field(alias="KGD_PORTAL_TOKEN")
+class TaxpayerProvider(StrEnum):
+    DADATA = "dadata"
+    KGD = "kgd"
+    MOCK = "mock"
+
+
+class TaxpayerRegistrySettings(BaseConfig):
+    source: TaxpayerProvider = Field(TaxpayerProvider.DADATA, alias="TAXPAYER_PROVIDER")
+    dadata_api_key: str | None = Field(None, alias="DADATA_API_KEY")
+    kgd_portal_token: str | None = Field(None, alias="KGD_PORTAL_TOKEN")
 
 
 class MeilisearchConfig(BaseConfig):
@@ -108,5 +117,5 @@ class ApplicationSettings(BaseConfig):
     redis_config: RedisConfig = Field(default_factory=RedisConfig)
     resend_config: ResendSettings = Field(default_factory=ResendSettings)
     sentry_config: SentryConfig = Field(default_factory=SentryConfig)
-    kgd_settings: KGDSettings = Field(default_factory=KGDSettings)
+    taxpayer_registry_config: TaxpayerRegistrySettings = Field(default_factory=TaxpayerRegistrySettings)
     meilisearch_config: MeilisearchConfig = Field(default_factory=MeilisearchConfig)

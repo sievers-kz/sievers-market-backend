@@ -8,7 +8,7 @@ class ListingMapper:
     def to_orm(domain_model: DomainListing) -> ORMListing:
         return ORMListing(
             id=domain_model.id,
-            owner_id=domain_model.owner_id,
+            organization_id=domain_model.organization_id,
             category_id=domain_model.category_id,
             subcategory_id=domain_model.subcategory_id,
             title=domain_model.title,
@@ -25,7 +25,7 @@ class ListingMapper:
     def to_domain(orm_model: ORMListing) -> DomainListing:
         return DomainListing(
             id=orm_model.id,
-            owner_id=orm_model.owner_id,
+            organization_id=orm_model.organization_id,
             category_id=orm_model.category_id,
             subcategory_id=orm_model.subcategory_id,
             title=orm_model.title,

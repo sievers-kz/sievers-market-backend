@@ -20,7 +20,6 @@ from src.core.iam.application.usecases.request_password_change import RequestPas
 from src.core.iam.infrastructure.repository import AccountRepository
 from src.core.iam.infrastructure.services.password_service import PasswordService
 from src.core.iam.infrastructure.services.pyjwt_token import PyJWTTokenService
-from src.core.iam.infrastructure.services.query_service import GetMeQueryService
 from src.core.iam.infrastructure.uow import IAMUnitOfWork
 from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormalizer
 
@@ -33,8 +32,6 @@ class IAMContainer(containers.DeclarativeContainer):
     redis_service = providers.Dependency()
     arq_service = providers.Dependency()
     bloom_filter = providers.Dependency()
-
-    query_service = providers.Factory(GetMeQueryService, session=database_session)
 
     password_service = providers.Factory(
         PasswordService,

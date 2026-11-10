@@ -8,12 +8,12 @@ class ArchiveListingUseCase:
     def __init__(self, uow: ListingUnitOfWork):
         self.uow = uow
 
-    async def execute(self, vendor_id: UUID, listing_id: UUID):
+    async def execute(self, organization_id: UUID, listing_id: UUID):
         async with self.uow as uow:
             listing = await uow.listing.get_by_id(listing_id)
-            if not listing or listing.owner_id != vendor_id:
+            if not listing or listing.organization_id != organization_id:
                 raise ListingNotFoundError()
 
-            listing.archive(vendor_id)
+            listing.archive(organization_id)
             await uow.listing.save(listing)
             await uow.commit()

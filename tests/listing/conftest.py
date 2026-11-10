@@ -9,19 +9,17 @@ from src.core.listing.domain.enums import ListingStatus
 from src.core.listing.domain.value_objects import Gallery, Image
 from src.core.listing.presentation.dto import CreateListingRequest, ListingImage
 from src.core.shared.domain.enums import PriceCurrency
-from tests.iam.conftest import create_domain_account
-from tests.vendor.conftest import create_domain_vendor
 
 
 def create_domain_listing(
-    owner_id: uuid.UUID,
+    organization_id: uuid.UUID,
     city_id: uuid.UUID,
     category_id: uuid.UUID,
     subcategory_id: uuid.UUID,
 ) -> Listing:
     return Listing(
         id=uuid.uuid4(),
-        owner_id=owner_id,
+        organization_id=organization_id,
         category_id=category_id,
         subcategory_id=subcategory_id,
         title="Трактор John Deere",
@@ -124,21 +122,13 @@ def listing_repository(container):
 
 
 @pytest_asyncio.fixture
-async def create_listing(listing_repository, account_repository, vendor_repository, database_session):
-    account = create_domain_account(is_active=True)
-    await account_repository.save(account)
-
-    vendor = create_domain_vendor(account_id=account.id)
-    await vendor_repository.save(vendor)
-
-    from sqlalchemy import text
-
+async def create_listing(listing_repository, create_organization, database_session):
     city_id = (await database_session.execute(text("SELECT id FROM cities LIMIT 1"))).scalar_one()
     category_id = (await database_session.execute(text("SELECT id FROM categories LIMIT 1"))).scalar_one()
     subcategory_id = (await database_session.execute(text("SELECT id FROM subcategories LIMIT 1"))).scalar_one()
 
     listing = create_domain_listing(
-        owner_id=vendor.id,
+        organization_id=create_organization.id,
         city_id=city_id,
         category_id=category_id,
         subcategory_id=subcategory_id,

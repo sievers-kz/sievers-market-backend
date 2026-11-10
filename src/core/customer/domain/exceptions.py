@@ -1,6 +1,8 @@
 from src.core.shared.domain.exceptions import (
     AccessDeniedError,
+    ConflictError,
     NotFoundError,
+    RulesError,
     ValidationError,
 )
 
@@ -29,3 +31,37 @@ class InvalidFullnameFormatError(ValidationError):
 class CustomerProfileRequiredError(AccessDeniedError):
     message = "Доступ запрещен. Необходимо иметь профиль покупателя"
     error_code = "customer_profile_required_error"
+
+
+class TaxpayerNotFoundError(NotFoundError):
+    message = "Не удалось найти такую организацию"
+    error_code = "taxpayer_not_found_error"
+
+
+class OrganizationAlreadyExistsError(ConflictError):
+    message = "Такая организация уже зарегистрирована"
+    error_code = "organization_already_exists_error"
+
+
+class OrganizationOwnershipLimitError(RulesError):
+    message = "У вас не может быть больше одной организации"
+    error_code = "organization_ownership_limit_error"
+
+
+class OrganizationRequiredError(AccessDeniedError):
+    message = "Требуется организация"
+    error_code = "organization_required_error"
+
+
+class OrganizationNotFoundError(NotFoundError):
+    message = "Не удалось найти такую организацию"
+    error_code = "organization_not_found_error"
+
+
+class TaxpayerRegistryUnavailableError(Exception):
+    pass
+
+
+class OrganizationCannotBeDeletedError(RulesError):
+    message = "Нельзя удалить активную организацию"
+    error_code = "organization_cannot_be_deleted"
