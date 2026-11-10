@@ -3,7 +3,6 @@ from uuid import UUID
 from sqlalchemy import cast, select
 from sqlalchemy.dialects.postgresql import UUID as PsqlUUID
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql.functions import coalesce
 
 from src.core.catalog.infrastructure.models import Subcategory
 from src.core.listing.domain.enums import ListingStatus
@@ -12,7 +11,6 @@ from src.core.listing.infrastructure.models import Listing
 from src.core.listing.presentation.dto import ListingCardResponse, ListingDetailResponse
 from src.core.references.infrastructure.models import City
 from src.core.shared.infrastructure.services.query_service import QueryService
-from src.core.vendor.infrastructure.models import Vendor
 
 
 class ListingQueryService(QueryService):
@@ -29,7 +27,6 @@ class ListingQueryService(QueryService):
         statement = (
             select(
                 Listing.id,
-                coalesce(Vendor.shop_name, Vendor.legal_name).label("display_owner_name"),
                 Subcategory.name.label("subcategory"),
                 Listing.title,
                 Listing.price,
@@ -37,7 +34,6 @@ class ListingQueryService(QueryService):
                 City.name.label("city"),
                 cast(Listing.gallery[0]["media_id"].as_string(), PsqlUUID).label("preview_image"),
             )
-            .join(Vendor, Listing.owner_id == Vendor.id)
             .join(Subcategory, Listing.subcategory_id == Subcategory.id)
             .join(City, Listing.city_id == City.id)
             .where(
@@ -61,10 +57,6 @@ class ListingQueryService(QueryService):
             select(
                 Listing.id,
                 Listing.owner_id,
-                coalesce(Vendor.shop_name, Vendor.legal_name).label("display_owner_name"),
-                Vendor.contact_phone,
-                Vendor.legal_address,
-                Vendor.logotype,
                 Subcategory.name.label("subcategory"),
                 Listing.title,
                 Listing.price,
@@ -74,7 +66,6 @@ class ListingQueryService(QueryService):
                 Listing.gallery,
                 Listing.attributes,
             )
-            .join(Vendor, Listing.owner_id == Vendor.id)
             .join(Subcategory, Listing.subcategory_id == Subcategory.id)
             .join(City, Listing.city_id == City.id)
             .where(Listing.id == listing_id, Listing.status == ListingStatus.ACTIVE)

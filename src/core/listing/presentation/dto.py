@@ -111,7 +111,6 @@ class ListingSearchQuery(DTO):
 
 class ListingCardResponse(DTO):
     id: UUID
-    display_owner_name: str
     subcategory: str
     title: str
     price: int
@@ -123,8 +122,6 @@ class ListingCardResponse(DTO):
 class ListingDetailResponse(DTO):
     id: UUID
     owner_id: UUID
-    contact_phone: str | None
-    display_owner_name: str
     subcategory: str
     title: str
     price: int

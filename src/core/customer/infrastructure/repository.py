@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.customer.domain.entities import Customer as DomainCustomer
@@ -67,3 +67,16 @@ class OrganizationRepository:
         if orm_model is None:
             return None
         return OrganizationMapper.to_domain(orm_model)
+
+    async def get_by_tax_id(self, tax_id: str) -> DomainOrganization:
+        statement = select(self._model).where(self._model.tax_id == tax_id)
+        query_result = await self._session.execute(statement)
+        orm_model = query_result.scalar_one_or_none()
+
+        if orm_model is None:
+            return None
+        return OrganizationMapper.to_domain(orm_model)
+
+    async def delete(self, organization_id: UUID) -> None:
+        statement = delete(self._model).where(self._model.id == organization_id)
+        await self._session.execute(statement)

@@ -1,8 +1,7 @@
-import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import UUID, DateTime, Enum, func
+from sqlalchemy import UUID, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.configuration.database.connection import Base
@@ -19,12 +18,3 @@ class BaseModel(Base):
         onupdate=func.now(),
         nullable=False,
     )
-
-    type_annotation_map = {
-        enum.Enum: Enum(
-            enum.Enum,  # Абстрактный маркер
-            native_enum=False,  # Отключает родные Enum базы данных (будет VARCHAR)
-            # Заставляет SQLAlchemy динамически брать .value конкретного энума
-            values_callable=lambda obj: [item.value for item in obj],
-        )
-    }

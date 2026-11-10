@@ -1,8 +1,8 @@
-"""initial
+"""initial_migration
 
-Revision ID: f9b9974d3411
+Revision ID: 411aa757fcd8
 Revises: 
-Create Date: 2026-09-19 09:30:23.941998
+Create Date: 2026-11-09 15:56:58.426209
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'f9b9974d3411'
+revision: str = '411aa757fcd8'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -35,7 +35,7 @@ def upgrade() -> None:
     op.create_table('attribute_definitions',
     sa.Column('key', sa.String(), nullable=False),
     sa.Column('label', sa.String(), nullable=False),
-    sa.Column('type', sa.Enum('STRING', 'INTEGER', 'BOOLEAN', 'FLOAT', 'ENUMERATE', 'REFERENCE', name='attributetype'), nullable=False),
+    sa.Column('type', sa.Enum('string', 'integer', 'boolean', 'float', 'enumerate', 'reference', name='attributetype', native_enum=False), nullable=False),
     sa.Column('options', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('source', sa.String(), nullable=True),
     sa.Column('id', sa.UUID(), nullable=False),
@@ -78,7 +78,7 @@ def upgrade() -> None:
     op.create_table('media',
     sa.Column('owner_id', sa.UUID(), nullable=False),
     sa.Column('media_url', sa.String(), nullable=False),
-    sa.Column('media_type', sa.Enum('PNG', 'JPEG', 'WEBP', name='mediatype'), nullable=False),
+    sa.Column('media_type', sa.Enum('image/png', 'image/jpeg', 'image/webp', name='mediatype', native_enum=False), nullable=False),
     sa.Column('media_size', sa.Integer(), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -102,7 +102,7 @@ def upgrade() -> None:
     )
     op.create_table('rubrics',
     sa.Column('name', sa.String(length=50), nullable=False),
-    sa.Column('status', sa.Enum('ACTIVE', 'DELETED', name='catalogstatus'), nullable=False),
+    sa.Column('status', sa.Enum('active', 'deleted', name='catalogstatus', native_enum=False), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -121,7 +121,7 @@ def upgrade() -> None:
     sa.Column('last_name', sa.String(), nullable=False),
     sa.Column('first_name', sa.String(), nullable=False),
     sa.Column('patronymic', sa.String(), nullable=True),
-    sa.Column('role', sa.Enum('SUPER_ADMIN', 'ADMIN', 'MODERATOR', name='adminroles'), nullable=False),
+    sa.Column('role', sa.Enum('super_admin', 'admin', 'moderator', name='adminroles', native_enum=False), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -132,7 +132,7 @@ def upgrade() -> None:
     op.create_table('categories',
     sa.Column('rubric_id', sa.UUID(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
-    sa.Column('status', sa.Enum('ACTIVE', 'DELETED', name='catalogstatus'), nullable=False),
+    sa.Column('status', sa.Enum('active', 'deleted', name='catalogstatus', native_enum=False), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -141,10 +141,9 @@ def upgrade() -> None:
     )
     op.create_table('customers',
     sa.Column('account_id', sa.UUID(), nullable=False),
-    sa.Column('last_name', sa.String(length=50), nullable=False),
-    sa.Column('first_name', sa.String(length=50), nullable=False),
+    sa.Column('last_name', sa.String(length=50), nullable=True),
+    sa.Column('first_name', sa.String(length=50), nullable=True),
     sa.Column('patronymic', sa.String(length=50), nullable=True),
-    sa.Column('avatar_url', sa.Text(), server_default='default_avatar.png', nullable=True),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -154,7 +153,7 @@ def upgrade() -> None:
     )
     op.create_table('tokens',
     sa.Column('account_id', sa.UUID(), nullable=False),
-    sa.Column('type', sa.Enum('REFRESH', 'ACCESS', 'EMAIL', 'PASSWORD', name='tokentype'), nullable=False),
+    sa.Column('type', sa.Enum('refresh', 'access', 'email', 'password', name='tokentype', native_enum=False), nullable=False),
     sa.Column('value', sa.Text(), nullable=False),
     sa.Column('is_revoked', sa.Boolean(), server_default='false', nullable=False),
     sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False),
@@ -163,28 +162,6 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('vendors',
-    sa.Column('account_id', sa.UUID(), nullable=False),
-    sa.Column('contact_last_name', sa.String(), nullable=False),
-    sa.Column('contact_first_name', sa.String(), nullable=False),
-    sa.Column('contact_patronymic', sa.String(), nullable=True),
-    sa.Column('contact_phone', sa.String(), nullable=True),
-    sa.Column('legal_name', sa.String(), nullable=False),
-    sa.Column('legal_address', sa.String(), nullable=False),
-    sa.Column('tax_id', sa.String(), nullable=False),
-    sa.Column('legal_form', sa.Enum('IE', 'LLP', 'JSC', 'FARM', name='legalform'), nullable=False),
-    sa.Column('shop_name', sa.String(), nullable=True),
-    sa.Column('logotype', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('is_verified', sa.Boolean(), nullable=False),
-    sa.Column('status', sa.Enum('ACTIVE', 'CLOSED', 'BANNED', name='vendorstatus'), nullable=False),
-    sa.Column('closed_at', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('tax_id')
     )
     op.create_table('admin_permissions',
     sa.Column('admin_id', sa.UUID(), nullable=False),
@@ -196,10 +173,32 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['permission_id'], ['permissions.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('admin_id', 'permission_id', 'id')
     )
+    op.create_table('organizations',
+    sa.Column('owner_id', sa.UUID(), nullable=False),
+    sa.Column('legal_name', sa.String(length=255), nullable=True),
+    sa.Column('legal_address', sa.String(), nullable=True),
+    sa.Column('tax_id', sa.String(), nullable=False),
+    sa.Column('kind', sa.Enum('individual', 'company', name='kind', native_enum=False), nullable=False),
+    sa.Column('form', sa.String(), nullable=True),
+    sa.Column('shop_name', sa.String(length=50), nullable=True),
+    sa.Column('logo_media_id', sa.UUID(), nullable=True),
+    sa.Column('contact_phone', sa.String(length=20), nullable=True),
+    sa.Column('contact_email', sa.String(length=255), nullable=True),
+    sa.Column('is_ownership_verified', sa.Boolean(), nullable=False),
+    sa.Column('registry_status', sa.Enum('verified', 'pending', 'not_found', name='registrystatus', native_enum=False), nullable=False),
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['logo_media_id'], ['media.id'], ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['owner_id'], ['customers.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('tax_id')
+    )
+    op.create_index(op.f('ix_organizations_owner_id'), 'organizations', ['owner_id'], unique=False)
     op.create_table('subcategories',
     sa.Column('category_id', sa.UUID(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
-    sa.Column('status', sa.Enum('ACTIVE', 'DELETED', name='catalogstatus'), nullable=False),
+    sa.Column('status', sa.Enum('active', 'deleted', name='catalogstatus', native_enum=False), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -207,23 +206,23 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('listings',
-    sa.Column('owner_id', sa.UUID(), nullable=False),
+    sa.Column('organization_id', sa.UUID(), nullable=False),
     sa.Column('category_id', sa.UUID(), nullable=False),
     sa.Column('subcategory_id', sa.UUID(), nullable=False),
     sa.Column('title', sa.String(), nullable=True),
     sa.Column('price', sa.BigInteger(), nullable=True),
-    sa.Column('currency', sa.Enum('KZT', 'RUB', 'USD', 'EUR', name='pricecurrency'), nullable=True),
+    sa.Column('currency', sa.Enum('KZT', 'RUB', 'USD', 'EUR', name='pricecurrency', native_enum=False), nullable=True),
     sa.Column('city_id', sa.UUID(), nullable=True),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('attributes', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('gallery', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('status', sa.Enum('ACTIVE', 'INACTIVE', 'ARCHIVED', 'DELETED', name='listingstatus'), nullable=True),
+    sa.Column('status', sa.Enum('active', 'inactive', 'archived', 'deleted', name='listingstatus', native_enum=False), nullable=True),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['city_id'], ['cities.id'], ondelete='SET NULL'),
-    sa.ForeignKeyConstraint(['owner_id'], ['vendors.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='RESTRICT'),
     sa.ForeignKeyConstraint(['subcategory_id'], ['subcategories.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -253,8 +252,9 @@ def downgrade() -> None:
     op.drop_table('subcategory_attributes')
     op.drop_table('listings')
     op.drop_table('subcategories')
+    op.drop_index(op.f('ix_organizations_owner_id'), table_name='organizations')
+    op.drop_table('organizations')
     op.drop_table('admin_permissions')
-    op.drop_table('vendors')
     op.drop_table('tokens')
     op.drop_table('customers')
     op.drop_table('categories')

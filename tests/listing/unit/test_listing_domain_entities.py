@@ -14,7 +14,7 @@ from src.core.shared.domain.enums import PriceCurrency
 def create_listing(status=ListingStatus.ACTIVE) -> Listing:
     return Listing(
         id=uuid.uuid4(),
-        owner_id=uuid.uuid4(),
+        organization_id=uuid.uuid4(),
         category_id=uuid.uuid4(),
         subcategory_id=uuid.uuid4(),
         title="Трактор John Deere",
@@ -41,67 +41,67 @@ class TestListingEntity:
     @pytest.mark.unit
     def test_activate_from_inactive_success(self):
         listing = create_listing(status=ListingStatus.INACTIVE)
-        listing.activate(listing.owner_id)
+        listing.activate(listing.organization_id)
         assert listing.status == ListingStatus.ACTIVE
 
     @pytest.mark.unit
     def test_activate_already_active_no_error(self):
         listing = create_listing(status=ListingStatus.ACTIVE)
-        listing.activate(listing.owner_id)
+        listing.activate(listing.organization_id)
         assert listing.status == ListingStatus.ACTIVE
 
     @pytest.mark.unit
     def test_activate_deleted_raises(self):
         listing = create_listing(status=ListingStatus.DELETED)
         with pytest.raises(ListingDeletedError):
-            listing.activate(listing.owner_id)
+            listing.activate(listing.organization_id)
 
     @pytest.mark.unit
     def test_deactivate_success(self):
         listing = create_listing(status=ListingStatus.ACTIVE)
-        listing.deactivate(listing.owner_id)
+        listing.deactivate(listing.organization_id)
         assert listing.status == ListingStatus.INACTIVE
 
     @pytest.mark.unit
     def test_deactivate_already_inactive_no_error(self):
         listing = create_listing(status=ListingStatus.INACTIVE)
-        listing.deactivate(listing.owner_id)
+        listing.deactivate(listing.organization_id)
         assert listing.status == ListingStatus.INACTIVE
 
     @pytest.mark.unit
     def test_archive_success(self):
         listing = create_listing(status=ListingStatus.ACTIVE)
-        listing.archive(listing.owner_id)
+        listing.archive(listing.organization_id)
         assert listing.status == ListingStatus.ARCHIVED
 
     @pytest.mark.unit
     def test_archive_already_archived_no_error(self):
         listing = create_listing(status=ListingStatus.ARCHIVED)
-        listing.archive(listing.owner_id)
+        listing.archive(listing.organization_id)
         assert listing.status == ListingStatus.ARCHIVED
 
     @pytest.mark.unit
     def test_archive_deleted_raises(self):
         listing = create_listing(status=ListingStatus.DELETED)
         with pytest.raises(ListingDeletedError):
-            listing.archive(listing.owner_id)
+            listing.archive(listing.organization_id)
 
     @pytest.mark.unit
     def test_delete_success(self):
         listing = create_listing(status=ListingStatus.ACTIVE)
-        listing.delete(listing.owner_id)
+        listing.delete(listing.organization_id)
         assert listing.status == ListingStatus.DELETED
 
     @pytest.mark.unit
     def test_delete_already_deleted_no_error(self):
         listing = create_listing(status=ListingStatus.DELETED)
-        listing.delete(listing.owner_id)
+        listing.delete(listing.organization_id)
         assert listing.status == ListingStatus.DELETED
 
     @pytest.mark.unit
     def test_change_price_success(self):
         listing = create_listing()
-        listing.change_price(listing.owner_id, 9000000, PriceCurrency.USD)
+        listing.change_price(listing.organization_id, 9000000, PriceCurrency.USD)
         assert listing.price == 9000000
         assert listing.currency == PriceCurrency.USD
 
@@ -109,18 +109,18 @@ class TestListingEntity:
     def test_change_location_success(self):
         listing = create_listing()
         new_city_id = uuid.uuid4()
-        listing.change_location(listing.owner_id, new_city_id)
+        listing.change_location(listing.organization_id, new_city_id)
         assert listing.city_id == new_city_id
 
     @pytest.mark.unit
     def test_change_description_success(self):
         listing = create_listing()
-        listing.change_description(listing.owner_id, "Новое описание")
+        listing.change_description(listing.organization_id, "Новое описание")
         assert listing.description == "Новое описание"
 
     @pytest.mark.unit
     def test_change_attributes_success(self):
         listing = create_listing()
         new_attrs = {"engine_power": 300, "fuel_type": "diesel"}
-        listing.change_attributes(listing.owner_id, new_attrs)
+        listing.change_attributes(listing.organization_id, new_attrs)
         assert listing.attributes == new_attrs

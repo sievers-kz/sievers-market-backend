@@ -1,10 +1,10 @@
+from src.core.customer.domain.exceptions import CustomerProfileRequiredError
 from src.core.listing.domain.exceptions import (
     ListingDeletedError,
     ListingInvalidFilterKeyError,
     ListingNotFoundError,
 )
 from src.core.shared.presentation.documentation import RouteDocs
-from src.core.vendor.domain.exceptions import VendorProfileRequiredError
 
 CREATE_LISTING_DOC = RouteDocs(
     operation_id="createListing",
@@ -12,7 +12,7 @@ CREATE_LISTING_DOC = RouteDocs(
     description="""
         Создаёт новое объявление продавца со статичными полями, галереей и динамическими атрибутами подкатегории.
     """,
-    responses=(VendorProfileRequiredError,),
+    responses=(CustomerProfileRequiredError,),
 )
 
 CHANGE_LISTING_PRICE_DOC = RouteDocs(
@@ -21,7 +21,7 @@ CHANGE_LISTING_PRICE_DOC = RouteDocs(
     description="""
         Обновляет цену и валюту объявления.
     """,
-    responses=(VendorProfileRequiredError,),
+    responses=(CustomerProfileRequiredError,),
 )
 
 CHANGE_LISTING_LOCATION_DOC = RouteDocs(
@@ -30,7 +30,7 @@ CHANGE_LISTING_LOCATION_DOC = RouteDocs(
     description="""
         Обновляет город объявления.
     """,
-    responses=(VendorProfileRequiredError,),
+    responses=(CustomerProfileRequiredError,),
 )
 
 CHANGE_LISTING_DESCRIPTION_DOC = RouteDocs(
@@ -39,7 +39,7 @@ CHANGE_LISTING_DESCRIPTION_DOC = RouteDocs(
     description="""
         Обновляет текстовое описание объявления.
     """,
-    responses=(VendorProfileRequiredError,),
+    responses=(CustomerProfileRequiredError,),
 )
 
 CHANGE_LISTING_ATTRIBUTE_DOC = RouteDocs(
@@ -48,7 +48,7 @@ CHANGE_LISTING_ATTRIBUTE_DOC = RouteDocs(
     description="""
         Обновляет значения динамических атрибутов объявления в рамках подкатегории.
     """,
-    responses=(VendorProfileRequiredError,),
+    responses=(CustomerProfileRequiredError,),
 )
 
 ACTIVATE_LISTING_DOC = RouteDocs(
@@ -58,7 +58,7 @@ ACTIVATE_LISTING_DOC = RouteDocs(
         Переводит объявление в статус `active` — делает его видимым в публичном каталоге.
     """,
     responses=(
-        VendorProfileRequiredError,
+        CustomerProfileRequiredError,
         ListingDeletedError,
     ),
 )
@@ -70,7 +70,7 @@ DEACTIVATE_LISTING_DOC = RouteDocs(
         Переводит объявление в статус `inactive` — скрывает из каталога без удаления.
     """,
     responses=(
-        VendorProfileRequiredError,
+        CustomerProfileRequiredError,
         ListingDeletedError,
     ),
 )
@@ -82,7 +82,7 @@ ARCHIVE_LISTING_DOC = RouteDocs(
         Переводит объявление в статус `archived`.
     """,
     responses=(
-        VendorProfileRequiredError,
+        CustomerProfileRequiredError,
         ListingDeletedError,
     ),
 )
@@ -94,7 +94,7 @@ DELETE_LISTING_DOC = RouteDocs(
         Переводит объявление в статус `deleted` (мягкое удаление).
     """,
     responses=(
-        VendorProfileRequiredError,
+        CustomerProfileRequiredError,
         ListingDeletedError,
     ),
 )

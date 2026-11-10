@@ -8,25 +8,24 @@ from src.core.customer.infrastructure.models import Organization as ORMOrganizat
 class CustomerMapper:
     @staticmethod
     def to_orm(customer: DomainCustomer) -> ORMCustomer:
+        fullname = customer.fullname
         return ORMCustomer(
             id=customer.id,
             account_id=customer.account_id,
-            last_name=customer.fullname.last_name,
-            first_name=customer.fullname.first_name,
-            patronymic=customer.fullname.patronymic,
+            last_name=fullname.last_name if fullname else None,
+            first_name=fullname.first_name if fullname else None,
+            patronymic=fullname.patronymic if fullname else None,
         )
 
     @staticmethod
     def to_domain(customer: ORMCustomer) -> DomainCustomer:
-        return DomainCustomer(
-            id=customer.id,
-            account_id=customer.account_id,
-            fullname=Fullname(
-                last_name=customer.last_name,
-                first_name=customer.first_name,
-                patronymic=customer.patronymic,
-            ),
-        )
+        fullname = None
+        if customer.last_name is not None or customer.first_name is not None:
+            fullname = Fullname(
+                last_name=customer.last_name, first_name=customer.first_name, patronymic=customer.patronymic
+            )
+
+        return DomainCustomer(id=customer.id, account_id=customer.account_id, fullname=fullname)
 
 
 class OrganizationMapper:
@@ -42,10 +41,10 @@ class OrganizationMapper:
             form=organization.form,
             shop_name=organization.shop_name,
             logo_media_id=organization.logo_media_id,
-            is_registry_verified=organization.is_registry_verified,
-            is_ownership_verified=organization.is_ownership_verified,
             contact_phone=organization.contact_phone,
             contact_email=organization.contact_email,
+            is_ownership_verified=organization.is_ownership_verified,
+            registry_status=organization.registry_status,
         )
 
     @staticmethod
@@ -60,8 +59,8 @@ class OrganizationMapper:
             form=organization.form,
             shop_name=organization.shop_name,
             logo_media_id=organization.logo_media_id,
-            is_registry_verified=organization.is_registry_verified,
-            is_ownership_verified=organization.is_ownership_verified,
             contact_phone=organization.contact_phone,
             contact_email=organization.contact_email,
+            is_ownership_verified=organization.is_ownership_verified,
+            registry_status=organization.registry_status,
         )

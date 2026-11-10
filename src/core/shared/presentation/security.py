@@ -14,7 +14,8 @@ from src.core.admin.domain.exceptions import (
     InsufficientPermissionsError,
 )
 from src.core.admin.infrastructure.uow import AdminUnitOfWork
-from src.core.customer.domain.exceptions import CustomerProfileRequiredError
+from src.core.customer.application.usecases import GetOrCreateCustomerUseCase
+from src.core.customer.domain.exceptions import OrganizationRequiredError
 from src.core.customer.infrastructure.uow import CustomerUnitOfWork
 from src.core.iam.domain.enums import TokenType
 from src.core.iam.domain.exceptions import (
@@ -29,11 +30,9 @@ from src.core.shared.infrastructure.services.api_session_service import (
 )
 from src.core.shared.presentation.dto import (
     CurrentCustomer,
+    CurrentOrganization,
     CurrentUser,
-    CurrentVendor,
 )
-from src.core.vendor.domain.exceptions import VendorProfileRequiredError
-from src.core.vendor.infrastructure.uow import VendorUnitOfWork
 
 bearer_scheme = HTTPBearer(
     scheme_name="BearerAuth",
@@ -104,26 +103,25 @@ async def get_current_user(
 
 @inject
 async def get_current_customer(
-    unit_of_work: Annotated[CustomerUnitOfWork, Depends(Provide[ApplicationContainer.customer.uow])],
+    usecase: Annotated[
+        GetOrCreateCustomerUseCase, Depends(Provide[ApplicationContainer.customer.get_or_create_customer_usecase])
+    ],
     account: CurrentUser = Depends(get_current_user),
 ):
-    async with unit_of_work as uow:
-        customer = await uow.customer.get_by_account_id(account.id)
-        if not customer:
-            raise CustomerProfileRequiredError()
-        return CurrentCustomer(id=customer.id)
+    customer = await usecase.execute(account.id)
+    return CurrentCustomer(id=customer.id)
 
 
 @inject
-async def get_current_vendor(
-    uow: Annotated[VendorUnitOfWork, Depends(Provide[ApplicationContainer.vendor.uow])],
-    account: CurrentUser = Depends(get_current_user),
+async def get_current_organization(
+    uow: Annotated[CustomerUnitOfWork, Depends(Provide[ApplicationContainer.customer.uow])],
+    customer: CurrentCustomer = Depends(get_current_customer),
 ):
     async with uow:
-        vendor = await uow.vendor.get_by_account_id(account.id)
-        if not vendor:
-            raise VendorProfileRequiredError()
-        return CurrentVendor(id=vendor.id)
+        organization = await uow.organization.get_by_owner_id(customer.id)
+        if not organization:
+            raise OrganizationRequiredError()
+        return CurrentOrganization(id=organization.id)
 
 
 @inject

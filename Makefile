@@ -3,7 +3,7 @@ COMPOSE = docker compose -f docker-compose.yml -f docker-compose.dev.yml
 COMPOSE_TEST = docker compose --env-file .env.test -f docker-compose.yml -f docker-compose.test.yml
 CI_SERVICES = db redis minio meilisearch sut
 
-.PHONY: up build start stop destroy logs restart shell db cache test coverage coverage-html ci
+.PHONY: up build start stop destroy logs restart shell db cache test coverage coverage-html ci migration migrate downgrade
 
 up:
 	$(COMPOSE) up -d --build --remove-orphans
@@ -34,6 +34,18 @@ db:
 
 cache:
 	$(COMPOSE) exec redis sh -c 'redis-cli -a "$$REDIS_PASSWORD"'
+
+migration:
+	@test -n "$(m)" || (echo 'Usage: make migration m="message"'; exit 1)
+	$(COMPOSE) up -d --wait db
+	$(COMPOSE) run --rm --no-deps --entrypoint "" backend \
+		alembic revision --autogenerate -m "$(m)"
+
+migrate:
+	$(COMPOSE) run --rm --no-deps --entrypoint "" backend alembic upgrade head
+
+downgrade:
+	$(COMPOSE) run --rm --no-deps --entrypoint "" backend alembic downgrade -1
 
 ci:
 	@echo "=== Running CI Test pipeline ==="

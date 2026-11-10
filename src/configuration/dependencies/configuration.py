@@ -12,5 +12,5 @@ class ConfigurationContainer(containers.DeclarativeContainer):
     redis = configuration.redis_config
     resend_config = configuration.resend_config
     sentry_config = configuration.sentry_config
-    kgd_settings = configuration.kgd_settings
+    taxpayer_registry_config = configuration.taxpayer_registry_config
     meilisearch_config = configuration.meilisearch_config

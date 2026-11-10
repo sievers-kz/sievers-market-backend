@@ -1,12 +1,18 @@
+from uuid import UUID
+
+from arq import Retry
 from arq.connections import RedisSettings
+from loguru import logger
 
 from src.configuration.dependencies.container import ApplicationContainer
 from src.configuration.settings.settings import RedisConfig
+from src.core.customer.domain.exceptions import TaxpayerRegistryUnavailableError
 
 
 async def startup(ctx):
     container = ApplicationContainer()
     ctx["resend_sender"] = container.shared.resend_sender()
+    ctx["verify_organization_registry_usecase"] = container.customer.verify_organization_registry_usecase()
 
 
 async def send_otp_email(ctx, to: str, code: str):
@@ -45,6 +51,22 @@ async def send_otp_change_password(ctx, to: str, code: str):
     )
 
 
+async def verify_organization_registry(ctx: dict, organization_id: str) -> None:
+    usecase = await ctx["verify_organization_registry_usecase"]
+    try:
+        await usecase.execute(UUID(organization_id))
+    except TaxpayerRegistryUnavailableError:
+        job_try = ctx["job_try"]
+        delay = min(60 * 2 ** (job_try - 1), 1800)
+        logger.warning(
+            "Taxpayer registry unavailable | organization_id={} try={} retry_in={}s",
+            organization_id,
+            job_try,
+            delay,
+        )
+        raise Retry(defer=delay)
+
+
 _redis_config = RedisConfig()
 
 
@@ -54,10 +76,11 @@ class WorkerSettings:
         send_otp_password_reset,
         send_otp_change_email,
         send_otp_change_password,
+        verify_organization_registry,
     ]
 
     on_startup = startup
-    max_retries = 5
+    max_tries = 5
 
     redis_settings = RedisSettings(
         host=_redis_config.host,

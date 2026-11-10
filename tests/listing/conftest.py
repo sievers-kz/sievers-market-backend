@@ -14,14 +14,14 @@ from tests.vendor.conftest import create_domain_vendor
 
 
 def create_domain_listing(
-    owner_id: uuid.UUID,
+    organization_id: uuid.UUID,
     city_id: uuid.UUID,
     category_id: uuid.UUID,
     subcategory_id: uuid.UUID,
 ) -> Listing:
     return Listing(
         id=uuid.uuid4(),
-        owner_id=owner_id,
+        organization_id=organization_id,
         category_id=category_id,
         subcategory_id=subcategory_id,
         title="Трактор John Deere",
