@@ -56,7 +56,7 @@ class ListingQueryService(QueryService):
         statement = (
             select(
                 Listing.id,
-                Listing.owner_id,
+                Listing.organization_id.label("owner_id"),
                 Subcategory.name.label("subcategory"),
                 Listing.title,
                 Listing.price,
