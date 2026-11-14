@@ -6,6 +6,7 @@ from loguru import logger
 from src.core.catalog.infrastructure.attribute_validation import (
     AttributeValidationService,
 )
+from src.core.catalog.infrastructure.catalog_service import CatalogService
 from src.core.customer.application.services.organization_service import OrganizationService
 from src.core.listing.application.services.listing_search import ListingSearchService
 from src.core.listing.domain.entities import Listing
@@ -20,11 +21,13 @@ class CreateListingUseCase:
         self,
         uow: ListingUnitOfWork,
         attribute_validation: AttributeValidationService,
+        catalog_service: CatalogService,
         listing_search_service: ListingSearchService,
         organization_service: OrganizationService,
     ):
         self.uow = uow
         self.attribute_validation = attribute_validation
+        self.catalog_service = catalog_service
         self.listing_search_service = listing_search_service
         self.organization_service = organization_service
 
@@ -32,6 +35,7 @@ class CreateListingUseCase:
         organization_id = dto.organization_id
         await self.organization_service.ensure_can_publish(customer_id, organization_id)
 
+        await self.catalog_service.ensure_subcategory_in_category(dto.category_id, dto.subcategory_id)
         validated_attributes = await self.attribute_validation.validate(dto.subcategory_id, dto.attributes)
 
         async with self.uow as uow:

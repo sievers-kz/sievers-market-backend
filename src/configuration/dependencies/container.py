@@ -72,6 +72,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         session_factory=gateways.session_factory,
         database_session=gateways.database_session,
         attribute_validation=catalog.attribute_validation,
+        catalog_service=catalog.catalog_service,
         meilisearch_service=shared.meilisearch_service,
         organization_service=customer.organization_service,
     )

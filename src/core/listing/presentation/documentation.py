@@ -1,3 +1,4 @@
+from src.core.catalog.infrastructure.exceptions import CatalogNotFoundError
 from src.core.customer.domain.exceptions import (
     OrganizationCannotPublishError,
     OrganizationNotFoundError,
@@ -19,9 +20,14 @@ CREATE_LISTING_DOC = RouteDocs(
         Объявление размещается от имени организации из `organization_id`. Организация должна принадлежать
         текущему покупателю (иначе `404`) и быть подтверждённой в реестре, `registry_status: verified`
         (иначе `403`). Список организаций для выбора — `GET /api/v1/customer/organizations`.
+
+        Категория должна существовать, а подкатегория — принадлежать этой категории, иначе `404`
+        `catalog_not_found_error` (`metadata.field` — id не найденного объекта). Подкатегория без
+        заданных атрибутов допустима.
     """,
     responses=(
         OrganizationNotFoundError,
+        CatalogNotFoundError,
         OrganizationCannotPublishError,
         OrganizationProfileIncompleteError,
     ),
@@ -59,8 +65,13 @@ CHANGE_LISTING_ATTRIBUTE_DOC = RouteDocs(
     summary="Изменение атрибутов объявления",
     description="""
         Обновляет значения динамических атрибутов объявления в рамках подкатегории.
+
+        `subcategory_id` должен совпадать с подкатегорией объявления, иначе `404` `catalog_not_found_error`.
     """,
-    responses=(ListingNotFoundError,),
+    responses=(
+        ListingNotFoundError,
+        CatalogNotFoundError,
+    ),
 )
 
 ACTIVATE_LISTING_DOC = RouteDocs(
