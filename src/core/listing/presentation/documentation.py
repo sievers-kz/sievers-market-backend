@@ -1,4 +1,8 @@
-from src.core.customer.domain.exceptions import OrganizationCannotPublishError, OrganizationNotFoundError
+from src.core.customer.domain.exceptions import (
+    OrganizationCannotPublishError,
+    OrganizationNotFoundError,
+    OrganizationProfileIncompleteError,
+)
 from src.core.listing.domain.exceptions import (
     ListingDeletedError,
     ListingInvalidFilterKeyError,
@@ -19,6 +23,7 @@ CREATE_LISTING_DOC = RouteDocs(
     responses=(
         OrganizationNotFoundError,
         OrganizationCannotPublishError,
+        OrganizationProfileIncompleteError,
     ),
 )
 

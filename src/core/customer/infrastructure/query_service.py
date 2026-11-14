@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlalchemy import select
 
 from src.core.customer.domain.exceptions import OrganizationNotFoundError
+from src.core.customer.domain.policies import missing_profile_fields
 from src.core.customer.infrastructure.models import Customer, Organization
 from src.core.customer.presentation.dto import CustomerMeResponse, OrganizationListResponse, OrganizationResponse
 from src.core.iam.infrastructure.models import Account
@@ -67,4 +68,6 @@ class CustomerQueryService(QueryService):
         if organization is None:
             raise OrganizationNotFoundError()
 
-        return OrganizationResponse.model_validate(organization)
+        response = OrganizationResponse.model_validate(organization)
+        response.missing_fields = missing_profile_fields(organization)
+        return response

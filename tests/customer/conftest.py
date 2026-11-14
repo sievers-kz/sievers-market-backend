@@ -22,9 +22,17 @@ def create_domain_organization(
     tax_id: str | None = None,
     kind: Kind = Kind.COMPANY,
     registry_status: RegistryStatus = RegistryStatus.PENDING,
+    with_profile: bool | None = None,
 ) -> Organization:
+    """By default a verified organization comes with a filled profile, so it can publish listings."""
     organization = Organization.create(owner_id=owner_id, tax_id=tax_id or random_tax_id(), kind=kind)
     organization.registry_status = registry_status
+    if with_profile is None:
+        with_profile = registry_status == RegistryStatus.VERIFIED
+    if with_profile:
+        organization.shop_name = "Olzha Agro"
+        organization.contact_phone = "+77001234567"
+        organization.contact_email = "shop@example.com"
     return organization
 
 

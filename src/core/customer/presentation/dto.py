@@ -76,3 +76,7 @@ class OrganizationResponse(DTO):
     logo_media_id: UUID | None = None
     contact_phone: str | None = None
     contact_email: str | None = None
+    missing_fields: list[str] = Field(
+        default_factory=list,
+        description="Поля профиля, которые нужно заполнить, чтобы организация могла размещать объявления",
+    )

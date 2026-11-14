@@ -8,11 +8,21 @@ from src.core.customer.domain.exceptions import (
     InvalidShopNameError,
     OrganizationCannotPublishError,
     OrganizationNotFoundError,
+    OrganizationProfileIncompleteError,
 )
 
 
 def make_organization() -> Organization:
     return Organization.create(owner_id=uuid.uuid4(), tax_id="180240041089", kind=Kind.COMPANY)
+
+
+def make_publishable_organization() -> Organization:
+    organization = make_organization()
+    organization.mark_registry_verified("ТОО")
+    organization.change_shop_name("Olzha Agro")
+    organization.change_contact_phone("+77001234567")
+    organization.change_contact_email("shop@example.com")
+    return organization
 
 
 class TestOrganizationEntity:
@@ -65,21 +75,6 @@ class TestOrganizationEntity:
         assert organization.legal_name is None
 
     @pytest.mark.unit
-    @pytest.mark.parametrize(
-        ("status", "expected"),
-        [
-            (RegistryStatus.PENDING, False),
-            (RegistryStatus.NOT_FOUND, False),
-            (RegistryStatus.VERIFIED, True),
-        ],
-    )
-    def test_can_publish_only_when_verified(self, status, expected):
-        organization = make_organization()
-        organization.registry_status = status
-
-        assert organization.can_publish() is expected
-
-    @pytest.mark.unit
     def test_is_owned_by(self):
         organization = make_organization()
 
@@ -87,16 +82,14 @@ class TestOrganizationEntity:
         assert organization.is_owned_by(uuid.uuid4()) is False
 
     @pytest.mark.unit
-    def test_ensure_can_publish_passes_for_owner_of_verified(self):
-        organization = make_organization()
-        organization.mark_registry_verified("ТОО")
+    def test_ensure_can_publish_passes_for_owner_of_verified_with_profile(self):
+        organization = make_publishable_organization()
 
         organization.ensure_can_publish(organization.owner_id)
 
     @pytest.mark.unit
     def test_ensure_can_publish_hides_foreign_organization(self):
-        organization = make_organization()
-        organization.mark_registry_verified("ТОО")
+        organization = make_publishable_organization()
 
         with pytest.raises(OrganizationNotFoundError):
             organization.ensure_can_publish(uuid.uuid4())
@@ -106,6 +99,24 @@ class TestOrganizationEntity:
     def test_ensure_can_publish_rejects_unverified(self, status):
         organization = make_organization()
         organization.registry_status = status
+
+        with pytest.raises(OrganizationCannotPublishError):
+            organization.ensure_can_publish(organization.owner_id)
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize("field", ["shop_name", "contact_phone", "contact_email"])
+    def test_ensure_can_publish_rejects_missing_profile_field(self, field):
+        organization = make_publishable_organization()
+        setattr(organization, field, None)
+
+        with pytest.raises(OrganizationProfileIncompleteError) as error:
+            organization.ensure_can_publish(organization.owner_id)
+
+        assert error.value.metadata == {"missing_fields": [field]}
+
+    @pytest.mark.unit
+    def test_ensure_can_publish_reports_unverified_before_missing_profile(self):
+        organization = make_organization()
 
         with pytest.raises(OrganizationCannotPublishError):
             organization.ensure_can_publish(organization.owner_id)
