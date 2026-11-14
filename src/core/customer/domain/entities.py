@@ -3,9 +3,16 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from src.core.customer.domain.enums import Kind, RegistryStatus
-from src.core.customer.domain.exceptions import OrganizationCannotPublishError, OrganizationNotFoundError
+from src.core.customer.domain.exceptions import (
+    InvalidShopNameError,
+    OrganizationCannotPublishError,
+    OrganizationNotFoundError,
+)
 from src.core.customer.domain.value_objects import Fullname
 from src.core.shared.domain.entities import AggregateRoot
+
+SHOP_NAME_MIN_LENGTH = 2
+SHOP_NAME_MAX_LENGTH = 50
 
 
 @dataclass(frozen=False)
@@ -68,6 +75,20 @@ class Organization(AggregateRoot):
 
     def mark_registry_not_found(self) -> None:
         self.registry_status = RegistryStatus.NOT_FOUND
+
+    def change_shop_name(self, shop_name: str) -> None:
+        normalized = " ".join(shop_name.split())
+        if not SHOP_NAME_MIN_LENGTH <= len(normalized) <= SHOP_NAME_MAX_LENGTH:
+            raise InvalidShopNameError()
+        if not any(char.isalpha() for char in normalized):
+            raise InvalidShopNameError()
+        self.shop_name = normalized
+
+    def change_contact_phone(self, contact_phone: str) -> None:
+        self.contact_phone = contact_phone
+
+    def change_contact_email(self, contact_email: str) -> None:
+        self.contact_email = contact_email
 
     def is_owned_by(self, owner_id: UUID) -> bool:
         return self.owner_id == owner_id

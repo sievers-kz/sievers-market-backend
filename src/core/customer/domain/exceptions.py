@@ -70,3 +70,11 @@ class OrganizationCannotBeDeletedError(RulesError):
 class OrganizationCannotPublishError(AccessDeniedError):
     message = "Организация ещё не подтверждена и не может размещать объявления"
     error_code = "organization_cannot_publish_error"
+
+
+class InvalidShopNameError(ValidationError):
+    message = "Название магазина должно содержать от 2 до 50 символов и хотя бы одну букву"
+    error_code = "invalid_shop_name_error"
+
+    def __init__(self):
+        super().__init__(message=self.message, metadata={"field": "shop_name"})

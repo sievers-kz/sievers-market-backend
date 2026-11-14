@@ -2,10 +2,12 @@ from src.core.customer.domain.exceptions import (
     CustomerProfileRequiredError,
     FullnameRequiredError,
     InvalidFullnameFormatError,
+    InvalidShopNameError,
     OrganizationAlreadyExistsError,
     OrganizationCannotBeDeletedError,
     OrganizationNotFoundError,
 )
+from src.core.shared.domain.exceptions import InvalidPhoneFormatError
 from src.core.shared.presentation.documentation import RouteDocs
 
 CREATE_CUSTOMER_DOC = RouteDocs(
@@ -93,4 +95,42 @@ DELETE_ORGANIZATION_DOC = RouteDocs(
         OrganizationNotFoundError,
         OrganizationCannotBeDeletedError,
     ),
+)
+
+CHANGE_ORGANIZATION_SHOP_NAME_DOC = RouteDocs(
+    operation_id="changeOrganizationShopName",
+    summary="Изменение названия магазина организации",
+    description="""
+        Задаёт название магазина — оно показывается покупателям вместо юридического наименования.
+        Поле обязательное: от 2 до 50 символов и хотя бы одна буква, лишние пробелы схлопываются.
+        Менять может владелец при любом статусе организации. Чужая организация возвращается как ненайденная.
+    """,
+    responses=(
+        OrganizationNotFoundError,
+        InvalidShopNameError,
+    ),
+)
+
+CHANGE_ORGANIZATION_CONTACT_PHONE_DOC = RouteDocs(
+    operation_id="changeOrganizationContactPhone",
+    summary="Изменение контактного телефона организации",
+    description="""
+        Задаёт контактный телефон организации. Номер приводится к международному формату (E.164) для Казахстана.
+        Поле обязательное. Менять может владелец при любом статусе организации.
+        Чужая организация возвращается как ненайденная.
+    """,
+    responses=(
+        OrganizationNotFoundError,
+        InvalidPhoneFormatError,
+    ),
+)
+
+CHANGE_ORGANIZATION_CONTACT_EMAIL_DOC = RouteDocs(
+    operation_id="changeOrganizationContactEmail",
+    summary="Изменение контактного email организации",
+    description="""
+        Задаёт контактный email организации (до 255 символов). Поле обязательное.
+        Менять может владелец при любом статусе организации. Чужая организация возвращается как ненайденная.
+    """,
+    responses=(OrganizationNotFoundError,),
 )

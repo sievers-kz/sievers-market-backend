@@ -4,7 +4,11 @@ import pytest
 
 from src.core.customer.domain.entities import Organization
 from src.core.customer.domain.enums import Kind, RegistryStatus
-from src.core.customer.domain.exceptions import OrganizationCannotPublishError, OrganizationNotFoundError
+from src.core.customer.domain.exceptions import (
+    InvalidShopNameError,
+    OrganizationCannotPublishError,
+    OrganizationNotFoundError,
+)
 
 
 def make_organization() -> Organization:
@@ -105,3 +109,40 @@ class TestOrganizationEntity:
 
         with pytest.raises(OrganizationCannotPublishError):
             organization.ensure_can_publish(organization.owner_id)
+
+    @pytest.mark.unit
+    def test_change_shop_name_stores_trimmed_name_with_collapsed_spaces(self):
+        organization = make_organization()
+
+        organization.change_shop_name("  Olzha   Agro  ")
+
+        assert organization.shop_name == "Olzha Agro"
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize("shop_name", ["", "   ", "A", "12345", "---", "x" * 51])
+    def test_change_shop_name_rejects_invalid_name(self, shop_name):
+        organization = make_organization()
+
+        with pytest.raises(InvalidShopNameError):
+            organization.change_shop_name(shop_name)
+
+        assert organization.shop_name is None
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize("shop_name", ["Ол", "x" * 50, "Агро 24"])
+    def test_change_shop_name_accepts_boundaries(self, shop_name):
+        organization = make_organization()
+
+        organization.change_shop_name(shop_name)
+
+        assert organization.shop_name == shop_name
+
+    @pytest.mark.unit
+    def test_change_contact_phone_and_email(self):
+        organization = make_organization()
+
+        organization.change_contact_phone("+77011234567")
+        organization.change_contact_email("shop@example.com")
+
+        assert organization.contact_phone == "+77011234567"
+        assert organization.contact_email == "shop@example.com"
