@@ -35,4 +35,5 @@ class CatalogContainer(containers.DeclarativeContainer):
     attribute_validation = providers.Factory(
         AttributeValidationService,
         link_repo=subcategory_attribute_repository,
+        subcategory_repo=subcategory_repository,
     )
