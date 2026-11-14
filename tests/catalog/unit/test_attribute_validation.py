@@ -16,15 +16,11 @@ def make_service(subcategory_exists: bool, links: list) -> AttributeValidationSe
     link_repo.get_with_definitions.return_value = links
     subcategory_repo = AsyncMock()
     subcategory_repo.get_by_id.return_value = object() if subcategory_exists else None
-    return AttributeValidationService(
-        link_repo=link_repo, subcategory_repo=subcategory_repo
-    )
+    return AttributeValidationService(link_repo=link_repo, subcategory_repo=subcategory_repo)
 
 
 def make_link(key: str, attr_type: AttributeType, required: bool):
-    return SimpleNamespace(
-        attribute=SimpleNamespace(key=key, type=attr_type), required=required
-    )
+    return SimpleNamespace(attribute=SimpleNamespace(key=key, type=attr_type), required=required)
 
 
 @pytest.mark.asyncio
@@ -47,6 +43,4 @@ async def test_validates_attributes_when_configured():
     links = [make_link("engine_power", AttributeType.INTEGER, required=True)]
     service = make_service(subcategory_exists=True, links=links)
 
-    assert await service.validate(uuid4(), {"engine_power": 123}) == {
-        "engine_power": 123
-    }
+    assert await service.validate(uuid4(), {"engine_power": 123}) == {"engine_power": 123}
