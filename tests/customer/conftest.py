@@ -33,8 +33,11 @@ def create_taxpayer(
     kind: Kind = Kind.COMPANY,
     legal_name: str = 'ТОО "Тест Агро"',
     is_active: bool = True,
+    legal_address: str | None = None,
 ) -> TaxpayerResponse:
-    return TaxpayerResponse(tax_id=tax_id, legal_name=legal_name, kind=kind, is_active=is_active)
+    return TaxpayerResponse(
+        tax_id=tax_id, legal_name=legal_name, legal_address=legal_address, kind=kind, is_active=is_active
+    )
 
 
 @pytest.fixture

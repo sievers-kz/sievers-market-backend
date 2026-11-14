@@ -36,6 +36,22 @@ class TestOrganizationEntity:
         assert organization.legal_name == 'ТОО "Olzha Agro"'
 
     @pytest.mark.unit
+    def test_mark_registry_verified_stores_legal_address(self):
+        organization = make_organization()
+
+        organization.mark_registry_verified('ТОО "Olzha Agro"', "Г.АСТАНА, УЛИЦА БАРАЕВ, ЗДАНИЕ 16")
+
+        assert organization.legal_address == "Г.АСТАНА, УЛИЦА БАРАЕВ, ЗДАНИЕ 16"
+
+    @pytest.mark.unit
+    def test_mark_registry_verified_without_address_keeps_it_empty(self):
+        organization = make_organization()
+
+        organization.mark_registry_verified('ТОО "Olzha Agro"')
+
+        assert organization.legal_address is None
+
+    @pytest.mark.unit
     def test_mark_registry_not_found_keeps_legal_name_empty(self):
         organization = make_organization()
 

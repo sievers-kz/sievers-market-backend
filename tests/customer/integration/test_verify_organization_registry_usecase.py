@@ -36,6 +36,21 @@ class TestVerifyOrganizationRegistryUseCase:
 
     @pytest.mark.asyncio
     @pytest.mark.integration
+    async def test_stores_legal_address_from_registry(
+        self, verify_organization_registry_usecase, mock_taxpayer_gateway, pending_organization, get_organization
+    ):
+        organization = await pending_organization()
+        mock_taxpayer_gateway.fetch.return_value = create_taxpayer(
+            organization.tax_id, legal_address="Г.АСТАНА, УЛИЦА БАРАЕВ, ЗДАНИЕ 16"
+        )
+
+        await verify_organization_registry_usecase.execute(organization.id)
+
+        result = await get_organization(organization.id)
+        assert result.legal_address == "Г.АСТАНА, УЛИЦА БАРАЕВ, ЗДАНИЕ 16"
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
     async def test_marks_not_found_when_registry_has_no_record(
         self, verify_organization_registry_usecase, mock_taxpayer_gateway, pending_organization, get_organization
     ):
