@@ -5,6 +5,9 @@ from src.core.customer.application.services.organization_service import Organiza
 from src.core.customer.application.services.taxpayer_service import TaxpayerService
 from src.core.customer.application.usecases import (
     ChangeCustomerFullnameUseCase,
+    ChangeOrganizationContactEmailUseCase,
+    ChangeOrganizationContactPhoneUseCase,
+    ChangeOrganizationShopNameUseCase,
     CreateOrganizationUseCase,
     DeleteOrganizationUseCase,
     GetOrCreateCustomerUseCase,
@@ -16,6 +19,7 @@ from src.core.customer.infrastructure.gateways.mock import MockTaxpayerGateway
 from src.core.customer.infrastructure.query_service import CustomerQueryService
 from src.core.customer.infrastructure.repository import CustomerRepository
 from src.core.customer.infrastructure.uow import CustomerUnitOfWork
+from src.core.shared.infrastructure.services.phone_normalizer import PhoneNormalizer
 
 
 class CustomerContainer(containers.DeclarativeContainer):
@@ -37,6 +41,8 @@ class CustomerContainer(containers.DeclarativeContainer):
         ),
         mock=providers.Singleton(MockTaxpayerGateway),
     )
+
+    phone_normalizer = providers.Singleton(PhoneNormalizer)
 
     customer_repository = providers.Factory(CustomerRepository, session=database_session)
 
@@ -61,3 +67,11 @@ class CustomerContainer(containers.DeclarativeContainer):
     get_or_create_customer_usecase = providers.Factory(GetOrCreateCustomerUseCase, uow=uow)
 
     delete_organization_usecase = providers.Factory(DeleteOrganizationUseCase, uow=uow)
+
+    change_organization_shop_name_usecase = providers.Factory(ChangeOrganizationShopNameUseCase, uow=uow)
+
+    change_organization_contact_phone_usecase = providers.Factory(
+        ChangeOrganizationContactPhoneUseCase, uow=uow, phone_normalizer=phone_normalizer
+    )
+
+    change_organization_contact_email_usecase = providers.Factory(ChangeOrganizationContactEmailUseCase, uow=uow)

@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 from src.core.customer.domain.enums import Kind, RegistryStatus
 from src.core.shared.presentation.dto import DTO
@@ -11,6 +11,18 @@ class ChangeCustomerFullname(BaseModel):
     last_name: str
     first_name: str
     patronymic: str | None = None
+
+
+class ChangeOrganizationShopNameRequest(DTO):
+    shop_name: str
+
+
+class ChangeOrganizationContactPhoneRequest(DTO):
+    contact_phone: str
+
+
+class ChangeOrganizationContactEmailRequest(DTO):
+    contact_email: EmailStr = Field(max_length=255)
 
 
 class CreateOrganizationRequest(DTO):

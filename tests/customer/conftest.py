@@ -128,3 +128,18 @@ def verify_organization_registry_usecase(container, mock_taxpayer_gateway):
 @pytest.fixture
 def organization_service(container):
     return container.customer.organization_service()
+
+
+@pytest.fixture
+def change_organization_shop_name_usecase(container):
+    return container.customer.change_organization_shop_name_usecase()
+
+
+@pytest.fixture
+def change_organization_contact_phone_usecase(container):
+    return container.customer.change_organization_contact_phone_usecase()
+
+
+@pytest.fixture
+def change_organization_contact_email_usecase(container):
+    return container.customer.change_organization_contact_email_usecase()

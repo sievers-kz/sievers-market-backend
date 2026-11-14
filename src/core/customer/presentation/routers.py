@@ -6,12 +6,18 @@ from fastapi.params import Security
 
 from src.core.customer.presentation.dependencies import (
     ChangeCustomerFullnameUseCaseDependency,
+    ChangeOrganizationContactEmailUseCaseDependency,
+    ChangeOrganizationContactPhoneUseCaseDependency,
+    ChangeOrganizationShopNameUseCaseDependency,
     CreateOrganizationUseCaseDependency,
     CustomerQueryServiceDependency,
     DeleteOrganizationUseCaseDependency,
 )
 from src.core.customer.presentation.documentation import (
     CHANGE_CUSTOMER_FULLNAME_DOC,
+    CHANGE_ORGANIZATION_CONTACT_EMAIL_DOC,
+    CHANGE_ORGANIZATION_CONTACT_PHONE_DOC,
+    CHANGE_ORGANIZATION_SHOP_NAME_DOC,
     CREATE_ORGANIZATION_DOC,
     DELETE_ORGANIZATION_DOC,
     GET_CUSTOMER_ME_DOC,
@@ -20,6 +26,9 @@ from src.core.customer.presentation.documentation import (
 )
 from src.core.customer.presentation.dto import (
     ChangeCustomerFullname,
+    ChangeOrganizationContactEmailRequest,
+    ChangeOrganizationContactPhoneRequest,
+    ChangeOrganizationShopNameRequest,
     CreateOrganizationRequest,
     CreateOrganizationResponse,
     CustomerMeResponse,
@@ -131,3 +140,57 @@ async def delete_organization(
     current_customer: CurrentCustomer = Security(get_current_customer),
 ) -> None:
     await usecase.execute(current_customer.id, organization_id)
+
+
+@customer_router.patch(
+    "/organization/{organization_id}/shop-name",
+    operation_id=CHANGE_ORGANIZATION_SHOP_NAME_DOC.operation_id,
+    summary=CHANGE_ORGANIZATION_SHOP_NAME_DOC.summary,
+    responses=CHANGE_ORGANIZATION_SHOP_NAME_DOC.responses_doc,
+    description=CHANGE_ORGANIZATION_SHOP_NAME_DOC.description,
+)
+@inject
+async def change_organization_shop_name(
+    organization_id: UUID,
+    dto: ChangeOrganizationShopNameRequest,
+    usecase: ChangeOrganizationShopNameUseCaseDependency,
+    current_customer: CurrentCustomer = Security(get_current_customer),
+):
+    await usecase.execute(current_customer.id, organization_id, dto)
+    return {"message": "Название магазина успешно изменено"}
+
+
+@customer_router.patch(
+    "/organization/{organization_id}/contact-phone",
+    operation_id=CHANGE_ORGANIZATION_CONTACT_PHONE_DOC.operation_id,
+    summary=CHANGE_ORGANIZATION_CONTACT_PHONE_DOC.summary,
+    responses=CHANGE_ORGANIZATION_CONTACT_PHONE_DOC.responses_doc,
+    description=CHANGE_ORGANIZATION_CONTACT_PHONE_DOC.description,
+)
+@inject
+async def change_organization_contact_phone(
+    organization_id: UUID,
+    dto: ChangeOrganizationContactPhoneRequest,
+    usecase: ChangeOrganizationContactPhoneUseCaseDependency,
+    current_customer: CurrentCustomer = Security(get_current_customer),
+):
+    await usecase.execute(current_customer.id, organization_id, dto)
+    return {"message": "Контактный телефон успешно изменён"}
+
+
+@customer_router.patch(
+    "/organization/{organization_id}/contact-email",
+    operation_id=CHANGE_ORGANIZATION_CONTACT_EMAIL_DOC.operation_id,
+    summary=CHANGE_ORGANIZATION_CONTACT_EMAIL_DOC.summary,
+    responses=CHANGE_ORGANIZATION_CONTACT_EMAIL_DOC.responses_doc,
+    description=CHANGE_ORGANIZATION_CONTACT_EMAIL_DOC.description,
+)
+@inject
+async def change_organization_contact_email(
+    organization_id: UUID,
+    dto: ChangeOrganizationContactEmailRequest,
+    usecase: ChangeOrganizationContactEmailUseCaseDependency,
+    current_customer: CurrentCustomer = Security(get_current_customer),
+):
+    await usecase.execute(current_customer.id, organization_id, dto)
+    return {"message": "Контактный email успешно изменён"}
