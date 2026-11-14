@@ -27,7 +27,7 @@ class VerifyOrganizationRegistryUseCase:
             if taxpayer is None:
                 organization.mark_registry_not_found()
             else:
-                organization.mark_registry_verified(taxpayer.legal_name)
+                organization.mark_registry_verified(taxpayer.legal_name, taxpayer.legal_address)
 
             await uow.organization.save(organization)
             await uow.commit()

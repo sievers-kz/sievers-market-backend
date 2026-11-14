@@ -26,6 +26,7 @@ class CreateOrganizationResponse(DTO):
 class TaxpayerResponse(DTO):
     tax_id: str
     legal_name: str
+    legal_address: str | None = None
     kind: Kind
     is_active: bool = True
 

@@ -61,8 +61,9 @@ class Organization(AggregateRoot):
             registry_status=RegistryStatus.PENDING,
         )
 
-    def mark_registry_verified(self, legal_name: str) -> None:
+    def mark_registry_verified(self, legal_name: str, legal_address: str | None = None) -> None:
         self.legal_name = legal_name
+        self.legal_address = legal_address
         self.registry_status = RegistryStatus.VERIFIED
 
     def mark_registry_not_found(self) -> None:

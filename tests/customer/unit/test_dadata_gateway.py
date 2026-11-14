@@ -10,8 +10,17 @@ from src.core.customer.infrastructure.gateways.dadata import DaDataTaxpayerGatew
 TAX_ID = "180240041089"
 
 
-def party(bin_: str = TAX_ID, type_: str = "LEGAL", status: str = "ACTIVE", name: str = 'ТОО "Olzha Agro"') -> dict:
-    return {"value": name, "data": {"bin": bin_, "type": type_, "status": status, "name_ru": name}}
+def party(
+    bin_: str = TAX_ID,
+    type_: str = "LEGAL",
+    status: str = "ACTIVE",
+    name: str = 'ТОО "Olzha Agro"',
+    address: str | None = None,
+) -> dict:
+    data = {"bin": bin_, "type": type_, "status": status, "name_ru": name}
+    if address is not None:
+        data["address_ru"] = address
+    return {"value": name, "data": data}
 
 
 def make_gateway(handler) -> tuple[DaDataTaxpayerGateway, list[httpx.Request]]:
@@ -55,6 +64,25 @@ class TestDaDataTaxpayerGateway:
         assert result.legal_name == 'ТОО "Olzha Agro"'
         assert result.kind == Kind.COMPANY
         assert result.is_active is True
+
+    @pytest.mark.unit
+    async def test_maps_address(self):
+        address = "Г.АСТАНА, РАЙОН БАЙҚОҢЫР, МИКРОРАЙОН ЖАСТАР, УЛИЦА АЛЕКСАНДР БАРАЕВ, ЗДАНИЕ 16"
+        gateway, _ = make_gateway(json_response({"suggestions": [party(address=address)]}))
+
+        result = await gateway.fetch(Kind.COMPANY, TAX_ID)
+
+        assert result is not None
+        assert result.legal_address == address
+
+    @pytest.mark.unit
+    async def test_missing_address_is_none(self):
+        gateway, _ = make_gateway(json_response({"suggestions": [party()]}))
+
+        result = await gateway.fetch(Kind.COMPANY, TAX_ID)
+
+        assert result is not None
+        assert result.legal_address is None
 
     @pytest.mark.unit
     @pytest.mark.parametrize(

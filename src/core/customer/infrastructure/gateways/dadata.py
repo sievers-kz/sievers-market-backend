@@ -31,6 +31,7 @@ class DaDataParty(DTO):
     type: DaDataType
     status: DaDataStatus
     name_ru: str
+    address_ru: str | None = None
 
 
 class DaDataSuggestion(DTO):
@@ -86,6 +87,7 @@ class DaDataTaxpayerGateway(ITaxpayerGateway):
         return TaxpayerResponse(
             tax_id=party.bin,
             legal_name=party.name_ru,
+            legal_address=party.address_ru,
             kind=KIND_DADATA_BY_TYPE[party.type],
             is_active=party.status is DaDataStatus.ACTIVE,
         )
