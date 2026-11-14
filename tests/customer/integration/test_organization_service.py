@@ -3,7 +3,11 @@ import uuid
 import pytest
 
 from src.core.customer.domain.enums import RegistryStatus
-from src.core.customer.domain.exceptions import OrganizationCannotPublishError, OrganizationNotFoundError
+from src.core.customer.domain.exceptions import (
+    OrganizationCannotPublishError,
+    OrganizationNotFoundError,
+    OrganizationProfileIncompleteError,
+)
 from tests.customer.conftest import create_domain_organization
 
 
@@ -39,6 +43,22 @@ class TestOrganizationServiceEnsureCanPublish:
 
         with pytest.raises(OrganizationCannotPublishError):
             await organization_service.ensure_can_publish(create_customer.id, organization.id)
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_verified_organization_without_profile_cannot_publish(
+        self, organization_service, create_customer, save_organization
+    ):
+        organization = await save_organization(
+            create_domain_organization(
+                owner_id=create_customer.id, registry_status=RegistryStatus.VERIFIED, with_profile=False
+            )
+        )
+
+        with pytest.raises(OrganizationProfileIncompleteError) as error:
+            await organization_service.ensure_can_publish(create_customer.id, organization.id)
+
+        assert error.value.metadata["missing_fields"] == ["shop_name", "contact_phone", "contact_email"]
 
 
 class TestOrganizationServiceIsOwner:

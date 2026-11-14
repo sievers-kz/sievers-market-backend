@@ -7,7 +7,9 @@ from src.core.customer.domain.exceptions import (
     InvalidShopNameError,
     OrganizationCannotPublishError,
     OrganizationNotFoundError,
+    OrganizationProfileIncompleteError,
 )
+from src.core.customer.domain.policies import missing_profile_fields
 from src.core.customer.domain.value_objects import Fullname
 from src.core.shared.domain.entities import AggregateRoot
 
@@ -93,12 +95,12 @@ class Organization(AggregateRoot):
     def is_owned_by(self, owner_id: UUID) -> bool:
         return self.owner_id == owner_id
 
-    def can_publish(self) -> bool:
-        return self.registry_status == RegistryStatus.VERIFIED
-
     def ensure_can_publish(self, owner_id: UUID) -> None:
         # A foreign organization is reported as missing, so its existence is not revealed.
         if not self.is_owned_by(owner_id):
             raise OrganizationNotFoundError()
-        if not self.can_publish():
+        if self.registry_status != RegistryStatus.VERIFIED:
             raise OrganizationCannotPublishError()
+        missing = missing_profile_fields(self)
+        if missing:
+            raise OrganizationProfileIncompleteError(missing)

@@ -72,6 +72,14 @@ class OrganizationCannotPublishError(AccessDeniedError):
     error_code = "organization_cannot_publish_error"
 
 
+class OrganizationProfileIncompleteError(AccessDeniedError):
+    message = "Дополните данные организации, чтобы размещать объявления"
+    error_code = "organization_profile_incomplete_error"
+
+    def __init__(self, missing_fields: list[str]):
+        super().__init__(message=self.message, metadata={"missing_fields": missing_fields})
+
+
 class InvalidShopNameError(ValidationError):
     message = "Название магазина должно содержать от 2 до 50 символов и хотя бы одну букву"
     error_code = "invalid_shop_name_error"
