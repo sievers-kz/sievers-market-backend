@@ -21,6 +21,7 @@ class ListingContainer(containers.DeclarativeContainer):
     session_factory = providers.Dependency()
     database_session = providers.Dependency()
     attribute_validation = providers.Dependency()
+    catalog_service = providers.Dependency()
     meilisearch_service = providers.Dependency()
     organization_service = providers.Dependency()
 
@@ -40,6 +41,7 @@ class ListingContainer(containers.DeclarativeContainer):
         CreateListingUseCase,
         uow=uow,
         attribute_validation=attribute_validation,
+        catalog_service=catalog_service,
         listing_search_service=listing_search_service,
         organization_service=organization_service,
     )

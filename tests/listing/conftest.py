@@ -44,8 +44,9 @@ def create_domain_listing(
 @pytest_asyncio.fixture
 async def create_listing_request(database_session, create_organization):
     city_id = (await database_session.execute(text("SELECT id FROM cities LIMIT 1"))).scalar_one()
-    category_id = (await database_session.execute(text("SELECT id FROM categories LIMIT 1"))).scalar_one()
-    subcategory_id = (await database_session.execute(text("SELECT id FROM subcategories LIMIT 1"))).scalar_one()
+    subcategory_id, category_id = (
+        await database_session.execute(text("SELECT id, category_id FROM subcategories ORDER BY created_at LIMIT 1"))
+    ).one()
 
     return CreateListingRequest(
         organization_id=create_organization.id,
@@ -125,8 +126,9 @@ def listing_repository(container):
 @pytest_asyncio.fixture
 async def create_listing(listing_repository, create_organization, database_session):
     city_id = (await database_session.execute(text("SELECT id FROM cities LIMIT 1"))).scalar_one()
-    category_id = (await database_session.execute(text("SELECT id FROM categories LIMIT 1"))).scalar_one()
-    subcategory_id = (await database_session.execute(text("SELECT id FROM subcategories LIMIT 1"))).scalar_one()
+    subcategory_id, category_id = (
+        await database_session.execute(text("SELECT id, category_id FROM subcategories ORDER BY created_at LIMIT 1"))
+    ).one()
 
     listing = create_domain_listing(
         organization_id=create_organization.id,
