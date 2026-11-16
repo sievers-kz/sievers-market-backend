@@ -29,6 +29,7 @@ from src.core.listing.presentation.documentation import (
     DELETE_LISTING_DOC,
     GET_LISTING_DETAILS_DOC,
     GET_LISTINGS_CATALOG_DOC,
+    GET_MY_LISTINGS_DOC,
     SEARCH_LISTING_DOC,
 )
 from src.core.listing.presentation.dto import (
@@ -40,6 +41,9 @@ from src.core.listing.presentation.dto import (
     ListingCardResponse,
     ListingDetailResponse,
     ListingSearchQuery,
+    MyListingCardResponse,
+    MyListingsSort,
+    MyListingsStatus,
 )
 from src.core.shared.presentation.dto import CurrentCustomer, PaginatedResponse
 from src.core.shared.presentation.security import get_current_customer
@@ -236,6 +240,28 @@ async def get_listings_catalog(
     limit: int = Query(20, alias="limit"),
 ):
     return await service.get_listings_card(category_id, subcategory_id, page, limit)
+
+
+@listing_router.get(
+    "/my",
+    response_model=PaginatedResponse[MyListingCardResponse],
+    operation_id=GET_MY_LISTINGS_DOC.operation_id,
+    summary=GET_MY_LISTINGS_DOC.summary,
+    responses=GET_MY_LISTINGS_DOC.responses_doc,
+    description=GET_MY_LISTINGS_DOC.description,
+)
+@inject
+async def get_my_listings(
+    service: ListingQueryServiceDependency,
+    status: MyListingsStatus | None = Query(None, alias="status"),
+    organization_id: UUID | None = Query(None, alias="organization_id"),
+    category_id: UUID | None = Query(None, alias="category_id"),
+    sort: MyListingsSort = Query(MyListingsSort.NEWEST, alias="sort"),
+    page: int = Query(1, alias="page", ge=1),
+    limit: int = Query(20, alias="limit", ge=1, le=50),
+    current_customer: CurrentCustomer = Security(get_current_customer),
+):
+    return await service.get_my_listings(current_customer.id, status, organization_id, category_id, sort, page, limit)
 
 
 @listing_router.get(

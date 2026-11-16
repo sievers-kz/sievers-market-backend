@@ -140,6 +140,24 @@ GET_LISTINGS_CATALOG_DOC = RouteDocs(
     responses=(),
 )
 
+GET_MY_LISTINGS_DOC = RouteDocs(
+    operation_id="getMyListings",
+    summary="Мои объявления",
+    description="""
+        Возвращает постраничный список объявлений всех организаций текущего покупателя (кабинет).
+
+        Читает из базы, а не из поискового индекса, поэтому видны и неактивные объявления. Удалённые не
+        возвращаются. Без `status` приходят активные, неактивные и архивные.
+
+        Фильтры: `status` (`active`, `inactive`, `archived`), `organization_id` (организация должна
+        принадлежать текущему покупателю, иначе `404`), `category_id`. Сортировка `sort`: `newest`
+        (по умолчанию) или `oldest` по дате создания. `limit` от 1 до 50.
+
+        `preview_image` и `city` могут быть `null` (нет фото или города).
+    """,
+    responses=(OrganizationNotFoundError,),
+)
+
 GET_LISTING_DETAILS_DOC = RouteDocs(
     operation_id="getListingDetails",
     summary="Детали объявления",
