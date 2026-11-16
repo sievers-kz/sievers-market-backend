@@ -1,14 +1,22 @@
 from uuid import UUID
 
-from sqlalchemy import cast, select
+from sqlalchemy import cast, func, select
 from sqlalchemy.dialects.postgresql import UUID as PsqlUUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.catalog.infrastructure.models import Subcategory
+from src.core.catalog.infrastructure.models import Category, Subcategory
+from src.core.customer.domain.exceptions import OrganizationNotFoundError
+from src.core.customer.infrastructure.models import Organization
 from src.core.listing.domain.enums import ListingStatus
 from src.core.listing.domain.exceptions import ListingNotFoundError
 from src.core.listing.infrastructure.models import Listing
-from src.core.listing.presentation.dto import ListingCardResponse, ListingDetailResponse
+from src.core.listing.presentation.dto import (
+    ListingCardResponse,
+    ListingDetailResponse,
+    MyListingCardResponse,
+    MyListingsSort,
+    MyListingsStatus,
+)
 from src.core.references.infrastructure.models import City
 from src.core.shared.infrastructure.services.query_service import QueryService
 
@@ -48,6 +56,73 @@ class ListingQueryService(QueryService):
         return await self.paginate(
             statement=statement,
             schema=ListingCardResponse,
+            page=page,
+            limit=limit,
+        )
+
+    async def get_my_listings(
+        self,
+        owner_id: UUID,
+        status: MyListingsStatus | None = None,
+        organization_id: UUID | None = None,
+        category_id: UUID | None = None,
+        sort: MyListingsSort = MyListingsSort.NEWEST,
+        page: int = 1,
+        limit: int = 20,
+    ) -> dict:
+        """Объявления всех организаций владельца (читаем из Postgres: индекс поиска отстаёт и неактивных в нём нет).
+
+        Join на `Organization` осознанное исключение из ADR 004: это read-запрос, а владельца объявления
+        определяет именно организация. Удалённые объявления не возвращаются.
+        """
+        if organization_id is not None:
+            is_owner_stmt = select(Organization.id).where(
+                Organization.id == organization_id,
+                Organization.owner_id == owner_id,
+            )
+            if (await self._session.execute(is_owner_stmt)).first() is None:
+                raise OrganizationNotFoundError()
+
+        statement = (
+            select(
+                Listing.id,
+                Listing.title,
+                Listing.price,
+                Listing.currency,
+                Listing.status,
+                Category.name.label("category"),
+                Subcategory.name.label("subcategory"),
+                Listing.organization_id,
+                func.coalesce(Organization.shop_name, Organization.legal_name).label("organization_name"),
+                City.name.label("city"),
+                cast(Listing.gallery[0]["media_id"].as_string(), PsqlUUID).label("preview_image"),
+                Listing.created_at,
+            )
+            .join(Organization, Listing.organization_id == Organization.id)
+            .join(Category, Listing.category_id == Category.id)
+            .join(Subcategory, Listing.subcategory_id == Subcategory.id)
+            .outerjoin(City, Listing.city_id == City.id)
+            .where(
+                Organization.owner_id == owner_id,
+                Listing.status != ListingStatus.DELETED,
+            )
+        )
+
+        if status is not None:
+            statement = statement.where(Listing.status == ListingStatus(status.value))
+        if organization_id is not None:
+            statement = statement.where(Listing.organization_id == organization_id)
+        if category_id is not None:
+            statement = statement.where(Listing.category_id == category_id)
+
+        if sort == MyListingsSort.OLDEST:
+            statement = statement.order_by(Listing.created_at.asc(), Listing.id.asc())
+        else:
+            statement = statement.order_by(Listing.created_at.desc(), Listing.id.desc())
+
+        return await self.paginate(
+            statement=statement,
+            schema=MyListingCardResponse,
             page=page,
             limit=limit,
         )

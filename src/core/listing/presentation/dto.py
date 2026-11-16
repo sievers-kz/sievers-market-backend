@@ -1,4 +1,6 @@
 import math
+from datetime import datetime
+from enum import Enum
 from typing import Any
 from uuid import UUID
 
@@ -118,6 +120,34 @@ class ListingCardResponse(DTO):
     currency: str
     city: str
     preview_image: UUID
+
+
+class MyListingsStatus(str, Enum):
+    """Статусы, доступные в фильтре «Мои объявления». Удалённые объявления владельцу не показываются."""
+
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    ARCHIVED = "archived"
+
+
+class MyListingsSort(str, Enum):
+    NEWEST = "newest"
+    OLDEST = "oldest"
+
+
+class MyListingCardResponse(DTO):
+    id: UUID
+    title: str | None
+    price: int | None
+    currency: str | None
+    status: ListingStatus
+    category: str
+    subcategory: str
+    organization_id: UUID
+    organization_name: str | None
+    city: str | None
+    preview_image: UUID | None
+    created_at: datetime
 
 
 class ListingDetailResponse(DTO):
