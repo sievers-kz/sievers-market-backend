@@ -120,6 +120,9 @@ class ListingCardResponse(DTO):
     currency: str
     city: str
     preview_image: UUID
+    created_at: datetime
+    organization_name: str | None = None
+    condition: str | None = None
 
 
 class MyListingsStatus(str, Enum):

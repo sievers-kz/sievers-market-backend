@@ -32,6 +32,12 @@ class ListingQueryService(QueryService):
         page: int = 1,
         limit: int = 20,
     ) -> list:
+        """Карточки каталога: активные объявления категории, новые сверху.
+
+        Join на `Organization` осознанное исключение из ADR 004 (как в `get_my_listings`): это read-запрос.
+        Название организации: название магазина, а если его нет, юридическое название.
+        `condition` это ключ варианта атрибута (`new`, `used`); у подкатегорий без такого атрибута он `None`.
+        """
         statement = (
             select(
                 Listing.id,
@@ -41,9 +47,13 @@ class ListingQueryService(QueryService):
                 Listing.currency,
                 City.name.label("city"),
                 cast(Listing.gallery[0]["media_id"].as_string(), PsqlUUID).label("preview_image"),
+                Listing.created_at,
+                func.coalesce(Organization.shop_name, Organization.legal_name).label("organization_name"),
+                Listing.attributes["condition"].as_string().label("condition"),
             )
             .join(Subcategory, Listing.subcategory_id == Subcategory.id)
             .join(City, Listing.city_id == City.id)
+            .join(Organization, Listing.organization_id == Organization.id)
             .where(
                 Listing.category_id == category_id,
                 Listing.status == ListingStatus.ACTIVE,
@@ -52,6 +62,9 @@ class ListingQueryService(QueryService):
 
         if subcategory_id is not None:
             statement = statement.where(Listing.subcategory_id == subcategory_id)
+
+        # Второй ключ делает порядок стабильным между страницами при одинаковом `created_at`.
+        statement = statement.order_by(Listing.created_at.desc(), Listing.id.desc())
 
         return await self.paginate(
             statement=statement,
