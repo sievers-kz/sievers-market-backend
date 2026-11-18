@@ -41,6 +41,14 @@ class ListingAttributeFilterWithoutSubcategoryError(ValidationError):
         super().__init__(message=self.message, metadata={"field": "subcategory_id"})
 
 
+class ListingInvalidRangeFilterError(ValidationError):
+    message = "Диапазон доступен только для числовых атрибутов"
+    error_code = "listing_invalid_range_filter_error"
+
+    def __init__(self, key: str):
+        super().__init__(message=self.message, metadata={"field": "attribute_ranges", "key": key})
+
+
 class ListingActivationError(RulesError):
     message = "Невозможно активировать объявление"
     error_code = "listing_activation_error"

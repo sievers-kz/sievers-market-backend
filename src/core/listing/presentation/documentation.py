@@ -8,6 +8,7 @@ from src.core.listing.domain.exceptions import (
     ListingAttributeFilterWithoutSubcategoryError,
     ListingDeletedError,
     ListingInvalidFilterKeyError,
+    ListingInvalidRangeFilterError,
     ListingNotFoundError,
 )
 from src.core.shared.presentation.documentation import RouteDocs
@@ -134,12 +135,24 @@ SEARCH_LISTING_DOC = RouteDocs(
         только вместе с `subcategory_id` и только по атрибутам, фильтруемым в этой подкатегории
         (см. `getFilterableAttributes`); иначе `422`.
 
+        `attribute_ranges`: диапазоны для числовых атрибутов (`integer`, `float`), например
+        `{"year_of_issue": {"min": 2015, "max": 2020}}`; можно одну границу. Те же правила, что у
+        `attributes`, плюс атрибут должен быть числовым (иначе `422 listing_invalid_range_filter_error`).
+
+        Цена: `price_min`, `price_max` и сортировка по цене пока работают только среди объявлений в тенге
+        (`KZT`); объявления в других валютах при этом не попадают в выдачу. Без фильтра и сортировки по цене
+        видны все.
+
         Сортировка `sort`: `newest`, `price_asc`, `price_desc`. Без `sort` при заданном `text` порядок по
         релевантности, без `text` сначала новые. `page` от 1, `limit` от 1 до 50.
 
         На странице может прийти меньше `limit` карточек, если объявление стало неактивным после индексации.
     """,
-    responses=(ListingAttributeFilterWithoutSubcategoryError, ListingInvalidFilterKeyError),
+    responses=(
+        ListingAttributeFilterWithoutSubcategoryError,
+        ListingInvalidFilterKeyError,
+        ListingInvalidRangeFilterError,
+    ),
 )
 
 GET_LISTINGS_CATALOG_DOC = RouteDocs(

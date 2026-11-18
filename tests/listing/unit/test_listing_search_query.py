@@ -2,21 +2,28 @@ import uuid
 from unittest.mock import AsyncMock
 
 import pytest
+from pydantic import ValidationError
 
+from src.core.catalog.infrastructure.enums import AttributeType
 from src.core.listing.application.services.listing_search import ListingSearchService
 from src.core.listing.application.usecases import SearchListingsUseCase
 from src.core.listing.domain.exceptions import (
     ListingAttributeFilterWithoutSubcategoryError,
     ListingInvalidFilterKeyError,
+    ListingInvalidRangeFilterError,
 )
-from src.core.listing.presentation.dto import ListingSearchQuery, ListingSearchSort
+from src.core.listing.presentation.dto import ListingSearchQuery, ListingSearchSort, NumericRange
 from src.core.shared.presentation.dto import SearchResult
 
 
 @pytest.fixture
 def catalog() -> AsyncMock:
     catalog = AsyncMock()
-    catalog.get_filterable_keys.return_value = {"brand", "condition"}
+    catalog.get_filterable_types.return_value = {
+        "brand": AttributeType.REFERENCE,
+        "condition": AttributeType.ENUMERATE,
+        "year_of_issue": AttributeType.INTEGER,
+    }
     return catalog
 
 
@@ -57,7 +64,7 @@ class TestAttributeKeyValidation:
 
         await service.search_listings(query)
 
-        catalog.get_filterable_keys.assert_awaited_once_with(subcategory_id)
+        catalog.get_filterable_types.assert_awaited_once_with(subcategory_id)
         kwargs = meilisearch.search.await_args.kwargs
         assert 'brand = "John Deere"' in kwargs["filter_expression"]
         assert kwargs["attributes_to_retrieve"] == ["id"]
@@ -66,7 +73,85 @@ class TestAttributeKeyValidation:
     async def test_no_attributes_skips_catalog(self, service, catalog):
         await service.search_listings(ListingSearchQuery(text="трактор"))
 
-        catalog.get_filterable_keys.assert_not_awaited()
+        catalog.get_filterable_types.assert_not_awaited()
+
+
+class TestAttributeRanges:
+
+    @pytest.mark.unit
+    async def test_range_on_numeric_attribute_builds_bounds(self, service, meilisearch):
+        query = ListingSearchQuery(
+            subcategory_id=uuid.uuid4(),
+            attribute_ranges={"year_of_issue": {"min": 2015, "max": 2020}},
+        )
+
+        await service.search_listings(query)
+
+        filters = meilisearch.search.await_args.kwargs["filter_expression"]
+        assert "year_of_issue >= 2015.0" in filters
+        assert "year_of_issue <= 2020.0" in filters
+
+    @pytest.mark.unit
+    async def test_single_bound(self, service, meilisearch):
+        query = ListingSearchQuery(subcategory_id=uuid.uuid4(), attribute_ranges={"year_of_issue": {"min": 2015}})
+
+        await service.search_listings(query)
+
+        filters = meilisearch.search.await_args.kwargs["filter_expression"]
+        assert "year_of_issue >= 2015.0" in filters
+        assert not any(item.startswith("year_of_issue <=") for item in filters)
+
+    @pytest.mark.unit
+    async def test_range_on_non_numeric_attribute_rejected(self, service, meilisearch):
+        query = ListingSearchQuery(subcategory_id=uuid.uuid4(), attribute_ranges={"condition": {"min": 1}})
+
+        with pytest.raises(ListingInvalidRangeFilterError):
+            await service.search_listings(query)
+        meilisearch.search.assert_not_awaited()
+
+    @pytest.mark.unit
+    async def test_range_on_unknown_attribute_rejected(self, service):
+        query = ListingSearchQuery(subcategory_id=uuid.uuid4(), attribute_ranges={"torque": {"min": 1}})
+
+        with pytest.raises(ListingInvalidFilterKeyError):
+            await service.search_listings(query)
+
+    @pytest.mark.unit
+    async def test_range_without_subcategory_rejected(self, service):
+        query = ListingSearchQuery(attribute_ranges={"year_of_issue": {"min": 2015}})
+
+        with pytest.raises(ListingAttributeFilterWithoutSubcategoryError):
+            await service.search_listings(query)
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize("bounds", [{}, {"min": 5, "max": 1}, {"min": float("inf")}])
+    def test_invalid_bounds_rejected_by_dto(self, bounds):
+        with pytest.raises(ValidationError):
+            NumericRange(**bounds)
+
+
+class TestPriceCurrency:
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "query",
+        [
+            ListingSearchQuery(price_min=1_000_000),
+            ListingSearchQuery(price_max=5_000_000),
+            ListingSearchQuery(sort=ListingSearchSort.PRICE_ASC),
+            ListingSearchQuery(sort=ListingSearchSort.PRICE_DESC),
+        ],
+    )
+    def test_price_filter_or_sort_limits_to_kzt(self, service, query):
+        assert 'currency = "KZT"' in service.build_filter(query)
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "query",
+        [ListingSearchQuery(), ListingSearchQuery(sort=ListingSearchSort.NEWEST), ListingSearchQuery(text="трактор")],
+    )
+    def test_without_price_all_currencies(self, service, query):
+        assert not any(item.startswith("currency") for item in service.build_filter(query))
 
 
 class TestSort:

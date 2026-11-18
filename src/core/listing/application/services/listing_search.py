@@ -2,17 +2,20 @@ import re
 from uuid import UUID
 
 from src.core.catalog.infrastructure.catalog_service import CatalogService
+from src.core.catalog.infrastructure.enums import AttributeType
 from src.core.listing.domain.entities import Listing
 from src.core.listing.domain.enums import ListingStatus
 from src.core.listing.domain.exceptions import (
     ListingAttributeFilterWithoutSubcategoryError,
     ListingInvalidFilterKeyError,
+    ListingInvalidRangeFilterError,
 )
 from src.core.listing.presentation.dto import (
     ListingSearchDocument,
     ListingSearchQuery,
     ListingSearchSort,
 )
+from src.core.shared.domain.enums import PriceCurrency
 from src.core.shared.infrastructure.services.meilisearch_service import (
     MeilisearchService,
 )
@@ -33,6 +36,8 @@ class ListingSearchService:
     SEARCHABLE: list[str] = ["title", "description"]
     # Ключ атрибута попадает в выражение фильтра без кавычек, поэтому допускаем только идентификатор.
     FILTER_KEY_PATTERN = re.compile(r"^[a-z][a-z0-9_]*$")
+    NUMERIC_TYPES = frozenset({AttributeType.INTEGER, AttributeType.FLOAT})
+    PRICE_SORTS = frozenset({ListingSearchSort.PRICE_ASC, ListingSearchSort.PRICE_DESC})
     SORT_RULES: dict[ListingSearchSort, list[str]] = {
         ListingSearchSort.NEWEST: ["created_at:desc"],
         ListingSearchSort.PRICE_ASC: ["price:asc"],
@@ -111,15 +116,19 @@ class ListingSearchService:
 
         Иначе Meilisearch ответит ошибкой «атрибут не фильтруемый», и клиент получит 500 вместо понятной 422.
         """
-        if not query.attributes:
+        if not query.attributes and not query.attribute_ranges:
             return
         if query.subcategory_id is None:
             raise ListingAttributeFilterWithoutSubcategoryError()
 
-        filterable_keys = await self.catalog_service.get_filterable_keys(query.subcategory_id)
-        for key in query.attributes:
-            if key not in filterable_keys:
+        filterable_types = await self.catalog_service.get_filterable_types(query.subcategory_id)
+        for key in [*query.attributes, *query.attribute_ranges]:
+            if key not in filterable_types:
                 raise ListingInvalidFilterKeyError(key)
+        for key in query.attribute_ranges:
+            # Диапазон по строке или списку Meilisearch сравнил бы лексикографически, это бессмыслица.
+            if filterable_types[key] not in self.NUMERIC_TYPES:
+                raise ListingInvalidRangeFilterError(key)
 
     def build_sort(self, query: ListingSearchQuery) -> list[str] | None:
         if query.sort is not None:
@@ -158,12 +167,30 @@ class ListingSearchService:
             filters.append(f"price >= {query.price_min}")
         if query.price_max is not None:
             filters.append(f"price <= {query.price_max}")
+        if self._compares_price(query):
+            # Временно: `price` хранится в валюте продавца, поэтому сравниваем только тенговые объявления.
+            # Когда в документе появится `price_kzt` (курс НБ РК), фильтр и сортировку перевести на него,
+            # а это условие убрать: тогда найдутся и объявления в других валютах.
+            filters.append(f"currency = {self._format_value(PriceCurrency.KZT.value)}")
         for key, value in query.attributes.items():
-            if not self.FILTER_KEY_PATTERN.fullmatch(key):
-                raise ListingInvalidFilterKeyError(key)
+            self._check_key(key)
             filters.append(f"{key} = {self._format_value(value)}")
+        for key, bounds in query.attribute_ranges.items():
+            self._check_key(key)
+            if bounds.min is not None:
+                filters.append(f"{key} >= {self._format_value(bounds.min)}")
+            if bounds.max is not None:
+                filters.append(f"{key} <= {self._format_value(bounds.max)}")
 
         return filters
+
+    def _check_key(self, key: str) -> None:
+        # Ключ попадает в выражение без кавычек: второй рубеж после проверки по каталогу.
+        if not self.FILTER_KEY_PATTERN.fullmatch(key):
+            raise ListingInvalidFilterKeyError(key)
+
+    def _compares_price(self, query: ListingSearchQuery) -> bool:
+        return query.price_min is not None or query.price_max is not None or query.sort in self.PRICE_SORTS
 
     @staticmethod
     def _format_value(value: str | int | float | bool) -> str:

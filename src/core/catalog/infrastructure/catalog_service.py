@@ -45,7 +45,11 @@ class CatalogService:
 
     async def get_filterable_keys(self, subcategory_id: UUID) -> set[str]:
         """Ключи атрибутов подкатегории с флагом `filterable`: только они попадают в индекс поиска."""
-        return await self._link_repo.get_filterable_keys(subcategory_id)
+        return set(await self.get_filterable_types(subcategory_id))
+
+    async def get_filterable_types(self, subcategory_id: UUID) -> dict[str, AttributeType]:
+        """Фильтруемые атрибуты подкатегории с типом: по типу поиск решает, допустим ли диапазон."""
+        return await self._link_repo.get_filterable_types(subcategory_id)
 
     async def get_search_attributes(self) -> SearchAttributes:
         attributes = await self._link_repo.get_all_filterable()
