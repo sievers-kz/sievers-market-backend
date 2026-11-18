@@ -3,7 +3,7 @@ COMPOSE = docker compose -f docker-compose.yml -f docker-compose.dev.yml
 COMPOSE_TEST = docker compose --env-file .env.test -f docker-compose.yml -f docker-compose.test.yml
 CI_SERVICES = db redis minio meilisearch sut
 
-.PHONY: up build start stop destroy logs restart shell db cache test coverage coverage-html ci migration migrate downgrade
+.PHONY: up build start stop destroy logs restart shell db cache test coverage coverage-html ci migration migrate downgrade reindex
 
 up:
 	$(COMPOSE) up -d --build --remove-orphans
@@ -28,6 +28,9 @@ restart:
 
 shell:
 	$(COMPOSE) exec backend /bin/bash
+
+reindex:
+	$(COMPOSE) exec backend python -m scripts.reindex
 
 db:
 	$(COMPOSE) exec db sh -c 'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_NAME"'

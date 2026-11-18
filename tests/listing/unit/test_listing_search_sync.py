@@ -88,3 +88,48 @@ class TestSyncListing:
         meilisearch.delete_documents.assert_awaited_once_with(index_name="listing", document_ids=[str(listing.id)])
         meilisearch.index_documents.assert_not_awaited()
         catalog.get_filterable_keys.assert_not_awaited()
+
+
+class TestIndexListings:
+
+    @pytest.mark.asyncio
+    @pytest.mark.unit
+    async def test_batch_skips_inactive_and_asks_catalog_once_per_subcategory(self, service, meilisearch, catalog):
+        first = make_listing()
+        second = make_listing()
+        second.subcategory_id = first.subcategory_id
+        inactive = make_listing(ListingStatus.INACTIVE)
+
+        total = await service.index_listings([first, second, inactive])
+
+        assert total == 2
+        catalog.get_filterable_keys.assert_awaited_once_with(first.subcategory_id)
+        documents = meilisearch.index_documents.await_args.kwargs["documents"]
+        assert [document["id"] for document in documents] == [str(first.id), str(second.id)]
+        assert all("engine_power" not in document for document in documents)
+
+    @pytest.mark.asyncio
+    @pytest.mark.unit
+    async def test_empty_batch_does_not_call_meilisearch(self, service, meilisearch):
+        assert await service.index_listings([make_listing(ListingStatus.ARCHIVED)]) == 0
+        meilisearch.index_documents.assert_not_awaited()
+
+
+class TestSyncSchema:
+
+    @pytest.mark.asyncio
+    @pytest.mark.unit
+    async def test_filterable_and_text_attributes_from_catalog(self, service, meilisearch, catalog):
+        from src.core.catalog.infrastructure.catalog_service import SearchAttributes
+
+        catalog.get_search_attributes.return_value = SearchAttributes(
+            filterable=["brand", "year"],
+            text=["brand"],
+        )
+
+        await service.sync_schema()
+
+        config = meilisearch.configure_index.await_args.kwargs["index_config"]
+        assert "brand" in config.filterable and "year" in config.filterable
+        assert "category_id" in config.filterable
+        assert config.searchable == ["title", "description", "brand"]

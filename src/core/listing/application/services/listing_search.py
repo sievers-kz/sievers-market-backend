@@ -54,12 +54,37 @@ class ListingSearchService:
             return
 
         filterable_keys = await self.catalog_service.get_filterable_keys(listing.subcategory_id)
-        attributes = {key: value for key, value in listing.attributes.items() if key in filterable_keys}
-        await self.index_listing(listing, attributes)
-
-    async def index_listing(self, listing: Listing, attributes: dict) -> None:
-        document = ListingSearchDocument.from_listing(listing, attributes)
+        document = self.build_document(listing, filterable_keys)
         await self.search_service.index_documents(index_name=self.INDEX_NAME, documents=[document.model_dump()])
+
+    async def index_listings(self, listings: list[Listing]) -> int:
+        """Пачкой индексирует активные объявления (для переиндексации). Возвращает число документов.
+
+        Фильтруемые ключи запрашиваются один раз на подкатегорию, а не на каждое объявление.
+        """
+        keys_by_subcategory: dict[UUID, set[str]] = {}
+        documents = []
+        for listing in listings:
+            if listing.status != ListingStatus.ACTIVE:
+                continue
+            if listing.subcategory_id not in keys_by_subcategory:
+                keys_by_subcategory[listing.subcategory_id] = await self.catalog_service.get_filterable_keys(
+                    listing.subcategory_id
+                )
+            document = self.build_document(listing, keys_by_subcategory[listing.subcategory_id])
+            documents.append(document.model_dump())
+
+        if documents:
+            await self.search_service.index_documents(index_name=self.INDEX_NAME, documents=documents)
+        return len(documents)
+
+    async def clear_index(self) -> None:
+        await self.search_service.delete_all_documents(index_name=self.INDEX_NAME)
+
+    @staticmethod
+    def build_document(listing: Listing, filterable_keys: set[str]) -> ListingSearchDocument:
+        attributes = {key: value for key, value in listing.attributes.items() if key in filterable_keys}
+        return ListingSearchDocument.from_listing(listing, attributes)
 
     async def remove_listing(self, listing_id: UUID) -> None:
         await self.search_service.delete_documents(
@@ -102,11 +127,17 @@ class ListingSearchService:
         # С текстом оставляем порядок по релевантности, без текста показываем новые.
         return None if query.text else self.SORT_RULES[ListingSearchSort.NEWEST]
 
-    async def sync_schema(self, dynamic_filters: list[str]) -> None:
+    async def sync_schema(self) -> None:
+        """Настройки индекса: что фильтруется, сортируется и где ищется текст.
+
+        Фильтруемые атрибуты берутся из флагов `filterable` каталога; строковые из них ещё и участвуют
+        в текстовом поиске (например, марка, введённая текстом).
+        """
+        attributes = await self.catalog_service.get_search_attributes()
         config = SearchIndexConfig(
-            filterable=self.FILTERABLE + dynamic_filters,
+            filterable=self.FILTERABLE + attributes.filterable,
             sortable=self.SORTABLE,
-            searchable=self.SEARCHABLE,
+            searchable=self.SEARCHABLE + attributes.text,
         )
 
         return await self.search_service.configure_index(

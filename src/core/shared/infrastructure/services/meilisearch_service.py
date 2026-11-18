@@ -17,6 +17,10 @@ class MeilisearchService:
         string_ids = [str(doc_id) for doc_id in document_ids]
         await index.delete_documents(string_ids)
 
+    async def delete_all_documents(self, index_name: str) -> None:
+        index = self.client.index(index_name)
+        await index.delete_all_documents()
+
     async def configure_index(
         self,
         index_name: str,
