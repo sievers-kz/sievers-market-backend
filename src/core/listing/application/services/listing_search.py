@@ -1,7 +1,9 @@
 import re
 from uuid import UUID
 
+from src.core.catalog.infrastructure.catalog_service import CatalogService
 from src.core.listing.domain.entities import Listing
+from src.core.listing.domain.enums import ListingStatus
 from src.core.listing.domain.exceptions import ListingInvalidFilterKeyError
 from src.core.listing.presentation.dto import ListingSearchDocument, ListingSearchQuery
 from src.core.shared.infrastructure.services.meilisearch_service import (
@@ -24,8 +26,23 @@ class ListingSearchService:
     # Ключ атрибута попадает в выражение фильтра без кавычек, поэтому допускаем только идентификатор.
     FILTER_KEY_PATTERN = re.compile(r"^[a-z][a-z0-9_]*$")
 
-    def __init__(self, search_service: MeilisearchService):
+    def __init__(self, search_service: MeilisearchService, catalog_service: CatalogService):
         self.search_service = search_service
+        self.catalog_service = catalog_service
+
+    async def sync_listing(self, listing: Listing) -> None:
+        """Приводит индекс в соответствие с объявлением после любого изменения.
+
+        Активное объявление индексируется только с фильтруемыми атрибутами подкатегории;
+        неактивное, архивное или удалённое убирается из индекса, чтобы не попадать в поиск.
+        """
+        if listing.status != ListingStatus.ACTIVE:
+            await self.remove_listing(listing.id)
+            return
+
+        filterable_keys = await self.catalog_service.get_filterable_keys(listing.subcategory_id)
+        attributes = {key: value for key, value in listing.attributes.items() if key in filterable_keys}
+        await self.index_listing(listing, attributes)
 
     async def index_listing(self, listing: Listing, attributes: dict) -> None:
         document = ListingSearchDocument.from_listing(listing, attributes)

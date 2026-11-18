@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 from uuid import UUID
 
@@ -26,6 +27,8 @@ class Listing(AggregateRoot):
     attributes: dict[str, Any]
     gallery: Gallery
     status: ListingStatus
+    # Заполняется при создании; у объявлений из БД приходит из колонки `created_at`.
+    created_at: datetime | None = None
     # TODO: добавить поле deleted_at и реализовать метод restore() с _days_since_deletion()
 
     def ensure_owned_by(self, organization_id: UUID) -> None:

@@ -11,7 +11,7 @@ from src.core.listing.presentation.dto import ListingSearchQuery
 
 @pytest.fixture
 def service() -> ListingSearchService:
-    return ListingSearchService(search_service=MagicMock())
+    return ListingSearchService(search_service=MagicMock(), catalog_service=MagicMock())
 
 
 class TestBuildFilter:

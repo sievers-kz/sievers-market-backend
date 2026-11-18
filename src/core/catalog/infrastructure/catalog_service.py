@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from src.core.catalog.infrastructure.exceptions import CatalogNotFoundError
+from src.core.catalog.infrastructure.repositories.attributes import SubcategoryAttributeRepository
 from src.core.catalog.infrastructure.repositories.categories import (
     CategoryRepository,
     SubcategoryRepository,
@@ -14,9 +15,11 @@ class CatalogService:
         self,
         category_repo: CategoryRepository,
         subcategory_repo: SubcategoryRepository,
+        link_repo: SubcategoryAttributeRepository,
     ):
         self._category_repo = category_repo
         self._subcategory_repo = subcategory_repo
+        self._link_repo = link_repo
 
     async def ensure_subcategory_in_category(self, category_id: UUID, subcategory_id: UUID) -> None:
         if await self._category_repo.get_by_id(category_id) is None:
@@ -25,3 +28,7 @@ class CatalogService:
         subcategory = await self._subcategory_repo.get_by_id(subcategory_id)
         if subcategory is None or subcategory.category_id != category_id:
             raise CatalogNotFoundError(field=str(subcategory_id))
+
+    async def get_filterable_keys(self, subcategory_id: UUID) -> set[str]:
+        """Ключи атрибутов подкатегории с флагом `filterable`: только они попадают в индекс поиска."""
+        return await self._link_repo.get_filterable_keys(subcategory_id)

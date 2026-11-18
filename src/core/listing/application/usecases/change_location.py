@@ -30,10 +30,7 @@ class ChangeListingLocationUseCase:
             await uow.listing.save(listing)
             await uow.commit()
 
-        await self.listing_search_service.index_listing(
-            listing=listing,
-            attributes=listing.attributes,
-        )
+        await self.listing_search_service.sync_listing(listing)
 
         logger.info(
             "Listing location changed | listing_id={} new_location={}",
