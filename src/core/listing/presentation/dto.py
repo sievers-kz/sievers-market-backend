@@ -74,6 +74,9 @@ class ListingSearchDocument(DTO):
     city_id: str
     subcategory_id: str
     is_active: bool
+    description: str | None = None
+    # Unix-время в секундах: число сортируется в Meilisearch надёжнее строки с датой.
+    created_at: int | None = None
     model_config = ConfigDict(extra="allow")
 
     @classmethod
@@ -87,6 +90,8 @@ class ListingSearchDocument(DTO):
                 "city_id": str(listing.city_id),
                 "subcategory_id": str(listing.subcategory_id),
                 "is_active": listing.status == ListingStatus.ACTIVE,
+                "description": listing.description,
+                "created_at": int(listing.created_at.timestamp()) if listing.created_at else None,
                 **attributes,
             }
         )

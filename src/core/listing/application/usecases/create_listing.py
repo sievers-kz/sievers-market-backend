@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 from uuid import UUID
 
 from loguru import logger
@@ -52,12 +53,13 @@ class CreateListingUseCase:
                 attributes=validated_attributes,
                 gallery=Gallery.from_dicts([item.model_dump() for item in dto.gallery]),
                 status=ListingStatus.ACTIVE,
+                created_at=datetime.now(timezone.utc),
             )
 
             await uow.listing.save(listing)
             await uow.commit()
 
-        await self.listing_search_service.index_listing(listing=listing, attributes=listing.attributes)
+        await self.listing_search_service.sync_listing(listing)
 
         logger.info("Listing created | listing_id={} organization_id={}", listing.id, organization_id)
         return listing.id

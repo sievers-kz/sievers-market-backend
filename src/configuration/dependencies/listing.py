@@ -30,6 +30,7 @@ class ListingContainer(containers.DeclarativeContainer):
     listing_search_service = providers.Factory(
         ListingSearchService,
         search_service=meilisearch_service,
+        catalog_service=catalog_service,
     )
 
     listing_repository = providers.Factory(
@@ -63,6 +64,7 @@ class ListingContainer(containers.DeclarativeContainer):
     change_listing_description_usecase = providers.Factory(
         ChangeListingDescriptionUseCase,
         uow=uow,
+        listing_search_service=listing_search_service,
         organization_service=organization_service,
     )
 
@@ -70,30 +72,35 @@ class ListingContainer(containers.DeclarativeContainer):
         ChangeListingAttributeUseCase,
         uow=uow,
         attribute_validation=attribute_validation,
+        listing_search_service=listing_search_service,
         organization_service=organization_service,
     )
 
     activate_listing_usecase = providers.Factory(
         ActivateListingUseCase,
         uow=uow,
+        listing_search_service=listing_search_service,
         organization_service=organization_service,
     )
 
     deactivate_listing_usecase = providers.Factory(
         DeactivateListingUseCase,
         uow=uow,
+        listing_search_service=listing_search_service,
         organization_service=organization_service,
     )
 
     archive_listing_usecase = providers.Factory(
         ArchiveListingUseCase,
         uow=uow,
+        listing_search_service=listing_search_service,
         organization_service=organization_service,
     )
 
     delete_listing_usecase = providers.Factory(
         DeleteListingUseCase,
         uow=uow,
+        listing_search_service=listing_search_service,
         organization_service=organization_service,
     )
 

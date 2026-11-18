@@ -43,4 +43,5 @@ class CatalogContainer(containers.DeclarativeContainer):
         CatalogService,
         category_repo=category_repository,
         subcategory_repo=subcategory_repository,
+        link_repo=subcategory_attribute_repository,
     )
