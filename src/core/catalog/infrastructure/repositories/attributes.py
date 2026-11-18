@@ -106,9 +106,9 @@ class SubcategoryAttributeRepository:
         result = await self._session.execute(statement)
         return [(key, attribute_type) for key, attribute_type in result.all()]
 
-    async def get_filterable_keys(self, subcategory_id: UUID) -> set[str]:
+    async def get_filterable_types(self, subcategory_id: UUID) -> dict[str, AttributeType]:
         statement = (
-            select(AttributeDefinition.key)
+            select(AttributeDefinition.key, AttributeDefinition.type)
             .join(SubcategoryAttribute, SubcategoryAttribute.attribute_id == AttributeDefinition.id)
             .where(
                 SubcategoryAttribute.subcategory_id == subcategory_id,
@@ -116,7 +116,7 @@ class SubcategoryAttributeRepository:
             )
         )
         result = await self._session.execute(statement)
-        return set(result.scalars().all())
+        return {key: attribute_type for key, attribute_type in result.all()}
 
     async def create(
         self,

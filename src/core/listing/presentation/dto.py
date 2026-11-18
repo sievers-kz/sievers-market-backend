@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Any
 from uuid import UUID
 
-from pydantic import ConfigDict, Field, field_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from src.core.listing.domain.entities import Listing
 from src.core.listing.domain.enums import ListingStatus
@@ -105,6 +105,24 @@ class ListingSearchSort(str, Enum):
     PRICE_DESC = "price_desc"
 
 
+class NumericRange(DTO):
+    """Диапазон для числового атрибута; можно задать одну границу."""
+
+    min: float | None = None
+    max: float | None = None
+
+    @model_validator(mode="after")
+    def check_bounds(self) -> "NumericRange":
+        if self.min is None and self.max is None:
+            raise ValueError("Задайте хотя бы одну границу диапазона")
+        for bound in (self.min, self.max):
+            if bound is not None and not math.isfinite(bound):
+                raise ValueError("Границы диапазона должны быть конечными числами")
+        if self.min is not None and self.max is not None and self.min > self.max:
+            raise ValueError("Нижняя граница больше верхней")
+        return self
+
+
 class ListingSearchQuery(DTO):
     text: str | None = None
     category_id: UUID | None = None
@@ -114,6 +132,8 @@ class ListingSearchQuery(DTO):
     price_max: int | None = Field(None, ge=0)
     # Ключи атрибутов допустимы только вместе с `subcategory_id`: фильтруемые атрибуты задаются подкатегорией.
     attributes: dict[str, str | int | float | bool] = {}
+    # Диапазоны «от–до» для числовых атрибутов (`integer`, `float`), тоже только вместе с `subcategory_id`.
+    attribute_ranges: dict[str, NumericRange] = {}
     # Без `sort`: при тексте порядок по релевантности, без текста сначала новые.
     sort: ListingSearchSort | None = None
     page: int = Field(1, ge=1)

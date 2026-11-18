@@ -36,6 +36,7 @@ class TestBuildFilter:
             f'city_id = "{city_id}"',
             "price >= 100",
             "price <= 500",
+            'currency = "KZT"',
         ]
 
     @pytest.mark.unit
