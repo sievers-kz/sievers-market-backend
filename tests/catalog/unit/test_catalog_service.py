@@ -15,7 +15,7 @@ def make_service(category_exists: bool, subcategory_category_id=None) -> Catalog
     subcategory_repo.get_by_id.return_value = (
         SimpleNamespace(category_id=subcategory_category_id) if subcategory_category_id else None
     )
-    return CatalogService(category_repo=category_repo, subcategory_repo=subcategory_repo)
+    return CatalogService(category_repo=category_repo, subcategory_repo=subcategory_repo, link_repo=AsyncMock())
 
 
 @pytest.mark.asyncio
