@@ -11,6 +11,7 @@ from src.core.listing.application.usecases import (
     CreateListingUseCase,
     DeactivateListingUseCase,
     DeleteListingUseCase,
+    SearchListingsUseCase,
 )
 from src.core.listing.infrastructure.query import ListingQueryService
 from src.core.listing.infrastructure.repository import ListingRepository
@@ -107,4 +108,10 @@ class ListingContainer(containers.DeclarativeContainer):
     query_service = providers.Factory(
         ListingQueryService,
         session=database_session,
+    )
+
+    search_listings_usecase = providers.Factory(
+        SearchListingsUseCase,
+        listing_search_service=listing_search_service,
+        query_service=query_service,
     )

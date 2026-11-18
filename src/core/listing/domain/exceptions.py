@@ -33,6 +33,14 @@ class ListingInvalidFilterKeyError(ValidationError):
         super().__init__(message=self.message, metadata={"field": "attributes", "key": key})
 
 
+class ListingAttributeFilterWithoutSubcategoryError(ValidationError):
+    message = "Фильтр по атрибутам доступен только внутри подкатегории"
+    error_code = "listing_attribute_filter_without_subcategory_error"
+
+    def __init__(self):
+        super().__init__(message=self.message, metadata={"field": "subcategory_id"})
+
+
 class ListingActivationError(RulesError):
     message = "Невозможно активировать объявление"
     error_code = "listing_activation_error"

@@ -4,8 +4,15 @@ from uuid import UUID
 from src.core.catalog.infrastructure.catalog_service import CatalogService
 from src.core.listing.domain.entities import Listing
 from src.core.listing.domain.enums import ListingStatus
-from src.core.listing.domain.exceptions import ListingInvalidFilterKeyError
-from src.core.listing.presentation.dto import ListingSearchDocument, ListingSearchQuery
+from src.core.listing.domain.exceptions import (
+    ListingAttributeFilterWithoutSubcategoryError,
+    ListingInvalidFilterKeyError,
+)
+from src.core.listing.presentation.dto import (
+    ListingSearchDocument,
+    ListingSearchQuery,
+    ListingSearchSort,
+)
 from src.core.shared.infrastructure.services.meilisearch_service import (
     MeilisearchService,
 )
@@ -16,6 +23,7 @@ class ListingSearchService:
     INDEX_NAME = "listing"
     FILTERABLE: list[str] = [
         "is_active",
+        "category_id",
         "subcategory_id",
         "city_id",
         "price",
@@ -25,6 +33,11 @@ class ListingSearchService:
     SEARCHABLE: list[str] = ["title", "description"]
     # Ключ атрибута попадает в выражение фильтра без кавычек, поэтому допускаем только идентификатор.
     FILTER_KEY_PATTERN = re.compile(r"^[a-z][a-z0-9_]*$")
+    SORT_RULES: dict[ListingSearchSort, list[str]] = {
+        ListingSearchSort.NEWEST: ["created_at:desc"],
+        ListingSearchSort.PRICE_ASC: ["price:asc"],
+        ListingSearchSort.PRICE_DESC: ["price:desc"],
+    }
 
     def __init__(self, search_service: MeilisearchService, catalog_service: CatalogService):
         self.search_service = search_service
@@ -55,13 +68,39 @@ class ListingSearchService:
         )
 
     async def search_listings(self, query: ListingSearchQuery) -> SearchResult:
+        """Подходящие объявления в нужном порядке. В `hits` только `id`: карточки собираются из Postgres."""
+        await self.validate_attribute_keys(query)
+
         return await self.search_service.search(
             index_name=self.INDEX_NAME,
             query=query.text,
             filter_expression=self.build_filter(query),
             page=query.page,
             limit=query.limit,
+            sort=self.build_sort(query),
+            attributes_to_retrieve=["id"],
         )
+
+    async def validate_attribute_keys(self, query: ListingSearchQuery) -> None:
+        """Фильтр по атрибуту допустим, только если атрибут фильтруемый в выбранной подкатегории.
+
+        Иначе Meilisearch ответит ошибкой «атрибут не фильтруемый», и клиент получит 500 вместо понятной 422.
+        """
+        if not query.attributes:
+            return
+        if query.subcategory_id is None:
+            raise ListingAttributeFilterWithoutSubcategoryError()
+
+        filterable_keys = await self.catalog_service.get_filterable_keys(query.subcategory_id)
+        for key in query.attributes:
+            if key not in filterable_keys:
+                raise ListingInvalidFilterKeyError(key)
+
+    def build_sort(self, query: ListingSearchQuery) -> list[str] | None:
+        if query.sort is not None:
+            return self.SORT_RULES[query.sort]
+        # С текстом оставляем порядок по релевантности, без текста показываем новые.
+        return None if query.text else self.SORT_RULES[ListingSearchSort.NEWEST]
 
     async def sync_schema(self, dynamic_filters: list[str]) -> None:
         config = SearchIndexConfig(
@@ -78,6 +117,8 @@ class ListingSearchService:
     def build_filter(self, query: ListingSearchQuery) -> list[str]:
         filters = ["is_active = true"]
 
+        if query.category_id:
+            filters.append(f"category_id = {self._format_value(str(query.category_id))}")
         if query.subcategory_id:
             filters.append(f"subcategory_id = {self._format_value(str(query.subcategory_id))}")
         if query.city_id:

@@ -15,6 +15,7 @@ from src.core.listing.application.usecases import (
     CreateListingUseCase,
     DeactivateListingUseCase,
     DeleteListingUseCase,
+    SearchListingsUseCase,
 )
 from src.core.listing.infrastructure.query import ListingQueryService
 
@@ -71,4 +72,9 @@ ListingSearchServiceDependency = Annotated[
 ListingQueryServiceDependency = Annotated[
     ListingQueryService,
     Depends(Provide[ApplicationContainer.listing.query_service]),
+]
+
+SearchListingsUseCaseDependency = Annotated[
+    SearchListingsUseCase,
+    Depends(Provide[ApplicationContainer.listing.search_listings_usecase]),
 ]

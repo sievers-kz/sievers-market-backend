@@ -5,6 +5,7 @@ from src.core.customer.domain.exceptions import (
     OrganizationProfileIncompleteError,
 )
 from src.core.listing.domain.exceptions import (
+    ListingAttributeFilterWithoutSubcategoryError,
     ListingDeletedError,
     ListingInvalidFilterKeyError,
     ListingNotFoundError,
@@ -126,9 +127,19 @@ SEARCH_LISTING_DOC = RouteDocs(
     operation_id="searchListing",
     summary="Поиск объявлений",
     description="""
-        Полнотекстовый поиск объявлений через Meilisearch с фильтрами и пагинацией.
+        Поиск и фильтрация активных объявлений. Возвращает те же карточки, что `getListingsCatalog`.
+
+        Фильтры: `text` (название, описание), `category_id`, `subcategory_id`, `city_id`, `price_min`,
+        `price_max` и `attributes` (ключ атрибута → значение, равенство). Фильтр по `attributes` работает
+        только вместе с `subcategory_id` и только по атрибутам, фильтруемым в этой подкатегории
+        (см. `getFilterableAttributes`); иначе `422`.
+
+        Сортировка `sort`: `newest`, `price_asc`, `price_desc`. Без `sort` при заданном `text` порядок по
+        релевантности, без `text` сначала новые. `page` от 1, `limit` от 1 до 50.
+
+        На странице может прийти меньше `limit` карточек, если объявление стало неактивным после индексации.
     """,
-    responses=(ListingInvalidFilterKeyError,),
+    responses=(ListingAttributeFilterWithoutSubcategoryError, ListingInvalidFilterKeyError),
 )
 
 GET_LISTINGS_CATALOG_DOC = RouteDocs(

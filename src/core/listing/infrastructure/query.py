@@ -38,7 +38,46 @@ class ListingQueryService(QueryService):
         Название организации: название магазина, а если его нет, юридическое название.
         `condition` это ключ варианта атрибута (`new`, `used`); у подкатегорий без такого атрибута он `None`.
         """
-        statement = (
+        statement = self._card_statement().where(
+            Listing.category_id == category_id,
+            Listing.status == ListingStatus.ACTIVE,
+        )
+
+        if subcategory_id is not None:
+            statement = statement.where(Listing.subcategory_id == subcategory_id)
+
+        # Второй ключ делает порядок стабильным между страницами при одинаковом `created_at`.
+        statement = statement.order_by(Listing.created_at.desc(), Listing.id.desc())
+
+        return await self.paginate(
+            statement=statement,
+            schema=ListingCardResponse,
+            page=page,
+            limit=limit,
+        )
+
+    async def get_listings_by_ids(self, listing_ids: list[UUID]) -> list[ListingCardResponse]:
+        """Карточки активных объявлений по списку id (для поиска). Порядок не гарантирован, его задаёт вызывающий.
+
+        Объявление, которое успело стать неактивным после индексации, просто не вернётся.
+        """
+        if not listing_ids:
+            return []
+
+        statement = self._card_statement().where(
+            Listing.id.in_(listing_ids),
+            Listing.status == ListingStatus.ACTIVE,
+        )
+        result = await self._session.execute(statement)
+        return [ListingCardResponse.model_validate(row) for row in result.mappings().all()]
+
+    @staticmethod
+    def _card_statement():
+        """Колонки и join'ы карточки каталога; общие для каталога и поиска, чтобы формат карточки был один.
+
+        Join на `Organization` осознанное исключение из ADR 004: это read-запрос.
+        """
+        return (
             select(
                 Listing.id,
                 Subcategory.name.label("subcategory"),
@@ -54,23 +93,6 @@ class ListingQueryService(QueryService):
             .join(Subcategory, Listing.subcategory_id == Subcategory.id)
             .join(City, Listing.city_id == City.id)
             .join(Organization, Listing.organization_id == Organization.id)
-            .where(
-                Listing.category_id == category_id,
-                Listing.status == ListingStatus.ACTIVE,
-            )
-        )
-
-        if subcategory_id is not None:
-            statement = statement.where(Listing.subcategory_id == subcategory_id)
-
-        # Второй ключ делает порядок стабильным между страницами при одинаковом `created_at`.
-        statement = statement.order_by(Listing.created_at.desc(), Listing.id.desc())
-
-        return await self.paginate(
-            statement=statement,
-            schema=ListingCardResponse,
-            page=page,
-            limit=limit,
         )
 
     async def get_my_listings(
