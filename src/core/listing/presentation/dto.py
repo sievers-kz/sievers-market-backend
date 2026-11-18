@@ -72,6 +72,7 @@ class ListingSearchDocument(DTO):
     price: int
     currency: str
     city_id: str
+    category_id: str
     subcategory_id: str
     is_active: bool
     description: str | None = None
@@ -88,6 +89,7 @@ class ListingSearchDocument(DTO):
                 "price": listing.price,
                 "currency": listing.currency,
                 "city_id": str(listing.city_id),
+                "category_id": str(listing.category_id),
                 "subcategory_id": str(listing.subcategory_id),
                 "is_active": listing.status == ListingStatus.ACTIVE,
                 "description": listing.description,
@@ -97,15 +99,25 @@ class ListingSearchDocument(DTO):
         )
 
 
+class ListingSearchSort(str, Enum):
+    NEWEST = "newest"
+    PRICE_ASC = "price_asc"
+    PRICE_DESC = "price_desc"
+
+
 class ListingSearchQuery(DTO):
     text: str | None = None
+    category_id: UUID | None = None
     subcategory_id: UUID | None = None
     city_id: UUID | None = None
-    price_min: int | None = None
-    price_max: int | None = None
+    price_min: int | None = Field(None, ge=0)
+    price_max: int | None = Field(None, ge=0)
+    # Ключи атрибутов допустимы только вместе с `subcategory_id`: фильтруемые атрибуты задаются подкатегорией.
     attributes: dict[str, str | int | float | bool] = {}
-    page: int = 1
-    limit: int = 20
+    # Без `sort`: при тексте порядок по релевантности, без текста сначала новые.
+    sort: ListingSearchSort | None = None
+    page: int = Field(1, ge=1)
+    limit: int = Field(20, ge=1, le=50)
 
     @field_validator("attributes")
     @classmethod

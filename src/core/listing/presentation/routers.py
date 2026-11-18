@@ -15,7 +15,7 @@ from src.core.listing.presentation.dependencies import (
     DeactivateListingUseCaseDependency,
     DeleteListingUseCaseDependency,
     ListingQueryServiceDependency,
-    ListingSearchServiceDependency,
+    SearchListingsUseCaseDependency,
 )
 from src.core.listing.presentation.documentation import (
     ACTIVATE_LISTING_DOC,
@@ -210,6 +210,7 @@ async def delete_listing(
 
 @listing_router.post(
     "/search",
+    response_model=PaginatedResponse[ListingCardResponse],
     operation_id=SEARCH_LISTING_DOC.operation_id,
     summary=SEARCH_LISTING_DOC.summary,
     responses=SEARCH_LISTING_DOC.responses_doc,
@@ -218,9 +219,9 @@ async def delete_listing(
 @inject
 async def search_listing(
     params: ListingSearchQuery,
-    service: ListingSearchServiceDependency,
+    usecase: SearchListingsUseCaseDependency,
 ):
-    return await service.search_listings(params)
+    return await usecase.execute(params)
 
 
 @listing_router.get(

@@ -38,6 +38,8 @@ class MeilisearchService:
         filter_expression: str | list[str] | None = None,
         page: int = 1,
         limit: int = 20,
+        sort: list[str] | None = None,
+        attributes_to_retrieve: list[str] | None = None,
     ):
         index = self.client.index(index_name)
 
@@ -46,6 +48,8 @@ class MeilisearchService:
             filter=filter_expression,
             page=page,
             hits_per_page=limit,
+            sort=sort,
+            attributes_to_retrieve=attributes_to_retrieve,
         )
 
         return SearchResult(
