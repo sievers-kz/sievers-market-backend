@@ -32,7 +32,8 @@ async def main():
 
     async with AsyncClient(url=meili_settings.url, api_key=meili_settings.key) as client:
         search_service = MeilisearchService(client)
-        listing_search_service = ListingSearchService(search_service)
+        # sync_schema работает только с Meilisearch, каталог ему не нужен.
+        listing_search_service = ListingSearchService(search_service=search_service, catalog_service=None)
         await listing_search_service.sync_schema(dynamic_filterable)
 
     await engine.dispose()
