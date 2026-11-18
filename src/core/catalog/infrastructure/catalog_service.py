@@ -1,11 +1,25 @@
+from dataclasses import dataclass
 from uuid import UUID
 
+from src.core.catalog.infrastructure.enums import AttributeType
 from src.core.catalog.infrastructure.exceptions import CatalogNotFoundError
 from src.core.catalog.infrastructure.repositories.attributes import SubcategoryAttributeRepository
 from src.core.catalog.infrastructure.repositories.categories import (
     CategoryRepository,
     SubcategoryRepository,
 )
+
+
+@dataclass(frozen=True)
+class SearchAttributes:
+    """Атрибуты для настроек индекса поиска.
+
+    `filterable`: все фильтруемые ключи. `text`: из них строковые, по ним имеет смысл текстовый поиск
+    (у `enumerate` в значении ключ варианта, у `reference` id, у чисел цифры).
+    """
+
+    filterable: list[str]
+    text: list[str]
 
 
 class CatalogService:
@@ -32,3 +46,10 @@ class CatalogService:
     async def get_filterable_keys(self, subcategory_id: UUID) -> set[str]:
         """Ключи атрибутов подкатегории с флагом `filterable`: только они попадают в индекс поиска."""
         return await self._link_repo.get_filterable_keys(subcategory_id)
+
+    async def get_search_attributes(self) -> SearchAttributes:
+        attributes = await self._link_repo.get_all_filterable()
+        return SearchAttributes(
+            filterable=sorted(key for key, _ in attributes),
+            text=sorted(key for key, attribute_type in attributes if attribute_type == AttributeType.STRING),
+        )

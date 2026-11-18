@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
+from src.core.catalog.infrastructure.enums import AttributeType
 from src.core.catalog.infrastructure.models import (
     AttributeDefinition,
     AttributeGroup,
@@ -93,6 +94,17 @@ class SubcategoryAttributeRepository:
         )
         result = await self._session.execute(statement)
         return list(result.scalars().unique().all())
+
+    async def get_all_filterable(self) -> list[tuple[str, AttributeType]]:
+        """Ключ и тип каждого атрибута, фильтруемого хотя бы в одной подкатегории."""
+        statement = (
+            select(AttributeDefinition.key, AttributeDefinition.type)
+            .join(SubcategoryAttribute, SubcategoryAttribute.attribute_id == AttributeDefinition.id)
+            .where(SubcategoryAttribute.filterable.is_(True))
+            .distinct()
+        )
+        result = await self._session.execute(statement)
+        return [(key, attribute_type) for key, attribute_type in result.all()]
 
     async def get_filterable_keys(self, subcategory_id: UUID) -> set[str]:
         statement = (
