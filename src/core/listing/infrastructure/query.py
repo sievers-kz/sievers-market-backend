@@ -247,6 +247,7 @@ class ListingQueryService(QueryService):
                 Organization.contact_phone.label("phone"),
                 Organization.contact_email.label("email"),
             )
+            .select_from(Listing)
             .join(Organization, Listing.organization_id == Organization.id)
             .where(Listing.id == listing_id, Listing.status == ListingStatus.ACTIVE)
         )
