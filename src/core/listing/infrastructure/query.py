@@ -7,13 +7,16 @@ from sqlalchemy.orm import joinedload
 
 from src.core.catalog.infrastructure.enums import AttributeType
 from src.core.catalog.infrastructure.models import Category, Subcategory, SubcategoryAttribute
+from src.core.customer.domain.enums import RegistryStatus
 from src.core.customer.domain.exceptions import OrganizationNotFoundError
 from src.core.customer.infrastructure.models import Organization
 from src.core.listing.domain.enums import ListingStatus
 from src.core.listing.domain.exceptions import ListingNotFoundError
 from src.core.listing.infrastructure.models import Listing
+from src.core.listing.presentation.contact_masking import mask_email, mask_phone
 from src.core.listing.presentation.dto import (
     ListingCardResponse,
+    ListingContactsResponse,
     ListingDetailResponse,
     ListingSpecGroup,
     ListingSpecItem,
@@ -193,6 +196,12 @@ class ListingQueryService(QueryService):
                 Listing.attributes["condition"].as_string().label("condition"),
                 Listing.created_at,
                 func.coalesce(Organization.shop_name, Organization.legal_name).label("seller_name"),
+                Organization.legal_name.label("seller_legal_name"),
+                Organization.kind.label("seller_kind"),
+                Organization.form.label("seller_form"),
+                Organization.tax_id.label("seller_tax_id"),
+                Organization.legal_address.label("seller_legal_address"),
+                Organization.registry_status.label("seller_registry_status"),
                 Organization.contact_phone.label("seller_phone"),
                 Organization.contact_email.label("seller_email"),
                 Organization.logo_media_id.label("seller_logo_media_id"),
@@ -217,13 +226,35 @@ class ListingQueryService(QueryService):
                 "seller": {
                     "organization_id": result["owner_id"],
                     "name": result["seller_name"],
-                    "phone": result["seller_phone"],
-                    "email": result["seller_email"],
+                    "legal_name": result["seller_legal_name"],
+                    "kind": result["seller_kind"].value,
+                    "form": result["seller_form"],
+                    "tax_id": result["seller_tax_id"],
+                    "legal_address": result["seller_legal_address"],
+                    "is_registry_verified": result["seller_registry_status"] == RegistryStatus.VERIFIED,
+                    "phone_masked": mask_phone(result["seller_phone"]),
+                    "email_masked": mask_email(result["seller_email"]),
                     "logo_media_id": result["seller_logo_media_id"],
                 },
                 "specs": specs,
             }
         )
+
+    async def get_listing_contacts(self, listing_id: UUID) -> ListingContactsResponse:
+        """Полные контакты продавца активного объявления; для остальных `ListingNotFoundError`, как у детальной."""
+        statement = (
+            select(
+                Organization.contact_phone.label("phone"),
+                Organization.contact_email.label("email"),
+            )
+            .select_from(Listing)
+            .join(Organization, Listing.organization_id == Organization.id)
+            .where(Listing.id == listing_id, Listing.status == ListingStatus.ACTIVE)
+        )
+        result = (await self._session.execute(statement)).mappings().one_or_none()
+        if not result:
+            raise ListingNotFoundError()
+        return ListingContactsResponse.model_validate(result)
 
     async def _build_specs(self, subcategory_id: UUID, attributes: dict) -> list[ListingSpecGroup]:
         """Значения атрибутов с подписями, по группам и в порядке формы.

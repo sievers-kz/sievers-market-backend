@@ -210,13 +210,32 @@ class ListingSpecGroup(DTO):
 
 
 class ListingSeller(DTO):
-    """Продавец: организация, от имени которой подано объявление. Контакты публичные."""
+    """Продавец: организация, от имени которой подано объявление.
+
+    Юрданные открытые (это сведения реестра). Телефон и email только маской: полные значения
+    отдаёт `GET /listing/{id}/contacts`.
+    `kind`: `individual` (ИП, `tax_id` это ИИН) или `company` (`tax_id` это БИН).
+    `is_registry_verified`: БИН/ИИН найден в реестре налогоплательщиков.
+    """
 
     organization_id: UUID
     name: str | None
+    legal_name: str | None
+    kind: str
+    form: str | None
+    tax_id: str
+    legal_address: str | None
+    is_registry_verified: bool
+    phone_masked: str | None
+    email_masked: str | None
+    logo_media_id: UUID | None
+
+
+class ListingContactsResponse(DTO):
+    """Полные контакты продавца. Отдельный запрос, чтобы их не было в HTML страницы."""
+
     phone: str | None
     email: str | None
-    logo_media_id: UUID | None
 
 
 class ListingDetailResponse(DTO):

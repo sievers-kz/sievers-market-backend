@@ -60,8 +60,52 @@ class TestListingQueryServiceDetails:
         assert result.category
         assert result.seller.organization_id == create_organization.id
         assert result.seller.name == (create_organization.shop_name or create_organization.legal_name)
-        assert result.seller.phone == create_organization.contact_phone
+        assert result.seller.tax_id == create_organization.tax_id
+        assert result.seller.kind == "company"
+        assert result.seller.is_registry_verified is True
         assert result.created_at is not None
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_details_have_only_masked_contacts(self, listing_query_service, create_listing):
+        result = await listing_query_service.get_listing_details(create_listing.id)
+
+        assert result.seller.phone_masked == "+7 700 1•• •• ••"
+        assert result.seller.email_masked == "s••••@example.com"
+        dumped = result.model_dump_json()
+        assert "+77001234567" not in dumped
+        assert "shop@example.com" not in dumped
+
+
+class TestListingQueryServiceContacts:
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_returns_full_contacts(self, listing_query_service, create_listing, create_organization):
+        result = await listing_query_service.get_listing_contacts(create_listing.id)
+
+        assert result.phone == create_organization.contact_phone
+        assert result.email == create_organization.contact_email
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_unknown_listing_raises_not_found(self, listing_query_service):
+        with pytest.raises(ListingNotFoundError):
+            await listing_query_service.get_listing_contacts(uuid.uuid4())
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_inactive_listing_raises_not_found(self, listing_query_service, listing_repository, create_listing):
+        archived = create_domain_listing(
+            create_listing.organization_id,
+            create_listing.city_id,
+            create_listing.category_id,
+            create_listing.subcategory_id,
+        )
+        archived.status = ListingStatus.ARCHIVED
+        await listing_repository.save(archived)
+
+        with pytest.raises(ListingNotFoundError):
+            await listing_query_service.get_listing_contacts(archived.id)
 
 
 class TestListingQueryServiceDetailSpecs:
