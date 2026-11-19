@@ -1,8 +1,28 @@
 - key: hp
-  label: л.с
+  label: л. с.
 - key: nm
   label: Нм
 - key: l
   label: л
 - key: kmh
   label: км/ч
+- key: h
+  label: ч
+- key: km
+  label: км
+- key: m
+  label: м
+- key: m3
+  label: м³
+- key: kg
+  label: кг
+- key: mm
+  label: мм
+- key: pcs
+  label: шт
+- key: t_h
+  label: т/ч
+- key: m3_h
+  label: м³/ч
+- key: min
+  label: мин

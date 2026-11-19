@@ -6,6 +6,7 @@
     - {attribute: condition, group: general, required: true, filterable: true, position: 3}
     - {attribute: color, group: general, position: 4}
     - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, filterable: true, position: 6}
     - {attribute: engine_power, group: engine, unit: hp, required: true, filterable: true, position: 0}
     - {attribute: fuel_type, group: engine, position: 1}
     - {attribute: engine_volume, group: engine, unit: l, position: 2}
@@ -22,9 +23,514 @@
     - {attribute: condition, group: general, required: true, filterable: true, position: 3}
     - {attribute: color, group: general, position: 4}
     - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, filterable: true, position: 6}
     - {attribute: engine_power, group: engine, unit: hp, required: true, filterable: true, position: 0}
     - {attribute: fuel_type, group: engine, position: 1}
     - {attribute: engine_volume, group: engine, unit: l, position: 2}
     - {attribute: torque, group: engine, unit: nm, position: 3}
     - {attribute: transmission_type, group: transmission, position: 0}
     - {attribute: track_type, group: chassis, position: 0}
+
+- subcategory: Другие тракторы
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, filterable: true, position: 6}
+    - {attribute: engine_power, group: engine, unit: hp, filterable: true, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+
+- subcategory: Зерноуборочные комбайны
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, filterable: true, position: 6}
+    - {attribute: working_width, group: specs, unit: m, filterable: true, position: 0}
+    - {attribute: hopper_volume, group: specs, unit: m3, filterable: true, position: 1}
+    - {attribute: header_type, group: specs, filterable: true, position: 2}
+    - {attribute: engine_power, group: engine, unit: hp, filterable: true, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+
+- subcategory: Кормоуборочные комбайны
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, filterable: true, position: 6}
+    - {attribute: working_width, group: specs, unit: m, filterable: true, position: 0}
+    - {attribute: knives_count, group: specs, unit: pcs, position: 1}
+    - {attribute: chopper_type, group: specs, position: 2}
+    - {attribute: header_type, group: specs, position: 3}
+    - {attribute: engine_power, group: engine, unit: hp, filterable: true, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+
+- subcategory: Картофелеуборочные комбайны
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, position: 6}
+    - {attribute: rows_count, group: specs, unit: pcs, filterable: true, position: 0}
+    - {attribute: working_width, group: specs, unit: m, filterable: true, position: 1}
+    - {attribute: hopper_volume, group: specs, unit: m3, position: 2}
+    - {attribute: engine_power, group: engine, unit: hp, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+
+- subcategory: Свеклоуборочные комбайны
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, position: 6}
+    - {attribute: rows_count, group: specs, unit: pcs, filterable: true, position: 0}
+    - {attribute: hopper_volume, group: specs, unit: m3, filterable: true, position: 1}
+    - {attribute: working_width, group: specs, unit: m, position: 2}
+    - {attribute: engine_power, group: engine, unit: hp, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+
+- subcategory: Другие комбайны
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, filterable: true, position: 6}
+    - {attribute: engine_power, group: engine, unit: hp, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+
+- subcategory: Бороны
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: harrow_type, group: specs, filterable: true, position: 0}
+    - {attribute: working_width, group: specs, unit: m, filterable: true, position: 1}
+    - {attribute: working_depth, group: specs, unit: mm, position: 2}
+    - {attribute: required_tractor_power, group: specs, unit: hp, position: 3}
+
+- subcategory: Плуги
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: bodies_count, group: specs, unit: pcs, filterable: true, position: 0}
+    - {attribute: working_width, group: specs, unit: m, filterable: true, position: 1}
+    - {attribute: working_depth, group: specs, unit: mm, position: 2}
+    - {attribute: required_tractor_power, group: specs, unit: hp, position: 3}
+
+- subcategory: Глубокорыхлители
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: working_width, group: specs, unit: m, filterable: true, position: 0}
+    - {attribute: working_depth, group: specs, unit: mm, filterable: true, position: 1}
+    - {attribute: required_tractor_power, group: specs, unit: hp, position: 2}
+
+- subcategory: Культиваторы
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: cultivator_type, group: specs, filterable: true, position: 0}
+    - {attribute: working_width, group: specs, unit: m, filterable: true, position: 1}
+    - {attribute: working_depth, group: specs, unit: mm, position: 2}
+    - {attribute: required_tractor_power, group: specs, unit: hp, position: 3}
+
+- subcategory: Камнеуборочные машины
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: working_width, group: specs, unit: m, filterable: true, position: 0}
+    - {attribute: working_depth, group: specs, unit: mm, position: 1}
+    - {attribute: hopper_volume, group: specs, unit: m3, position: 2}
+    - {attribute: required_tractor_power, group: specs, unit: hp, position: 3}
+
+- subcategory: Катки
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: roller_type, group: specs, filterable: true, position: 0}
+    - {attribute: working_width, group: specs, unit: m, filterable: true, position: 1}
+    - {attribute: roller_diameter, group: specs, unit: mm, position: 2}
+    - {attribute: required_tractor_power, group: specs, unit: hp, position: 3}
+
+- subcategory: Другая почвообрабатывающая техника
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+
+- subcategory: Сеялки
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: seeder_type, group: specs, filterable: true, position: 0}
+    - {attribute: working_width, group: specs, unit: m, filterable: true, position: 1}
+    - {attribute: rows_count, group: specs, unit: pcs, filterable: true, position: 2}
+    - {attribute: row_spacing, group: specs, unit: mm, position: 3}
+    - {attribute: hopper_volume, group: specs, unit: m3, position: 4}
+    - {attribute: required_tractor_power, group: specs, unit: hp, position: 5}
+
+- subcategory: Сажалки
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: planter_type, group: specs, filterable: true, position: 0}
+    - {attribute: rows_count, group: specs, unit: pcs, filterable: true, position: 1}
+    - {attribute: row_spacing, group: specs, unit: mm, position: 2}
+    - {attribute: hopper_volume, group: specs, unit: m3, position: 3}
+    - {attribute: required_tractor_power, group: specs, unit: hp, position: 4}
+
+- subcategory: Другая посевная и посадочная техника
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+
+- subcategory: Опрыскиватели самоходные
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, filterable: true, position: 6}
+    - {attribute: tank_volume, group: specs, unit: l, filterable: true, position: 0}
+    - {attribute: boom_width, group: specs, unit: m, filterable: true, position: 1}
+    - {attribute: engine_power, group: engine, unit: hp, filterable: true, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+
+- subcategory: Опрыскиватели прицепные
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: tank_volume, group: specs, unit: l, filterable: true, position: 0}
+    - {attribute: boom_width, group: specs, unit: m, filterable: true, position: 1}
+    - {attribute: required_tractor_power, group: specs, unit: hp, position: 2}
+
+- subcategory: Опрыскиватели навесные
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: tank_volume, group: specs, unit: l, filterable: true, position: 0}
+    - {attribute: boom_width, group: specs, unit: m, filterable: true, position: 1}
+    - {attribute: required_tractor_power, group: specs, unit: hp, position: 2}
+
+- subcategory: Разбрасыватели удобрений самоходные
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, filterable: true, position: 6}
+    - {attribute: spreader_type, group: specs, filterable: true, position: 0}
+    - {attribute: hopper_volume, group: specs, unit: m3, filterable: true, position: 1}
+    - {attribute: working_width, group: specs, unit: m, position: 2}
+    - {attribute: engine_power, group: engine, unit: hp, filterable: true, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+
+- subcategory: Разбрасыватели удобрений прицепные
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: spreader_type, group: specs, filterable: true, position: 0}
+    - {attribute: hopper_volume, group: specs, unit: m3, filterable: true, position: 1}
+    - {attribute: working_width, group: specs, unit: m, position: 2}
+    - {attribute: required_tractor_power, group: specs, unit: hp, position: 3}
+
+- subcategory: Разбрасыватели удобрений навесные
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: spreader_type, group: specs, filterable: true, position: 0}
+    - {attribute: hopper_volume, group: specs, unit: m3, filterable: true, position: 1}
+    - {attribute: working_width, group: specs, unit: m, position: 2}
+    - {attribute: required_tractor_power, group: specs, unit: hp, position: 3}
+
+- subcategory: Другая техника для защиты растений
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+
+- subcategory: Дождевальные машины
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: working_width, group: specs, unit: m, filterable: true, position: 0}
+    - {attribute: flow_rate, group: specs, unit: m3_h, filterable: true, position: 1}
+
+- subcategory: Системы капельного орошения
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: flow_rate, group: specs, unit: m3_h, position: 0}
+
+- subcategory: Насосные станции
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: flow_rate, group: specs, unit: m3_h, filterable: true, position: 0}
+    - {attribute: pump_head, group: specs, unit: m, filterable: true, position: 1}
+    - {attribute: engine_power, group: engine, unit: hp, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+
+- subcategory: Другая техника для полива и орошения
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+
+- subcategory: Грузовой автотранспорт
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: mileage, group: general, unit: km, filterable: true, position: 6}
+    - {attribute: engine_power, group: engine, unit: hp, position: 0}
+    - {attribute: engine_volume, group: engine, unit: l, position: 1}
+    - {attribute: fuel_type, group: engine, filterable: true, position: 2}
+    - {attribute: transmission_type, group: transmission, filterable: true, position: 0}
+    - {attribute: drive_type, group: transmission, position: 1}
+    - {attribute: lift_capacity, group: specs, unit: kg, filterable: true, position: 0}
+
+- subcategory: Легковой автотранспорт
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: mileage, group: general, unit: km, filterable: true, position: 6}
+    - {attribute: engine_power, group: engine, unit: hp, position: 0}
+    - {attribute: engine_volume, group: engine, unit: l, position: 1}
+    - {attribute: fuel_type, group: engine, filterable: true, position: 2}
+    - {attribute: transmission_type, group: transmission, filterable: true, position: 0}
+    - {attribute: drive_type, group: transmission, position: 1}
+
+- subcategory: Автобусы
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: mileage, group: general, unit: km, filterable: true, position: 6}
+    - {attribute: engine_power, group: engine, unit: hp, position: 0}
+    - {attribute: engine_volume, group: engine, unit: l, position: 1}
+    - {attribute: fuel_type, group: engine, filterable: true, position: 2}
+    - {attribute: transmission_type, group: transmission, filterable: true, position: 0}
+    - {attribute: drive_type, group: transmission, position: 1}
+    - {attribute: seats_count, group: specs, unit: pcs, filterable: true, position: 0}
+
+- subcategory: Автоцистерны
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: mileage, group: general, unit: km, filterable: true, position: 6}
+    - {attribute: engine_power, group: engine, unit: hp, position: 0}
+    - {attribute: engine_volume, group: engine, unit: l, position: 1}
+    - {attribute: fuel_type, group: engine, filterable: true, position: 2}
+    - {attribute: transmission_type, group: transmission, filterable: true, position: 0}
+    - {attribute: drive_type, group: transmission, position: 1}
+    - {attribute: cistern_volume, group: specs, unit: l, filterable: true, position: 0}
+
+- subcategory: Другой автотранспорт
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: mileage, group: general, unit: km, filterable: true, position: 6}
+    - {attribute: engine_power, group: engine, unit: hp, position: 0}
+    - {attribute: engine_volume, group: engine, unit: l, position: 1}
+    - {attribute: fuel_type, group: engine, filterable: true, position: 2}
+    - {attribute: transmission_type, group: transmission, filterable: true, position: 0}
+    - {attribute: drive_type, group: transmission, position: 1}
+
+- subcategory: Фронтальные погрузчики
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, filterable: true, position: 6}
+    - {attribute: lift_capacity, group: specs, unit: kg, filterable: true, position: 0}
+    - {attribute: bucket_volume, group: specs, unit: m3, position: 1}
+    - {attribute: engine_power, group: engine, unit: hp, filterable: true, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+
+- subcategory: Телескопические погрузчики
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, filterable: true, position: 6}
+    - {attribute: lift_capacity, group: specs, unit: kg, filterable: true, position: 0}
+    - {attribute: lift_height, group: specs, unit: m, filterable: true, position: 1}
+    - {attribute: boom_reach, group: specs, unit: m, position: 2}
+    - {attribute: engine_power, group: engine, unit: hp, filterable: true, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+
+- subcategory: Мини-погрузчики
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, filterable: true, position: 6}
+    - {attribute: lift_capacity, group: specs, unit: kg, filterable: true, position: 0}
+    - {attribute: bucket_volume, group: specs, unit: m3, position: 1}
+    - {attribute: engine_power, group: engine, unit: hp, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+
+- subcategory: Другая погрузочная техника
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, filterable: true, position: 6}
+    - {attribute: engine_power, group: engine, unit: hp, position: 0}
+    - {attribute: fuel_type, group: engine, position: 1}
+
+- subcategory: Агродроны
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: tank_volume, group: specs, unit: l, filterable: true, position: 0}
+    - {attribute: working_width, group: specs, unit: m, position: 1}
+    - {attribute: flight_time, group: specs, unit: min, filterable: true, position: 2}
+
+- subcategory: Робототехника
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+
+- subcategory: Агроавиация
+  attributes:
+    - {attribute: brand, group: general, required: true, filterable: true, position: 0}
+    - {attribute: model, group: general, position: 1}
+    - {attribute: year_of_issue, group: general, required: true, filterable: true, position: 2}
+    - {attribute: condition, group: general, required: true, filterable: true, position: 3}
+    - {attribute: color, group: general, position: 4}
+    - {attribute: country, group: general, position: 5}
+    - {attribute: engine_hours, group: general, unit: h, position: 6}
