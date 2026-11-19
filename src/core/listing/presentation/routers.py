@@ -267,7 +267,7 @@ async def get_my_listings(
 
 @listing_router.get(
     "/{listing_id}",
-    response_model=ListingDetailResponse | None,
+    response_model=ListingDetailResponse,
     operation_id=GET_LISTING_DETAILS_DOC.operation_id,
     summary=GET_LISTING_DETAILS_DOC.summary,
     responses=GET_LISTING_DETAILS_DOC.responses_doc,
