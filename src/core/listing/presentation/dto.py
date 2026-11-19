@@ -190,9 +190,42 @@ class MyListingCardResponse(DTO):
     created_at: datetime
 
 
+class ListingSpecItem(DTO):
+    """Характеристика, готовая к показу.
+
+    `value`: подпись варианта, название из справочника, «Да»/«Нет» или число как есть
+    (число форматирует фронт, единица измерения отдельно в `unit`).
+    """
+
+    key: str
+    label: str
+    value: str | int | float
+    unit: str | None
+
+
+class ListingSpecGroup(DTO):
+    key: str
+    label: str
+    items: list[ListingSpecItem]
+
+
+class ListingSeller(DTO):
+    """Продавец: организация, от имени которой подано объявление. Контакты публичные."""
+
+    organization_id: UUID
+    name: str | None
+    phone: str | None
+    email: str | None
+    logo_media_id: UUID | None
+
+
 class ListingDetailResponse(DTO):
     id: UUID
+    # Это id организации, а не пользователя; оставлено для совместимости, то же значение в `seller.organization_id`.
     owner_id: UUID
+    category_id: UUID
+    category: str
+    subcategory_id: UUID
     subcategory: str
     title: str
     price: int
@@ -201,6 +234,10 @@ class ListingDetailResponse(DTO):
     description: str | None
     gallery: list[UUID]
     attributes: dict[str, Any]
+    condition: str | None
+    created_at: datetime
+    seller: ListingSeller
+    specs: list[ListingSpecGroup]
 
     @field_validator("gallery", mode="before")
     @classmethod
