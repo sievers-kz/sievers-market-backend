@@ -1,12 +1,15 @@
 - key: general
   label: Основная информация
   position: 0
+- key: specs
+  label: Технические характеристики
+  position: 1
 - key: engine
   label: Двигатель
-  position: 1
+  position: 2
 - key: transmission
   label: Трансмиссия
-  position: 2
+  position: 3
 - key: chassis
   label: Ходовая часть
-  position: 3
+  position: 4

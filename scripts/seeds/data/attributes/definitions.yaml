@@ -75,3 +75,154 @@
     - {key: metall, label: Металлические}
     - {key: rubber, label: Резиновые}
     - {key: polymer, label: Полимерные}
+
+- key: engine_hours
+  label: Моточасы
+  type: integer
+
+- key: mileage
+  label: Пробег
+  type: integer
+
+- key: working_width
+  label: Ширина захвата
+  type: float
+
+- key: hopper_volume
+  label: Объём бункера
+  type: float
+
+- key: header_type
+  label: Тип жатки
+  type: enumerate
+  options:
+    - {key: grain, label: Зерновая}
+    - {key: corn, label: Кукурузная}
+    - {key: sunflower, label: Подсолнечная}
+    - {key: pickup, label: Подборщик}
+
+- key: knives_count
+  label: Количество ножей
+  type: integer
+
+- key: chopper_type
+  label: Тип измельчителя
+  type: enumerate
+  options:
+    - {key: drum, label: Барабанный}
+    - {key: disc, label: Дисковый}
+
+- key: rows_count
+  label: Количество рядов
+  type: integer
+
+- key: row_spacing
+  label: Расстояние между рядами
+  type: integer
+
+- key: working_depth
+  label: Глубина обработки
+  type: integer
+
+- key: required_tractor_power
+  label: Рекомендуемая мощность трактора
+  type: integer
+
+- key: bodies_count
+  label: Количество корпусов
+  type: integer
+
+- key: harrow_type
+  label: Тип бороны
+  type: enumerate
+  options:
+    - {key: disc, label: Дисковая}
+    - {key: tooth, label: Зубовая}
+    - {key: spring, label: Пружинная}
+    - {key: needle, label: Игольчатая}
+
+- key: cultivator_type
+  label: Тип культиватора
+  type: enumerate
+  options:
+    - {key: solid, label: Сплошной обработки}
+    - {key: row, label: Междурядный}
+
+- key: seeder_type
+  label: Тип сеялки
+  type: enumerate
+  options:
+    - {key: solid_sowing, label: Сплошной высев}
+    - {key: precision_sowing, label: Точный высев}
+
+- key: planter_type
+  label: Тип сажалки
+  type: enumerate
+  options:
+    - {key: potato, label: Картофелесажалка}
+    - {key: seedling, label: Рассадопосадочная}
+    - {key: other, label: Другая}
+
+- key: roller_type
+  label: Тип катка
+  type: enumerate
+  options:
+    - {key: ring, label: Кольчатый}
+    - {key: smooth, label: Гладкий}
+    - {key: toothed, label: Зубчатый}
+
+- key: roller_diameter
+  label: Диаметр катка
+  type: integer
+
+- key: tank_volume
+  label: Объём бака
+  type: integer
+
+- key: boom_width
+  label: Ширина штанги
+  type: float
+
+- key: spreader_type
+  label: Тип разбрасывателя
+  type: enumerate
+  options:
+    - {key: centrifugal, label: Центробежный}
+    - {key: pendulum, label: Маятниковый}
+    - {key: pneumatic, label: Пневматический}
+
+- key: lift_capacity
+  label: Грузоподъёмность
+  type: integer
+
+- key: bucket_volume
+  label: Объём ковша
+  type: float
+
+- key: lift_height
+  label: Высота подъёма
+  type: float
+
+- key: boom_reach
+  label: Вылет стрелы
+  type: float
+
+- key: flow_rate
+  label: Расход воды
+  type: float
+
+- key: pump_head
+  label: Напор
+  type: integer
+
+- key: seats_count
+  label: Количество мест
+  type: integer
+
+- key: cistern_volume
+  label: Объём цистерны
+  type: integer
+
+- key: flight_time
+  label: Время полёта
+  type: integer
