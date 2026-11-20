@@ -135,3 +135,13 @@ CHANGE_ORGANIZATION_CONTACT_EMAIL_DOC = RouteDocs(
     """,
     responses=(OrganizationNotFoundError,),
 )
+
+GET_SELLERS_CATALOG_DOC = RouteDocs(
+    operation_id="getSellersCatalog",
+    summary="Каталог продавцов",
+    description="""
+        Публичный список продавцов, от новых к старым. Авторизация не нужна.
+        В каталог попадают только организации, найденные в реестре и с подтверждённым владением.
+        В карточке нет ИИН/БИН и контактов.
+    """,
+)
