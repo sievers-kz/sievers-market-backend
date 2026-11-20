@@ -9,6 +9,7 @@ from src.core.customer.domain.exceptions import (
     OrganizationCannotPublishError,
     OrganizationNotFoundError,
     OrganizationProfileIncompleteError,
+    OwnershipRequiresRegistryVerificationError,
 )
 
 
@@ -157,3 +158,47 @@ class TestOrganizationEntity:
 
         assert organization.contact_phone == "+77011234567"
         assert organization.contact_email == "shop@example.com"
+
+
+class TestOrganizationOwnership:
+    @pytest.mark.unit
+    def test_confirm_requires_verified_registry(self):
+        organization = make_organization()
+
+        with pytest.raises(OwnershipRequiresRegistryVerificationError):
+            organization.confirm_ownership()
+
+        assert organization.is_ownership_verified is False
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize("status", [RegistryStatus.PENDING, RegistryStatus.NOT_FOUND])
+    def test_confirm_rejected_for_non_verified_registry_status(self, status):
+        organization = make_organization()
+        organization.registry_status = status
+
+        with pytest.raises(OwnershipRequiresRegistryVerificationError):
+            organization.confirm_ownership()
+
+    @pytest.mark.unit
+    def test_confirm_and_revoke(self):
+        organization = make_organization()
+        organization.mark_registry_verified("ТОО")
+
+        organization.confirm_ownership()
+        assert organization.is_ownership_verified is True
+
+        organization.revoke_ownership()
+        assert organization.is_ownership_verified is False
+
+    @pytest.mark.unit
+    def test_confirm_and_revoke_are_idempotent(self):
+        organization = make_organization()
+        organization.mark_registry_verified("ТОО")
+
+        organization.confirm_ownership()
+        organization.confirm_ownership()
+        assert organization.is_ownership_verified is True
+
+        organization.revoke_ownership()
+        organization.revoke_ownership()
+        assert organization.is_ownership_verified is False

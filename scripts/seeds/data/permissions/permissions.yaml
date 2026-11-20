@@ -55,3 +55,6 @@
 # Admin Permissions
 - codename: "create:admin"
 - codename: "grant:permission"
+
+# Customer Permissions
+- codename: "verify:organization"

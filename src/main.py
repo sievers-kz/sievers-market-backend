@@ -11,7 +11,7 @@ from src.configuration.exception_handlers import setup_exception_handlers
 from src.configuration.logging import setup_logger
 from src.core.admin.presentation.router import admin_router
 from src.core.catalog.presentation.routers.catalog import catalog_router
-from src.core.customer.presentation.routers import customer_router
+from src.core.customer.presentation.routers import customer_router, organization_admin_router
 from src.core.iam.presentation.routers import iam
 from src.core.listing.presentation.routers import listing_router
 from src.core.media.presentation.routers import media_router
@@ -72,6 +72,7 @@ class ApplicationFactory:
         routers = [
             iam,
             customer_router,
+            organization_admin_router,
             reference_router,
             catalog_router,
             listing_router,

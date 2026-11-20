@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from dependency_injector.wiring import inject
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
 from fastapi.params import Security
 
 from src.core.customer.presentation.dependencies import (
@@ -9,20 +9,24 @@ from src.core.customer.presentation.dependencies import (
     ChangeOrganizationContactEmailUseCaseDependency,
     ChangeOrganizationContactPhoneUseCaseDependency,
     ChangeOrganizationShopNameUseCaseDependency,
+    ConfirmOrganizationOwnershipUseCaseDependency,
     CreateOrganizationUseCaseDependency,
     CustomerQueryServiceDependency,
     DeleteOrganizationUseCaseDependency,
+    RevokeOrganizationOwnershipUseCaseDependency,
 )
 from src.core.customer.presentation.documentation import (
     CHANGE_CUSTOMER_FULLNAME_DOC,
     CHANGE_ORGANIZATION_CONTACT_EMAIL_DOC,
     CHANGE_ORGANIZATION_CONTACT_PHONE_DOC,
     CHANGE_ORGANIZATION_SHOP_NAME_DOC,
+    CONFIRM_ORGANIZATION_OWNERSHIP_DOC,
     CREATE_ORGANIZATION_DOC,
     DELETE_ORGANIZATION_DOC,
     GET_CUSTOMER_ME_DOC,
     GET_ORGANIZATION_DOC,
     GET_ORGANIZATIONS_DOC,
+    REVOKE_ORGANIZATION_OWNERSHIP_DOC,
 )
 from src.core.customer.presentation.dto import (
     ChangeCustomerFullname,
@@ -36,9 +40,10 @@ from src.core.customer.presentation.dto import (
     OrganizationResponse,
 )
 from src.core.shared.presentation.dto import CurrentCustomer
-from src.core.shared.presentation.security import get_current_customer
+from src.core.shared.presentation.security import get_current_customer, require_admin
 
 customer_router = APIRouter(prefix="/api/v1/customer", tags=["Customer"])
+organization_admin_router = APIRouter(prefix="/api/v1/admin/organizations", tags=["Admin"])
 
 
 @customer_router.get(
@@ -194,3 +199,37 @@ async def change_organization_contact_email(
 ):
     await usecase.execute(current_customer.id, organization_id, dto)
     return {"message": "Контактный email успешно изменён"}
+
+
+@organization_admin_router.post(
+    "/{organization_id}/ownership/confirm",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin("verify:organization"))],
+    operation_id=CONFIRM_ORGANIZATION_OWNERSHIP_DOC.operation_id,
+    summary=CONFIRM_ORGANIZATION_OWNERSHIP_DOC.summary,
+    responses=CONFIRM_ORGANIZATION_OWNERSHIP_DOC.responses_doc,
+    description=CONFIRM_ORGANIZATION_OWNERSHIP_DOC.description,
+)
+@inject
+async def confirm_organization_ownership(
+    organization_id: UUID,
+    usecase: ConfirmOrganizationOwnershipUseCaseDependency,
+) -> None:
+    await usecase.execute(organization_id)
+
+
+@organization_admin_router.post(
+    "/{organization_id}/ownership/revoke",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin("verify:organization"))],
+    operation_id=REVOKE_ORGANIZATION_OWNERSHIP_DOC.operation_id,
+    summary=REVOKE_ORGANIZATION_OWNERSHIP_DOC.summary,
+    responses=REVOKE_ORGANIZATION_OWNERSHIP_DOC.responses_doc,
+    description=REVOKE_ORGANIZATION_OWNERSHIP_DOC.description,
+)
+@inject
+async def revoke_organization_ownership(
+    organization_id: UUID,
+    usecase: RevokeOrganizationOwnershipUseCaseDependency,
+) -> None:
+    await usecase.execute(organization_id)
