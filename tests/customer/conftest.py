@@ -151,3 +151,13 @@ def change_organization_contact_phone_usecase(container):
 @pytest.fixture
 def change_organization_contact_email_usecase(container):
     return container.customer.change_organization_contact_email_usecase()
+
+
+@pytest.fixture
+def confirm_organization_ownership_usecase(container):
+    return container.customer.confirm_organization_ownership_usecase()
+
+
+@pytest.fixture
+def revoke_organization_ownership_usecase(container):
+    return container.customer.revoke_organization_ownership_usecase()

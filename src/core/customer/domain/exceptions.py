@@ -58,6 +58,11 @@ class OrganizationNotFoundError(NotFoundError):
     error_code = "organization_not_found_error"
 
 
+class OwnershipRequiresRegistryVerificationError(RulesError):
+    message = "Подтвердить владение можно только у организации, найденной в реестре"
+    error_code = "ownership_requires_registry_verification_error"
+
+
 class TaxpayerRegistryUnavailableError(Exception):
     pass
 

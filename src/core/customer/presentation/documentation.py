@@ -6,6 +6,7 @@ from src.core.customer.domain.exceptions import (
     OrganizationAlreadyExistsError,
     OrganizationCannotBeDeletedError,
     OrganizationNotFoundError,
+    OwnershipRequiresRegistryVerificationError,
 )
 from src.core.shared.domain.exceptions import InvalidPhoneFormatError
 from src.core.shared.presentation.documentation import RouteDocs
@@ -132,6 +133,31 @@ CHANGE_ORGANIZATION_CONTACT_EMAIL_DOC = RouteDocs(
     description="""
         Задаёт контактный email организации (до 255 символов). Поле обязательное.
         Менять может владелец при любом статусе организации. Чужая организация возвращается как ненайденная.
+    """,
+    responses=(OrganizationNotFoundError,),
+)
+
+CONFIRM_ORGANIZATION_OWNERSHIP_DOC = RouteDocs(
+    operation_id="confirmOrganizationOwnership",
+    summary="Подтверждение владения организацией",
+    description="""
+        Только для администратора (право `verify:organization`). Администратор вручную убедился, что организацией
+        владеет её заявитель. Подтвердить можно только организацию, найденную в реестре (`registry_status = verified`).
+        После подтверждения организация появляется в публичном каталоге продавцов. Повторный вызов безопасен.
+    """,
+    responses=(
+        OrganizationNotFoundError,
+        OwnershipRequiresRegistryVerificationError,
+    ),
+)
+
+REVOKE_ORGANIZATION_OWNERSHIP_DOC = RouteDocs(
+    operation_id="revokeOrganizationOwnership",
+    summary="Снятие подтверждения владения",
+    description="""
+        Только для администратора (право `verify:organization`). Снимает подтверждение владения:
+        организация пропадает из публичного каталога продавцов. Публиковать объявления она по-прежнему может,
+        если найдена в реестре. Повторный вызов безопасен.
     """,
     responses=(OrganizationNotFoundError,),
 )

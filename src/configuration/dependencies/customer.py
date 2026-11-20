@@ -8,9 +8,11 @@ from src.core.customer.application.usecases import (
     ChangeOrganizationContactEmailUseCase,
     ChangeOrganizationContactPhoneUseCase,
     ChangeOrganizationShopNameUseCase,
+    ConfirmOrganizationOwnershipUseCase,
     CreateOrganizationUseCase,
     DeleteOrganizationUseCase,
     GetOrCreateCustomerUseCase,
+    RevokeOrganizationOwnershipUseCase,
 )
 from src.core.customer.application.usecases.verify_organization_registry import VerifyOrganizationRegistryUseCase
 from src.core.customer.infrastructure.gateways.dadata import DaDataTaxpayerGateway
@@ -67,6 +69,10 @@ class CustomerContainer(containers.DeclarativeContainer):
     get_or_create_customer_usecase = providers.Factory(GetOrCreateCustomerUseCase, uow=uow)
 
     delete_organization_usecase = providers.Factory(DeleteOrganizationUseCase, uow=uow)
+
+    confirm_organization_ownership_usecase = providers.Factory(ConfirmOrganizationOwnershipUseCase, uow=uow)
+
+    revoke_organization_ownership_usecase = providers.Factory(RevokeOrganizationOwnershipUseCase, uow=uow)
 
     change_organization_shop_name_usecase = providers.Factory(ChangeOrganizationShopNameUseCase, uow=uow)
 

@@ -8,6 +8,7 @@ from src.core.customer.domain.exceptions import (
     OrganizationCannotPublishError,
     OrganizationNotFoundError,
     OrganizationProfileIncompleteError,
+    OwnershipRequiresRegistryVerificationError,
 )
 from src.core.customer.domain.policies import missing_profile_fields
 from src.core.customer.domain.value_objects import Fullname
@@ -77,6 +78,15 @@ class Organization(AggregateRoot):
 
     def mark_registry_not_found(self) -> None:
         self.registry_status = RegistryStatus.NOT_FOUND
+
+    def confirm_ownership(self) -> None:
+        """Администратор убедился, что организацией действительно владеет её заявитель."""
+        if self.registry_status != RegistryStatus.VERIFIED:
+            raise OwnershipRequiresRegistryVerificationError()
+        self.is_ownership_verified = True
+
+    def revoke_ownership(self) -> None:
+        self.is_ownership_verified = False
 
     def change_shop_name(self, shop_name: str) -> None:
         normalized = " ".join(shop_name.split())

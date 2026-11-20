@@ -9,8 +9,10 @@ from src.core.customer.application.usecases import (
     ChangeOrganizationContactEmailUseCase,
     ChangeOrganizationContactPhoneUseCase,
     ChangeOrganizationShopNameUseCase,
+    ConfirmOrganizationOwnershipUseCase,
     CreateOrganizationUseCase,
     DeleteOrganizationUseCase,
+    RevokeOrganizationOwnershipUseCase,
 )
 from src.core.customer.infrastructure.query_service import CustomerQueryService
 
@@ -46,4 +48,14 @@ ChangeOrganizationContactPhoneUseCaseDependency = Annotated[
 ChangeOrganizationContactEmailUseCaseDependency = Annotated[
     ChangeOrganizationContactEmailUseCase,
     Depends(Provide[ApplicationContainer.customer.change_organization_contact_email_usecase]),
+]
+
+ConfirmOrganizationOwnershipUseCaseDependency = Annotated[
+    ConfirmOrganizationOwnershipUseCase,
+    Depends(Provide[ApplicationContainer.customer.confirm_organization_ownership_usecase]),
+]
+
+RevokeOrganizationOwnershipUseCaseDependency = Annotated[
+    RevokeOrganizationOwnershipUseCase,
+    Depends(Provide[ApplicationContainer.customer.revoke_organization_ownership_usecase]),
 ]
