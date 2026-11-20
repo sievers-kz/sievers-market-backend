@@ -45,8 +45,6 @@ from src.core.shared.presentation.dto import CurrentCustomer, PaginatedResponse
 from src.core.shared.presentation.security import get_current_customer, require_admin
 
 customer_router = APIRouter(prefix="/api/v1/customer", tags=["Customer"])
-seller_router = APIRouter(prefix="/api/v1/sellers", tags=["Sellers"])
-organization_admin_router = APIRouter(prefix="/api/v1/admin/organizations", tags=["Admin"])
 
 
 @customer_router.get(
@@ -204,8 +202,8 @@ async def change_organization_contact_email(
     return {"message": "Контактный email успешно изменён"}
 
 
-@seller_router.get(
-    "",
+@customer_router.get(
+    "/organizations/catalog",
     response_model=PaginatedResponse[SellerCardResponse],
     operation_id=GET_SELLERS_CATALOG_DOC.operation_id,
     summary=GET_SELLERS_CATALOG_DOC.summary,
@@ -221,8 +219,8 @@ async def get_sellers_catalog(
     return await service.get_sellers_catalog(page, limit)
 
 
-@organization_admin_router.post(
-    "/{organization_id}/ownership/confirm",
+@customer_router.post(
+    "/organization/{organization_id}/ownership/confirm",
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(require_admin("verify:organization"))],
     operation_id=CONFIRM_ORGANIZATION_OWNERSHIP_DOC.operation_id,
@@ -238,8 +236,8 @@ async def confirm_organization_ownership(
     await usecase.execute(organization_id)
 
 
-@organization_admin_router.post(
-    "/{organization_id}/ownership/revoke",
+@customer_router.post(
+    "/organization/{organization_id}/ownership/revoke",
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(require_admin("verify:organization"))],
     operation_id=REVOKE_ORGANIZATION_OWNERSHIP_DOC.operation_id,
