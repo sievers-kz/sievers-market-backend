@@ -82,13 +82,10 @@ class OrganizationResponse(DTO):
     )
 
 
-class SellerCardResponse(DTO):
-    """Публичная карточка продавца в каталоге. Без ИИН/БИН и контактов: они не для открытой выдачи."""
+class OrganizationCardResponse(DTO):
+    """Публичная карточка организации в каталоге. Без ИИН/БИН и контактов: они не для открытой выдачи."""
 
     id: UUID
     name: str = Field(description="Название магазина, а если оно не задано, юридическое название")
-    kind: Kind
     logo_media_id: UUID | None = None
-    is_ownership_verified: bool = Field(
-        description="Владение организацией подтверждено. В каталог попадают только такие продавцы, поле для карточки"
-    )
+    listings_count: int = Field(description="Число активных объявлений организации")

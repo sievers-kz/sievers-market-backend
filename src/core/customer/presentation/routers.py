@@ -25,8 +25,8 @@ from src.core.customer.presentation.documentation import (
     DELETE_ORGANIZATION_DOC,
     GET_CUSTOMER_ME_DOC,
     GET_ORGANIZATION_DOC,
+    GET_ORGANIZATIONS_CATALOG_DOC,
     GET_ORGANIZATIONS_DOC,
-    GET_SELLERS_CATALOG_DOC,
     REVOKE_ORGANIZATION_OWNERSHIP_DOC,
 )
 from src.core.customer.presentation.dto import (
@@ -37,9 +37,9 @@ from src.core.customer.presentation.dto import (
     CreateOrganizationRequest,
     CreateOrganizationResponse,
     CustomerMeResponse,
+    OrganizationCardResponse,
     OrganizationListResponse,
     OrganizationResponse,
-    SellerCardResponse,
 )
 from src.core.shared.presentation.dto import CurrentCustomer, PaginatedResponse
 from src.core.shared.presentation.security import get_current_customer, require_admin
@@ -204,19 +204,20 @@ async def change_organization_contact_email(
 
 @customer_router.get(
     "/organizations/catalog",
-    response_model=PaginatedResponse[SellerCardResponse],
-    operation_id=GET_SELLERS_CATALOG_DOC.operation_id,
-    summary=GET_SELLERS_CATALOG_DOC.summary,
-    responses=GET_SELLERS_CATALOG_DOC.responses_doc,
-    description=GET_SELLERS_CATALOG_DOC.description,
+    response_model=PaginatedResponse[OrganizationCardResponse],
+    operation_id=GET_ORGANIZATIONS_CATALOG_DOC.operation_id,
+    summary=GET_ORGANIZATIONS_CATALOG_DOC.summary,
+    responses=GET_ORGANIZATIONS_CATALOG_DOC.responses_doc,
+    description=GET_ORGANIZATIONS_CATALOG_DOC.description,
 )
 @inject
-async def get_sellers_catalog(
+async def get_organizations_catalog(
     service: CustomerQueryServiceDependency,
+    q: str | None = Query(None, alias="q", max_length=100),
     page: int = Query(1, alias="page", ge=1),
     limit: int = Query(20, alias="limit", ge=1, le=50),
 ):
-    return await service.get_sellers_catalog(page, limit)
+    return await service.get_organizations_catalog(page, limit, (q or "").strip() or None)
 
 
 @customer_router.post(

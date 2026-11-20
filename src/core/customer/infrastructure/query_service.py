@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 
 from src.core.customer.domain.enums import RegistryStatus
 from src.core.customer.domain.exceptions import OrganizationNotFoundError
@@ -8,11 +8,13 @@ from src.core.customer.domain.policies import missing_profile_fields
 from src.core.customer.infrastructure.models import Customer, Organization
 from src.core.customer.presentation.dto import (
     CustomerMeResponse,
+    OrganizationCardResponse,
     OrganizationListResponse,
     OrganizationResponse,
-    SellerCardResponse,
 )
 from src.core.iam.infrastructure.models import Account
+from src.core.listing.domain.enums import ListingStatus
+from src.core.listing.infrastructure.models import Listing
 from src.core.shared.infrastructure.services.query_service import QueryService
 
 
@@ -78,25 +80,40 @@ class CustomerQueryService(QueryService):
         response.missing_fields = missing_profile_fields(organization)
         return response
 
-    async def get_sellers_catalog(self, page: int, limit: int):
-        """Публичный каталог продавцов.
+    async def get_organizations_catalog(self, page: int, limit: int, q: str | None = None):
+        """Публичный каталог организаций.
 
         Показываем только организации, найденные в реестре И с подтверждённым владением (уровень доверия 3).
         Остальные в каталог не попадают, но объявления публиковать могут (см. `ensure_can_publish`).
+        Порядок по названию без учёта регистра, вторым ключом `id`, чтобы страницы не пересекались.
         """
-        statement = (
-            select(
-                Organization.id,
-                func.coalesce(Organization.shop_name, Organization.legal_name).label("name"),
-                Organization.kind,
-                Organization.logo_media_id,
-                Organization.is_ownership_verified,
-            ).where(
-                Organization.registry_status == RegistryStatus.VERIFIED,
-                Organization.is_ownership_verified.is_(True),
-            )
-            # Второй ключ делает порядок стабильным между страницами при одинаковом `created_at`.
-            .order_by(Organization.created_at.desc(), Organization.id.desc())
+        name = func.coalesce(Organization.shop_name, Organization.legal_name)
+        listings_count = (
+            select(func.count())
+            .select_from(Listing)
+            .where(Listing.organization_id == Organization.id, Listing.status == ListingStatus.ACTIVE)
+            .scalar_subquery()
         )
 
-        return await self.paginate(statement=statement, schema=SellerCardResponse, page=page, limit=limit)
+        statement = select(
+            Organization.id,
+            name.label("name"),
+            Organization.logo_media_id,
+            listings_count.label("listings_count"),
+        ).where(
+            Organization.registry_status == RegistryStatus.VERIFIED,
+            Organization.is_ownership_verified.is_(True),
+        )
+
+        if q:
+            # `autoescape` экранирует `%` и `_` в пользовательском вводе, иначе «100%» нашёл бы всё подряд.
+            statement = statement.where(
+                or_(
+                    Organization.shop_name.icontains(q, autoescape=True),
+                    Organization.legal_name.icontains(q, autoescape=True),
+                )
+            )
+
+        statement = statement.order_by(func.lower(name), Organization.id)
+
+        return await self.paginate(statement=statement, schema=OrganizationCardResponse, page=page, limit=limit)
