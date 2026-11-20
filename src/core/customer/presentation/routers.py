@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from dependency_injector.wiring import inject
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from fastapi.params import Security
 
 from src.core.customer.presentation.dependencies import (
@@ -26,6 +26,7 @@ from src.core.customer.presentation.documentation import (
     GET_CUSTOMER_ME_DOC,
     GET_ORGANIZATION_DOC,
     GET_ORGANIZATIONS_DOC,
+    GET_SELLERS_CATALOG_DOC,
     REVOKE_ORGANIZATION_OWNERSHIP_DOC,
 )
 from src.core.customer.presentation.dto import (
@@ -38,11 +39,13 @@ from src.core.customer.presentation.dto import (
     CustomerMeResponse,
     OrganizationListResponse,
     OrganizationResponse,
+    SellerCardResponse,
 )
-from src.core.shared.presentation.dto import CurrentCustomer
+from src.core.shared.presentation.dto import CurrentCustomer, PaginatedResponse
 from src.core.shared.presentation.security import get_current_customer, require_admin
 
 customer_router = APIRouter(prefix="/api/v1/customer", tags=["Customer"])
+seller_router = APIRouter(prefix="/api/v1/sellers", tags=["Sellers"])
 organization_admin_router = APIRouter(prefix="/api/v1/admin/organizations", tags=["Admin"])
 
 
@@ -199,6 +202,23 @@ async def change_organization_contact_email(
 ):
     await usecase.execute(current_customer.id, organization_id, dto)
     return {"message": "Контактный email успешно изменён"}
+
+
+@seller_router.get(
+    "",
+    response_model=PaginatedResponse[SellerCardResponse],
+    operation_id=GET_SELLERS_CATALOG_DOC.operation_id,
+    summary=GET_SELLERS_CATALOG_DOC.summary,
+    responses=GET_SELLERS_CATALOG_DOC.responses_doc,
+    description=GET_SELLERS_CATALOG_DOC.description,
+)
+@inject
+async def get_sellers_catalog(
+    service: CustomerQueryServiceDependency,
+    page: int = Query(1, alias="page", ge=1),
+    limit: int = Query(20, alias="limit", ge=1, le=50),
+):
+    return await service.get_sellers_catalog(page, limit)
 
 
 @organization_admin_router.post(

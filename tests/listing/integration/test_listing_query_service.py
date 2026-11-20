@@ -1,3 +1,4 @@
+import json
 import uuid
 
 import pytest
@@ -33,6 +34,145 @@ class TestListingQueryServiceDetails:
     async def test_unknown_listing_raises_not_found(self, listing_query_service):
         with pytest.raises(ListingNotFoundError):
             await listing_query_service.get_listing_details(uuid.uuid4())
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_inactive_listing_raises_not_found(self, listing_query_service, listing_repository, create_listing):
+        archived = create_domain_listing(
+            create_listing.organization_id,
+            create_listing.city_id,
+            create_listing.category_id,
+            create_listing.subcategory_id,
+        )
+        archived.status = ListingStatus.ARCHIVED
+        await listing_repository.save(archived)
+
+        with pytest.raises(ListingNotFoundError):
+            await listing_query_service.get_listing_details(archived.id)
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_returns_category_and_seller(self, listing_query_service, create_listing, create_organization):
+        result = await listing_query_service.get_listing_details(create_listing.id)
+
+        assert result.category_id == create_listing.category_id
+        assert result.subcategory_id == create_listing.subcategory_id
+        assert result.category
+        assert result.seller.organization_id == create_organization.id
+        assert result.seller.name == (create_organization.shop_name or create_organization.legal_name)
+        assert result.seller.tax_id == create_organization.tax_id
+        assert result.seller.kind == "company"
+        assert result.seller.is_registry_verified is True
+        assert result.created_at is not None
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_details_have_only_masked_contacts(self, listing_query_service, create_listing):
+        result = await listing_query_service.get_listing_details(create_listing.id)
+
+        assert result.seller.phone_masked == "+7 700 1•• •• ••"
+        assert result.seller.email_masked == "s••••@example.com"
+        dumped = result.model_dump_json()
+        assert "+77001234567" not in dumped
+        assert "shop@example.com" not in dumped
+
+
+class TestListingQueryServiceContacts:
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_returns_full_contacts(self, listing_query_service, create_listing, create_organization):
+        result = await listing_query_service.get_listing_contacts(create_listing.id)
+
+        assert result.phone == create_organization.contact_phone
+        assert result.email == create_organization.contact_email
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_unknown_listing_raises_not_found(self, listing_query_service):
+        with pytest.raises(ListingNotFoundError):
+            await listing_query_service.get_listing_contacts(uuid.uuid4())
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_inactive_listing_raises_not_found(self, listing_query_service, listing_repository, create_listing):
+        archived = create_domain_listing(
+            create_listing.organization_id,
+            create_listing.city_id,
+            create_listing.category_id,
+            create_listing.subcategory_id,
+        )
+        archived.status = ListingStatus.ARCHIVED
+        await listing_repository.save(archived)
+
+        with pytest.raises(ListingNotFoundError):
+            await listing_query_service.get_listing_contacts(archived.id)
+
+
+class TestListingQueryServiceDetailSpecs:
+    """Характеристики на тракторе: в seed-настройке у «Колесные тракторы» есть марка, состояние, мощность."""
+
+    @pytest.fixture
+    def tractor_listing(self, listing_repository, create_organization, database_session):
+        async def _make(attributes: dict):
+            city_id = (await database_session.execute(text("SELECT id FROM cities LIMIT 1"))).scalar_one()
+            subcategory_id, category_id = (
+                await database_session.execute(
+                    text("SELECT id, category_id FROM subcategories WHERE name = 'Колесные тракторы'")
+                )
+            ).one()
+            listing = create_domain_listing(create_organization.id, city_id, category_id, subcategory_id)
+            await listing_repository.save(listing)
+            await database_session.execute(
+                text("UPDATE listings SET attributes = CAST(:attrs AS jsonb) WHERE id = :id"),
+                {"attrs": json.dumps(attributes), "id": listing.id},
+            )
+            return listing
+
+        return _make
+
+    @staticmethod
+    def _items(result) -> dict:
+        return {item.key: item for group in result.specs for item in group.items}
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_resolves_labels_references_and_units(self, listing_query_service, tractor_listing, database_session):
+        brand_id, brand_name = (await database_session.execute(text("SELECT id, name FROM brands LIMIT 1"))).one()
+        listing = await tractor_listing({"brand": str(brand_id), "condition": "used", "engine_power": 410})
+
+        result = await listing_query_service.get_listing_details(listing.id)
+        items = self._items(result)
+
+        assert items["brand"].value == brand_name
+        assert items["brand"].label == "Марка"
+        assert items["condition"].value == "Б/У"
+        assert items["engine_power"].value == 410
+        assert items["engine_power"].unit == "л. с."
+        assert result.condition == "used"
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_skips_empty_unknown_and_stale_values(self, listing_query_service, tractor_listing):
+        listing = await tractor_listing(
+            {"condition": "broken", "model": "", "engine_power": None, "removed_key": "x", "brand": str(uuid.uuid4())}
+        )
+
+        result = await listing_query_service.get_listing_details(listing.id)
+
+        assert self._items(result) == {}
+        assert result.specs == []
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_groups_follow_form_order(self, listing_query_service, tractor_listing, database_session):
+        brand_id = (await database_session.execute(text("SELECT id FROM brands LIMIT 1"))).scalar_one()
+        listing = await tractor_listing({"engine_power": 410, "condition": "new", "brand": str(brand_id)})
+
+        result = await listing_query_service.get_listing_details(listing.id)
+
+        general = result.specs[0]
+        assert general.key == "general"
+        assert [item.key for item in general.items] == ["brand", "condition"]
 
 
 class TestListingQueryServiceMyListings:

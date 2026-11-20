@@ -27,6 +27,7 @@ from src.core.listing.presentation.documentation import (
     CREATE_LISTING_DOC,
     DEACTIVATE_LISTING_DOC,
     DELETE_LISTING_DOC,
+    GET_LISTING_CONTACTS_DOC,
     GET_LISTING_DETAILS_DOC,
     GET_LISTINGS_CATALOG_DOC,
     GET_MY_LISTINGS_DOC,
@@ -39,6 +40,7 @@ from src.core.listing.presentation.dto import (
     ChangeListingPriceRequest,
     CreateListingRequest,
     ListingCardResponse,
+    ListingContactsResponse,
     ListingDetailResponse,
     ListingSearchQuery,
     MyListingCardResponse,
@@ -267,7 +269,7 @@ async def get_my_listings(
 
 @listing_router.get(
     "/{listing_id}",
-    response_model=ListingDetailResponse | None,
+    response_model=ListingDetailResponse,
     operation_id=GET_LISTING_DETAILS_DOC.operation_id,
     summary=GET_LISTING_DETAILS_DOC.summary,
     responses=GET_LISTING_DETAILS_DOC.responses_doc,
@@ -279,3 +281,19 @@ async def get_listing_details(
     service: ListingQueryServiceDependency,
 ):
     return await service.get_listing_details(listing_id)
+
+
+@listing_router.get(
+    "/{listing_id}/contacts",
+    response_model=ListingContactsResponse,
+    operation_id=GET_LISTING_CONTACTS_DOC.operation_id,
+    summary=GET_LISTING_CONTACTS_DOC.summary,
+    responses=GET_LISTING_CONTACTS_DOC.responses_doc,
+    description=GET_LISTING_CONTACTS_DOC.description,
+)
+@inject
+async def get_listing_contacts(
+    listing_id: UUID,
+    service: ListingQueryServiceDependency,
+):
+    return await service.get_listing_contacts(listing_id)
