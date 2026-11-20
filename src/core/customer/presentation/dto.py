@@ -80,3 +80,15 @@ class OrganizationResponse(DTO):
         default_factory=list,
         description="Поля профиля, которые нужно заполнить, чтобы организация могла размещать объявления",
     )
+
+
+class SellerCardResponse(DTO):
+    """Публичная карточка продавца в каталоге. Без ИИН/БИН и контактов: они не для открытой выдачи."""
+
+    id: UUID
+    name: str = Field(description="Название магазина, а если оно не задано, юридическое название")
+    kind: Kind
+    logo_media_id: UUID | None = None
+    is_ownership_verified: bool = Field(
+        description="Владение организацией подтверждено. В каталог попадают только такие продавцы, поле для карточки"
+    )

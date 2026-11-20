@@ -1,11 +1,17 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
+from src.core.customer.domain.enums import RegistryStatus
 from src.core.customer.domain.exceptions import OrganizationNotFoundError
 from src.core.customer.domain.policies import missing_profile_fields
 from src.core.customer.infrastructure.models import Customer, Organization
-from src.core.customer.presentation.dto import CustomerMeResponse, OrganizationListResponse, OrganizationResponse
+from src.core.customer.presentation.dto import (
+    CustomerMeResponse,
+    OrganizationListResponse,
+    OrganizationResponse,
+    SellerCardResponse,
+)
 from src.core.iam.infrastructure.models import Account
 from src.core.shared.infrastructure.services.query_service import QueryService
 
@@ -71,3 +77,26 @@ class CustomerQueryService(QueryService):
         response = OrganizationResponse.model_validate(organization)
         response.missing_fields = missing_profile_fields(organization)
         return response
+
+    async def get_sellers_catalog(self, page: int, limit: int):
+        """Публичный каталог продавцов.
+
+        Показываем только организации, найденные в реестре И с подтверждённым владением (уровень доверия 3).
+        Остальные в каталог не попадают, но объявления публиковать могут (см. `ensure_can_publish`).
+        """
+        statement = (
+            select(
+                Organization.id,
+                func.coalesce(Organization.shop_name, Organization.legal_name).label("name"),
+                Organization.kind,
+                Organization.logo_media_id,
+                Organization.is_ownership_verified,
+            ).where(
+                Organization.registry_status == RegistryStatus.VERIFIED,
+                Organization.is_ownership_verified.is_(True),
+            )
+            # Второй ключ делает порядок стабильным между страницами при одинаковом `created_at`.
+            .order_by(Organization.created_at.desc(), Organization.id.desc())
+        )
+
+        return await self.paginate(statement=statement, schema=SellerCardResponse, page=page, limit=limit)
