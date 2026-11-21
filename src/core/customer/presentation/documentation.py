@@ -162,12 +162,13 @@ REVOKE_ORGANIZATION_OWNERSHIP_DOC = RouteDocs(
     responses=(OrganizationNotFoundError,),
 )
 
-GET_SELLERS_CATALOG_DOC = RouteDocs(
-    operation_id="getSellersCatalog",
-    summary="Каталог продавцов",
+GET_ORGANIZATIONS_CATALOG_DOC = RouteDocs(
+    operation_id="getOrganizationsCatalog",
+    summary="Каталог организаций",
     description="""
-        Публичный список продавцов, от новых к старым. Авторизация не нужна.
+        Публичный список организаций, по названию от А до Я. Авторизация не нужна.
         В каталог попадают только организации, найденные в реестре и с подтверждённым владением.
-        В карточке нет ИИН/БИН и контактов.
+        Параметр `q` ищет по названию магазина и юридическому названию без учёта регистра.
+        В карточке есть число активных объявлений; ИИН/БИН и контактов в ней нет.
     """,
 )
