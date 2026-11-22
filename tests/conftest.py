@@ -18,7 +18,6 @@ from src.core.shared.infrastructure.services.meilisearch_service import (
 pytest_plugins = [
     "tests.iam.conftest",
     "tests.customer.conftest",
-    "tests.vendor.conftest",
     "tests.listing.conftest",
     "tests.catalog.conftest",
     "tests.admin.conftest",

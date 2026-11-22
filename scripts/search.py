@@ -1,39 +1,40 @@
+"""Настройки индекса поиска (`sync_schema`). Запускается в `entrypoint.sh` при каждом старте контейнера."""
+
 import asyncio
 
 from meilisearch_python_sdk import AsyncClient
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.orm import joinedload
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from src.configuration.settings.settings import MeilisearchConfig, PostgresSettings
-from src.core.catalog.infrastructure.models import SubcategoryAttribute
+from src.core.catalog.infrastructure.catalog_service import CatalogService
+from src.core.catalog.infrastructure.repositories.attributes import SubcategoryAttributeRepository
+from src.core.catalog.infrastructure.repositories.categories import (
+    CategoryRepository,
+    SubcategoryRepository,
+)
 from src.core.listing.application.services.listing_search import ListingSearchService
 from src.core.shared.infrastructure.services.meilisearch_service import (
     MeilisearchService,
 )
 
 
+def build_listing_search_service(session: AsyncSession, client: AsyncClient) -> ListingSearchService:
+    """Сервис поиска для скриптов: те же классы, что в приложении, но без DI-контейнера."""
+    catalog_service = CatalogService(
+        category_repo=CategoryRepository(session),
+        subcategory_repo=SubcategoryRepository(session),
+        link_repo=SubcategoryAttributeRepository(session),
+    )
+    return ListingSearchService(search_service=MeilisearchService(client), catalog_service=catalog_service)
+
+
 async def main():
-    db_settings = PostgresSettings()
+    engine = create_async_engine(url=PostgresSettings().database_url, echo=False)
+    session_factory = async_sessionmaker(bind=engine, expire_on_commit=False)
     meili_settings = MeilisearchConfig()
 
-    engine = create_async_engine(url=db_settings.database_url, echo=False)
-    session_factory = async_sessionmaker(bind=engine, expire_on_commit=False)
-
-    async with session_factory() as session:
-        statement = (
-            select(SubcategoryAttribute)
-            .where(SubcategoryAttribute.filterable.is_(True))
-            .options(joinedload(SubcategoryAttribute.attribute))
-        )
-        result = await session.execute(statement)
-        links = result.scalars().unique().all()
-        dynamic_filterable = list({link.attribute.key for link in links})
-
-    async with AsyncClient(url=meili_settings.url, api_key=meili_settings.key) as client:
-        search_service = MeilisearchService(client)
-        listing_search_service = ListingSearchService(search_service)
-        await listing_search_service.sync_schema(dynamic_filterable)
+    async with session_factory() as session, AsyncClient(url=meili_settings.url, api_key=meili_settings.key) as client:
+        await build_listing_search_service(session, client).sync_schema()
 
     await engine.dispose()
     print("✅ Search schema synced")

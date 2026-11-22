@@ -10,7 +10,6 @@ from src.configuration.dependencies.listing import ListingContainer
 from src.configuration.dependencies.media import MediaContainer
 from src.configuration.dependencies.reference import ReferenceContainer
 from src.configuration.dependencies.shared import SharedContainer
-from src.configuration.dependencies.vendor import VendorContainer
 
 
 class ApplicationContainer(containers.DeclarativeContainer):
@@ -52,6 +51,9 @@ class ApplicationContainer(containers.DeclarativeContainer):
         CustomerContainer,
         session_factory=gateways.session_factory,
         database_session=gateways.database_session,
+        redis_service=shared.redis_service,
+        taxpayer_registry_config=configurations.taxpayer_registry_config,
+        arq_service=shared.arq_service,
     )
 
     iam = providers.Container(
@@ -70,7 +72,9 @@ class ApplicationContainer(containers.DeclarativeContainer):
         session_factory=gateways.session_factory,
         database_session=gateways.database_session,
         attribute_validation=catalog.attribute_validation,
+        catalog_service=catalog.catalog_service,
         meilisearch_service=shared.meilisearch_service,
+        organization_service=customer.organization_service,
     )
 
     media = providers.Container(
@@ -78,17 +82,8 @@ class ApplicationContainer(containers.DeclarativeContainer):
         session_factory=gateways.session_factory,
         database_session=gateways.database_session,
         minio_client=gateways.minio_client,
+        minio_public_client=gateways.minio_public_client,
         minio_config=configurations.minio_config,
-    )
-
-    vendor = providers.Container(
-        VendorContainer,
-        session_factory=gateways.session_factory,
-        database_session=gateways.database_session,
-        phone_normalizer=shared.phone_normalizer,
-        customer_service=customer.customer_service,
-        redis_service=shared.redis_service,
-        kgd_settings=configurations.kgd_settings,
     )
 
     admin = providers.Container(

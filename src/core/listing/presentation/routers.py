@@ -15,7 +15,7 @@ from src.core.listing.presentation.dependencies import (
     DeactivateListingUseCaseDependency,
     DeleteListingUseCaseDependency,
     ListingQueryServiceDependency,
-    ListingSearchServiceDependency,
+    SearchListingsUseCaseDependency,
 )
 from src.core.listing.presentation.documentation import (
     ACTIVATE_LISTING_DOC,
@@ -27,8 +27,10 @@ from src.core.listing.presentation.documentation import (
     CREATE_LISTING_DOC,
     DEACTIVATE_LISTING_DOC,
     DELETE_LISTING_DOC,
+    GET_LISTING_CONTACTS_DOC,
     GET_LISTING_DETAILS_DOC,
     GET_LISTINGS_CATALOG_DOC,
+    GET_MY_LISTINGS_DOC,
     SEARCH_LISTING_DOC,
 )
 from src.core.listing.presentation.dto import (
@@ -38,11 +40,15 @@ from src.core.listing.presentation.dto import (
     ChangeListingPriceRequest,
     CreateListingRequest,
     ListingCardResponse,
+    ListingContactsResponse,
     ListingDetailResponse,
     ListingSearchQuery,
+    MyListingCardResponse,
+    MyListingsSort,
+    MyListingsStatus,
 )
-from src.core.shared.presentation.dto import CurrentVendor, PaginatedResponse
-from src.core.shared.presentation.security import get_current_vendor
+from src.core.shared.presentation.dto import CurrentCustomer, PaginatedResponse
+from src.core.shared.presentation.security import get_current_customer
 
 listing_router = APIRouter(prefix="/api/v1/listing", tags=["Listing"])
 
@@ -58,9 +64,9 @@ listing_router = APIRouter(prefix="/api/v1/listing", tags=["Listing"])
 async def create_listing(
     dto: CreateListingRequest,
     usecase: CreateListingUseCaseDependency,
-    current_vendor: CurrentVendor = Security(get_current_vendor),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    respone = await usecase.execute(current_vendor.id, dto)
+    respone = await usecase.execute(current_customer.id, dto)
     return {"message": "Объявление создано", "response": respone}
 
 
@@ -76,9 +82,9 @@ async def change_listing_price(
     listing_id: UUID,
     dto: ChangeListingPriceRequest,
     usecase: ChangeListingPriceUseCaseDependency,
-    current_vendor: CurrentVendor = Security(get_current_vendor),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_vendor.id, listing_id, dto)
+    await usecase.execute(current_customer.id, listing_id, dto)
     return {"message": "Цена объявления обновлена"}
 
 
@@ -94,9 +100,9 @@ async def change_listing_location(
     listing_id: UUID,
     dto: ChangeListingLocationRequest,
     usecase: ChangeListingLocationUseCaseDependency,
-    current_vendor: CurrentVendor = Security(get_current_vendor),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_vendor.id, listing_id, dto)
+    await usecase.execute(current_customer.id, listing_id, dto)
     return {"message": "Местоположение объявления изменены"}
 
 
@@ -112,9 +118,9 @@ async def change_listing_description(
     listing_id: UUID,
     dto: ChangeListingDescriptionRequest,
     usecase: ChangeListingDescriptionUseCaseDependency,
-    current_vendor: CurrentVendor = Security(get_current_vendor),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_vendor.id, listing_id, dto)
+    await usecase.execute(current_customer.id, listing_id, dto)
     return {"message": "Описание объявления изменено"}
 
 
@@ -130,9 +136,9 @@ async def change_listing_attribute(
     listing_id: UUID,
     dto: ChangeListingAttributeRequest,
     usecase: ChangeListingAttributeUseCaseDependency,
-    current_vendor: CurrentVendor = Security(get_current_vendor),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_vendor.id, listing_id, dto)
+    await usecase.execute(current_customer.id, listing_id, dto)
     return {"message": "Атрибуты объявления обновлены"}
 
 
@@ -147,9 +153,9 @@ async def change_listing_attribute(
 async def activate_listing(
     listing_id: UUID,
     usecase: ActivateListingUseCaseDependency,
-    current_vendor: CurrentVendor = Security(get_current_vendor),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_vendor.id, listing_id)
+    await usecase.execute(current_customer.id, listing_id)
     return {"message": "Объявление активировано"}
 
 
@@ -164,9 +170,9 @@ async def activate_listing(
 async def deactivate_listing(
     listing_id: UUID,
     usecase: DeactivateListingUseCaseDependency,
-    current_vendor: CurrentVendor = Security(get_current_vendor),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_vendor.id, listing_id)
+    await usecase.execute(current_customer.id, listing_id)
     return {"message": "Объявление деактивировано"}
 
 
@@ -181,9 +187,9 @@ async def deactivate_listing(
 async def archive_listing(
     listing_id: UUID,
     usecase: ArchiveListingUseCaseDependency,
-    current_vendor: CurrentVendor = Security(get_current_vendor),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_vendor.id, listing_id)
+    await usecase.execute(current_customer.id, listing_id)
     return {"message": "Объявление архивировано"}
 
 
@@ -198,14 +204,15 @@ async def archive_listing(
 async def delete_listing(
     listing_id: UUID,
     usecase: DeleteListingUseCaseDependency,
-    current_vendor: CurrentVendor = Security(get_current_vendor),
+    current_customer: CurrentCustomer = Security(get_current_customer),
 ):
-    await usecase.execute(current_vendor.id, listing_id)
+    await usecase.execute(current_customer.id, listing_id)
     return {"message": "Объявление удалено"}
 
 
 @listing_router.post(
     "/search",
+    response_model=PaginatedResponse[ListingCardResponse],
     operation_id=SEARCH_LISTING_DOC.operation_id,
     summary=SEARCH_LISTING_DOC.summary,
     responses=SEARCH_LISTING_DOC.responses_doc,
@@ -214,9 +221,9 @@ async def delete_listing(
 @inject
 async def search_listing(
     params: ListingSearchQuery,
-    service: ListingSearchServiceDependency,
+    usecase: SearchListingsUseCaseDependency,
 ):
-    return await service.search_listings(params)
+    return await usecase.execute(params)
 
 
 @listing_router.get(
@@ -239,8 +246,30 @@ async def get_listings_catalog(
 
 
 @listing_router.get(
+    "/my",
+    response_model=PaginatedResponse[MyListingCardResponse],
+    operation_id=GET_MY_LISTINGS_DOC.operation_id,
+    summary=GET_MY_LISTINGS_DOC.summary,
+    responses=GET_MY_LISTINGS_DOC.responses_doc,
+    description=GET_MY_LISTINGS_DOC.description,
+)
+@inject
+async def get_my_listings(
+    service: ListingQueryServiceDependency,
+    status: MyListingsStatus | None = Query(None, alias="status"),
+    organization_id: UUID | None = Query(None, alias="organization_id"),
+    category_id: UUID | None = Query(None, alias="category_id"),
+    sort: MyListingsSort = Query(MyListingsSort.NEWEST, alias="sort"),
+    page: int = Query(1, alias="page", ge=1),
+    limit: int = Query(20, alias="limit", ge=1, le=50),
+    current_customer: CurrentCustomer = Security(get_current_customer),
+):
+    return await service.get_my_listings(current_customer.id, status, organization_id, category_id, sort, page, limit)
+
+
+@listing_router.get(
     "/{listing_id}",
-    response_model=ListingDetailResponse | None,
+    response_model=ListingDetailResponse,
     operation_id=GET_LISTING_DETAILS_DOC.operation_id,
     summary=GET_LISTING_DETAILS_DOC.summary,
     responses=GET_LISTING_DETAILS_DOC.responses_doc,
@@ -252,3 +281,19 @@ async def get_listing_details(
     service: ListingQueryServiceDependency,
 ):
     return await service.get_listing_details(listing_id)
+
+
+@listing_router.get(
+    "/{listing_id}/contacts",
+    response_model=ListingContactsResponse,
+    operation_id=GET_LISTING_CONTACTS_DOC.operation_id,
+    summary=GET_LISTING_CONTACTS_DOC.summary,
+    responses=GET_LISTING_CONTACTS_DOC.responses_doc,
+    description=GET_LISTING_CONTACTS_DOC.description,
+)
+@inject
+async def get_listing_contacts(
+    listing_id: UUID,
+    service: ListingQueryServiceDependency,
+):
+    return await service.get_listing_contacts(listing_id)

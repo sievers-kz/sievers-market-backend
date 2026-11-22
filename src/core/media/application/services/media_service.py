@@ -27,7 +27,7 @@ class MediaService:
             unique_key = uuid.uuid4()
             object_key = f"uploads/{unique_key}/{file.client_filename}"
 
-            upload_url = self.storage.generate_upload_url(object_name=object_key)
+            upload_url = await self.storage.generate_upload_url(object_name=object_key)
             response.append(
                 UploadUrlResponse(
                     client_filename=file.client_filename,
@@ -68,4 +68,4 @@ class MediaService:
             media = await uow.media.get_by_id(media_id)
             if not media:
                 return None
-        return self.storage.generate_download_url(media.media_url)
+        return await self.storage.generate_download_url(media.media_url)

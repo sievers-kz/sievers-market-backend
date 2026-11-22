@@ -14,7 +14,7 @@ from src.core.shared.infrastructure.base_model import BaseModel
 class Listing(BaseModel):
     __tablename__ = "listings"
 
-    owner_id: Mapped[UUID] = mapped_column(FK("vendors.id", ondelete="CASCADE"), nullable=False)
+    organization_id: Mapped[UUID] = mapped_column(FK("organizations.id", ondelete="RESTRICT"), nullable=False)
     category_id: Mapped[UUID] = mapped_column(FK("categories.id", ondelete="CASCADE"), nullable=False)
     subcategory_id: Mapped[UUID] = mapped_column(FK("subcategories.id", ondelete="RESTRICT"), nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=True)

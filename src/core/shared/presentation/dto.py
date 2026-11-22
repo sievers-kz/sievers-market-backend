@@ -16,10 +16,6 @@ class CurrentCustomer(DTO):
     id: UUID
 
 
-class CurrentVendor(DTO):
-    id: UUID
-
-
 class CurrentAdmin(DTO):
     id: UUID
 

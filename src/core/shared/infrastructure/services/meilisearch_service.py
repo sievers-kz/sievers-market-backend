@@ -17,6 +17,10 @@ class MeilisearchService:
         string_ids = [str(doc_id) for doc_id in document_ids]
         await index.delete_documents(string_ids)
 
+    async def delete_all_documents(self, index_name: str) -> None:
+        index = self.client.index(index_name)
+        await index.delete_all_documents()
+
     async def configure_index(
         self,
         index_name: str,
@@ -38,6 +42,8 @@ class MeilisearchService:
         filter_expression: str | list[str] | None = None,
         page: int = 1,
         limit: int = 20,
+        sort: list[str] | None = None,
+        attributes_to_retrieve: list[str] | None = None,
     ):
         index = self.client.index(index_name)
 
@@ -46,6 +52,8 @@ class MeilisearchService:
             filter=filter_expression,
             page=page,
             hits_per_page=limit,
+            sort=sort,
+            attributes_to_retrieve=attributes_to_retrieve,
         )
 
         return SearchResult(

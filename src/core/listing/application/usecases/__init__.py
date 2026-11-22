@@ -7,6 +7,7 @@ from .change_price import ChangeListingPriceUseCase
 from .create_listing import CreateListingUseCase
 from .deactivate_listing import DeactivateListingUseCase
 from .delete_listing import DeleteListingUseCase
+from .search_listings import SearchListingsUseCase
 
 __all__ = [
     "CreateListingUseCase",
@@ -18,4 +19,5 @@ __all__ = [
     "DeactivateListingUseCase",
     "ArchiveListingUseCase",
     "DeleteListingUseCase",
+    "SearchListingsUseCase",
 ]

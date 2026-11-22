@@ -3,6 +3,7 @@ from dependency_injector import containers, providers
 from src.core.catalog.infrastructure.attribute_validation import (
     AttributeValidationService,
 )
+from src.core.catalog.infrastructure.catalog_service import CatalogService
 from src.core.catalog.infrastructure.query import CatalogQueryService
 from src.core.catalog.infrastructure.repositories.attributes import (
     AttributeDefinitionRepository,
@@ -34,5 +35,13 @@ class CatalogContainer(containers.DeclarativeContainer):
 
     attribute_validation = providers.Factory(
         AttributeValidationService,
+        link_repo=subcategory_attribute_repository,
+        subcategory_repo=subcategory_repository,
+    )
+
+    catalog_service = providers.Factory(
+        CatalogService,
+        category_repo=category_repository,
+        subcategory_repo=subcategory_repository,
         link_repo=subcategory_attribute_repository,
     )

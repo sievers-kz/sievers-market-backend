@@ -4,7 +4,6 @@ from dependency_injector.wiring import Provide
 from fastapi import Depends
 
 from src.configuration.dependencies.container import ApplicationContainer
-from src.core.listing.application.services.listing_search import ListingSearchService
 from src.core.listing.application.usecases import (
     ActivateListingUseCase,
     ArchiveListingUseCase,
@@ -15,6 +14,7 @@ from src.core.listing.application.usecases import (
     CreateListingUseCase,
     DeactivateListingUseCase,
     DeleteListingUseCase,
+    SearchListingsUseCase,
 )
 from src.core.listing.infrastructure.query import ListingQueryService
 
@@ -63,12 +63,12 @@ DeleteListingUseCaseDependency = Annotated[
     Depends(Provide[ApplicationContainer.listing.delete_listing_usecase]),
 ]
 
-ListingSearchServiceDependency = Annotated[
-    ListingSearchService,
-    Depends(Provide[ApplicationContainer.listing.listing_search_service]),
-]
-
 ListingQueryServiceDependency = Annotated[
     ListingQueryService,
     Depends(Provide[ApplicationContainer.listing.query_service]),
+]
+
+SearchListingsUseCaseDependency = Annotated[
+    SearchListingsUseCase,
+    Depends(Provide[ApplicationContainer.listing.search_listings_usecase]),
 ]

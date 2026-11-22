@@ -1,6 +1,7 @@
+from enum import StrEnum
 from typing import Tuple, Type
 
-from pydantic import Field, computed_field
+from pydantic import Field, computed_field, model_validator
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -55,7 +56,21 @@ class MinioConfig(BaseConfig):
     access_key: str = Field(alias="MINIO_ROOT_USER")
     secret_key: str = Field(alias="MINIO_ROOT_PASSWORD")
     bucket_name: str = Field(alias="MINIO_BUCKET_NAME")
+    # Только для внутреннего соединения бэкенда с MinIO (внутри Docker-сети обычно false).
     secure_config: bool = Field(alias="MINIO_SECURE_CONFIG")
+    # Адрес для подписи ссылок, которые открывает браузер. Если не задан, берётся внутренний.
+    public_endpoint: str | None = Field(None, alias="MINIO_PUBLIC_ENDPOINT")
+    public_secure: bool | None = Field(None, alias="MINIO_PUBLIC_SECURE")
+    # Регион нужен, чтобы подпись ссылки считалась локально, без сетевого запроса к MinIO.
+    region: str = Field("us-east-1", alias="MINIO_REGION")
+
+    @model_validator(mode="after")
+    def _fill_public_from_internal(self) -> "MinioConfig":
+        if self.public_endpoint is None:
+            self.public_endpoint = self.endpoint
+        if self.public_secure is None:
+            self.public_secure = self.secure_config
+        return self
 
 
 class RedisConfig(BaseConfig):
@@ -75,8 +90,16 @@ class SentryConfig(BaseConfig):
     mode: str = Field(alias="MODE")
 
 
-class KGDSettings(BaseConfig):
-    portal_token: str = Field(alias="KGD_PORTAL_TOKEN")
+class TaxpayerProvider(StrEnum):
+    DADATA = "dadata"
+    KGD = "kgd"
+    MOCK = "mock"
+
+
+class TaxpayerRegistrySettings(BaseConfig):
+    source: TaxpayerProvider = Field(TaxpayerProvider.DADATA, alias="TAXPAYER_PROVIDER")
+    dadata_api_key: str | None = Field(None, alias="DADATA_API_KEY")
+    kgd_portal_token: str | None = Field(None, alias="KGD_PORTAL_TOKEN")
 
 
 class MeilisearchConfig(BaseConfig):
@@ -94,5 +117,5 @@ class ApplicationSettings(BaseConfig):
     redis_config: RedisConfig = Field(default_factory=RedisConfig)
     resend_config: ResendSettings = Field(default_factory=ResendSettings)
     sentry_config: SentryConfig = Field(default_factory=SentryConfig)
-    kgd_settings: KGDSettings = Field(default_factory=KGDSettings)
+    taxpayer_registry_config: TaxpayerRegistrySettings = Field(default_factory=TaxpayerRegistrySettings)
     meilisearch_config: MeilisearchConfig = Field(default_factory=MeilisearchConfig)

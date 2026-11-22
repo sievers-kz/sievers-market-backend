@@ -18,7 +18,6 @@ from src.core.iam.application.usecases import (
     ResendConfirmationCodeUseCase,
     ResetPasswordUseCase,
 )
-from src.core.iam.infrastructure.services.query_service import GetMeQueryService
 from src.core.shared.infrastructure.services.api_session_service import (
     APISessionService,
 )
@@ -27,8 +26,6 @@ APISessionServiceDependency = Annotated[
     APISessionService,
     Depends(Provide[ApplicationContainer.shared.api_session_service]),
 ]
-
-GetMeQueryServiceDependency = Annotated[GetMeQueryService, Depends(Provide[ApplicationContainer.iam.query_service])]
 
 CreateAccountUseCaseDependency = Annotated[
     CreateAccountUseCase,

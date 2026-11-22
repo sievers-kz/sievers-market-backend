@@ -12,7 +12,6 @@ from src.core.iam.presentation.dependencies import (
     ConfirmPassworChangeUseCaseDependency,
     CreateAccountUseCaseDependency,
     ForgotPasswordUseCaseDependency,
-    GetMeQueryServiceDependency,
     LoginUserUseCaseDependency,
     LogoutUserUseCaseDependency,
     RefreshTokenUseCaseDependency,
@@ -26,7 +25,6 @@ from src.core.iam.presentation.documentation import (
     CONFIRM_EMAIL_CHANGE_DOC,
     CONFIRM_PASSWORD_CHANGE_DOC,
     CREATE_NEW_USER_DOC,
-    GET_ME_DOC,
     LOGIN_USER_DOC,
     LOGOUT_USER_DOC,
     REFRESH_TOKEN_DOC,
@@ -45,7 +43,6 @@ from src.core.iam.presentation.dto import (
     ForgotPasswordData,
     LoginAccount,
     LoginResponse,
-    MeResponse,
     RefreshData,
     RequestPasswordChange,
     ResendCodeRequest,
@@ -55,22 +52,6 @@ from src.core.shared.presentation.dto import CurrentUser
 from src.core.shared.presentation.security import get_current_user
 
 iam = APIRouter(prefix="/api/v1/iam", tags=["IAM"])
-
-
-@iam.get(
-    "/me",
-    response_model=MeResponse,
-    operation_id=GET_ME_DOC.operation_id,
-    summary=GET_ME_DOC.summary,
-    responses=GET_ME_DOC.responses_doc,
-    description=GET_ME_DOC.description,
-)
-@inject
-async def get_me(
-    service: GetMeQueryServiceDependency,
-    current_user: CurrentUser = Security(get_current_user),
-):
-    return await service.get_me(current_user.id)
 
 
 @iam.post(

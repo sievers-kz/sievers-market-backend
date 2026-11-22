@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from src.configuration.database.connection import Base
 from src.configuration.settings.settings import PostgresSettings
 from src.core.catalog.infrastructure.models import Category, Rubric, Subcategory, AttributeDefinition, AttributeGroup, SubcategoryAttribute, UnitOfMeasure
-from src.core.customer.infrastructure.models import Customer
+from src.core.customer.infrastructure.models import Customer, Organization
 from src.core.iam.infrastructure.models import Account, Token
 from src.core.listing.infrastructure.models import Listing
 from src.core.media.infrastructure.models import Media
@@ -18,7 +18,6 @@ from src.core.references.infrastructure.models import (
     OriginCountry,
 )
 from src.core.shared.infrastructure.base_model import BaseModel
-from src.core.vendor.infrastructure.models import Vendor
 from src.core.admin.infrastructure.models import Admin
 
 # this is the Alembic Config object, which provides

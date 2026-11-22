@@ -6,9 +6,11 @@ from src.core.listing.infrastructure.models import Listing as ORMListing
 class ListingMapper:
     @staticmethod
     def to_orm(domain_model: DomainListing) -> ORMListing:
+        # None не передаём: явный NULL перебил бы `server_default` колонки.
+        extra = {"created_at": domain_model.created_at} if domain_model.created_at is not None else {}
         return ORMListing(
             id=domain_model.id,
-            owner_id=domain_model.owner_id,
+            organization_id=domain_model.organization_id,
             category_id=domain_model.category_id,
             subcategory_id=domain_model.subcategory_id,
             title=domain_model.title,
@@ -19,13 +21,14 @@ class ListingMapper:
             attributes=domain_model.attributes,
             gallery=domain_model.gallery.to_dicts(),
             status=domain_model.status,
+            **extra,
         )
 
     @staticmethod
     def to_domain(orm_model: ORMListing) -> DomainListing:
         return DomainListing(
             id=orm_model.id,
-            owner_id=orm_model.owner_id,
+            organization_id=orm_model.organization_id,
             category_id=orm_model.category_id,
             subcategory_id=orm_model.subcategory_id,
             title=orm_model.title,
@@ -36,4 +39,5 @@ class ListingMapper:
             attributes=orm_model.attributes,
             gallery=Gallery.from_dicts(orm_model.gallery),
             status=orm_model.status,
+            created_at=orm_model.created_at,
         )

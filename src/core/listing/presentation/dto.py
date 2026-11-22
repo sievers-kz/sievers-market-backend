@@ -1,7 +1,10 @@
+import math
+from datetime import datetime
+from enum import Enum
 from typing import Any
 from uuid import UUID
 
-from pydantic import ConfigDict, Field, field_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from src.core.listing.domain.entities import Listing
 from src.core.listing.domain.enums import ListingStatus
@@ -19,6 +22,7 @@ class ListingImage(DTO):
 
 
 class CreateListingRequest(DTO):
+    organization_id: UUID
     category_id: UUID
     subcategory_id: UUID
     title: str
@@ -68,8 +72,12 @@ class ListingSearchDocument(DTO):
     price: int
     currency: str
     city_id: str
+    category_id: str
     subcategory_id: str
     is_active: bool
+    description: str | None = None
+    # Unix-время в секундах: число сортируется в Meilisearch надёжнее строки с датой.
+    created_at: int | None = None
     model_config = ConfigDict(extra="allow")
 
     @classmethod
@@ -81,40 +89,162 @@ class ListingSearchDocument(DTO):
                 "price": listing.price,
                 "currency": listing.currency,
                 "city_id": str(listing.city_id),
+                "category_id": str(listing.category_id),
                 "subcategory_id": str(listing.subcategory_id),
                 "is_active": listing.status == ListingStatus.ACTIVE,
+                "description": listing.description,
+                "created_at": int(listing.created_at.timestamp()) if listing.created_at else None,
                 **attributes,
             }
         )
 
 
+class ListingSearchSort(str, Enum):
+    NEWEST = "newest"
+    PRICE_ASC = "price_asc"
+    PRICE_DESC = "price_desc"
+
+
+class NumericRange(DTO):
+    """Диапазон для числового атрибута; можно задать одну границу."""
+
+    min: float | None = None
+    max: float | None = None
+
+    @model_validator(mode="after")
+    def check_bounds(self) -> "NumericRange":
+        if self.min is None and self.max is None:
+            raise ValueError("Задайте хотя бы одну границу диапазона")
+        for bound in (self.min, self.max):
+            if bound is not None and not math.isfinite(bound):
+                raise ValueError("Границы диапазона должны быть конечными числами")
+        if self.min is not None and self.max is not None and self.min > self.max:
+            raise ValueError("Нижняя граница больше верхней")
+        return self
+
+
 class ListingSearchQuery(DTO):
     text: str | None = None
-    subcategory_id: str | None = None
-    city_id: str | None = None
-    price_min: int | None = None
-    price_max: int | None = None
-    attributes: dict[str, Any] = {}
-    page: int = 1
-    limit: int = 20
+    category_id: UUID | None = None
+    subcategory_id: UUID | None = None
+    city_id: UUID | None = None
+    price_min: int | None = Field(None, ge=0)
+    price_max: int | None = Field(None, ge=0)
+    # Ключи атрибутов допустимы только вместе с `subcategory_id`: фильтруемые атрибуты задаются подкатегорией.
+    attributes: dict[str, str | int | float | bool] = {}
+    # Диапазоны «от–до» для числовых атрибутов (`integer`, `float`), тоже только вместе с `subcategory_id`.
+    attribute_ranges: dict[str, NumericRange] = {}
+    # Без `sort`: при тексте порядок по релевантности, без текста сначала новые.
+    sort: ListingSearchSort | None = None
+    page: int = Field(1, ge=1)
+    limit: int = Field(20, ge=1, le=50)
+
+    @field_validator("attributes")
+    @classmethod
+    def reject_non_finite_numbers(cls, value: dict[str, str | int | float | bool]):
+        # NaN и Infinity не имеют записи в выражении фильтра Meilisearch.
+        for key, item in value.items():
+            if isinstance(item, float) and not math.isfinite(item):
+                raise ValueError(f"Значение атрибута {key} должно быть конечным числом")
+        return value
 
 
 class ListingCardResponse(DTO):
     id: UUID
-    display_owner_name: str
     subcategory: str
     title: str
     price: int
     currency: str
     city: str
     preview_image: UUID
+    created_at: datetime
+    organization_name: str | None = None
+    condition: str | None = None
+
+
+class MyListingsStatus(str, Enum):
+    """Статусы, доступные в фильтре «Мои объявления». Удалённые объявления владельцу не показываются."""
+
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    ARCHIVED = "archived"
+
+
+class MyListingsSort(str, Enum):
+    NEWEST = "newest"
+    OLDEST = "oldest"
+
+
+class MyListingCardResponse(DTO):
+    id: UUID
+    title: str | None
+    price: int | None
+    currency: str | None
+    status: ListingStatus
+    category: str
+    subcategory: str
+    organization_id: UUID
+    organization_name: str | None
+    city: str | None
+    preview_image: UUID | None
+    created_at: datetime
+
+
+class ListingSpecItem(DTO):
+    """Характеристика, готовая к показу.
+
+    `value`: подпись варианта, название из справочника, «Да»/«Нет» или число как есть
+    (число форматирует фронт, единица измерения отдельно в `unit`).
+    """
+
+    key: str
+    label: str
+    value: str | int | float
+    unit: str | None
+
+
+class ListingSpecGroup(DTO):
+    key: str
+    label: str
+    items: list[ListingSpecItem]
+
+
+class ListingSeller(DTO):
+    """Продавец: организация, от имени которой подано объявление.
+
+    Юрданные открытые (это сведения реестра). Телефон и email только маской: полные значения
+    отдаёт `GET /listing/{id}/contacts`.
+    `kind`: `individual` (ИП, `tax_id` это ИИН) или `company` (`tax_id` это БИН).
+    `is_registry_verified`: БИН/ИИН найден в реестре налогоплательщиков.
+    """
+
+    organization_id: UUID
+    name: str | None
+    legal_name: str | None
+    kind: str
+    form: str | None
+    tax_id: str
+    legal_address: str | None
+    is_registry_verified: bool
+    phone_masked: str | None
+    email_masked: str | None
+    logo_media_id: UUID | None
+
+
+class ListingContactsResponse(DTO):
+    """Полные контакты продавца. Отдельный запрос, чтобы их не было в HTML страницы."""
+
+    phone: str | None
+    email: str | None
 
 
 class ListingDetailResponse(DTO):
     id: UUID
+    # Это id организации, а не пользователя; оставлено для совместимости, то же значение в `seller.organization_id`.
     owner_id: UUID
-    contact_phone: str | None
-    display_owner_name: str
+    category_id: UUID
+    category: str
+    subcategory_id: UUID
     subcategory: str
     title: str
     price: int
@@ -123,6 +253,10 @@ class ListingDetailResponse(DTO):
     description: str | None
     gallery: list[UUID]
     attributes: dict[str, Any]
+    condition: str | None
+    created_at: datetime
+    seller: ListingSeller
+    specs: list[ListingSpecGroup]
 
     @field_validator("gallery", mode="before")
     @classmethod

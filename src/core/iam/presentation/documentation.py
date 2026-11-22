@@ -1,6 +1,5 @@
 from src.core.iam.domain.exceptions import (
     AccountAlreadyExistsError,
-    AccountNotFoundError,
     CompromisedPasswordError,
     EmailChangeRequestNotFoundError,
     EmailRequiredError,
@@ -17,23 +16,6 @@ from src.core.iam.domain.exceptions import (
     TokenExpiredError,
 )
 from src.core.shared.presentation.documentation import RouteDocs
-
-GET_ME_DOC = RouteDocs(
-    operation_id="getMe",
-    summary="Получить текущего пользователя",
-    description="""
-        Возвращает профиль аутентифицированного пользователя:
-        * `Customer` - Покупатель
-        * `Vendor` - Продавец
-        * `None` - Если онбординг еще не пройден.
-    """,
-    responses=(
-        AccountNotFoundError,
-        InvalidTokenError,
-        TokenExpiredError,
-        InvalidTokenTypeError,
-    ),
-)
 
 CREATE_NEW_USER_DOC = RouteDocs(
     operation_id="createNewUser",

@@ -9,19 +9,27 @@ from src.core.catalog.infrastructure.exceptions import CatalogNotFoundError
 from src.core.catalog.infrastructure.repositories.attributes import (
     SubcategoryAttributeRepository,
 )
+from src.core.catalog.infrastructure.repositories.categories import (
+    SubcategoryRepository,
+)
 
 
 class AttributeValidationService:
     def __init__(
         self,
         link_repo: SubcategoryAttributeRepository,
+        subcategory_repo: SubcategoryRepository,
     ):
         self._link_repo = link_repo
+        self._subcategory_repo = subcategory_repo
 
     async def validate(self, subcategory_id: UUID, raw_attributes: dict) -> dict:
-        links = await self._link_repo.get_with_definitions(subcategory_id)
-        if not links:
+        # Подкатегория без атрибутов допустима: пустой набор характеристик не ошибка.
+        # Отсутствие самой подкатегории проверяем отдельно.
+        if await self._subcategory_repo.get_by_id(subcategory_id) is None:
             raise CatalogNotFoundError(field=str(subcategory_id))
+
+        links = await self._link_repo.get_with_definitions(subcategory_id)
 
         fields = {}
         for link in links:
