@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.4.1](https://github.com/sievers-kz/sievers-market-backend/compare/v4.4.0...v4.4.1) (2026-11-23)
+
+
+### Documentation
+
+* архитектура, модули, ADR и CI/CD в README ([83158f8](https://github.com/sievers-kz/sievers-market-backend/commit/83158f8f20d2d5e98ec0d17b7326cdbf52e7338b))
+* архитектура, модули, ADR и CI/CD в README ([cded964](https://github.com/sievers-kz/sievers-market-backend/commit/cded9645c40a8b1c9d8344fd131fa13fe7f9ccda))
+* ссылки на живое API в README ([529453a](https://github.com/sievers-kz/sievers-market-backend/commit/529453a29067f7227723d3f794b20a6f0eadde6e))
+* ссылки на живое API в README ([d9df4ef](https://github.com/sievers-kz/sievers-market-backend/commit/d9df4ef3b441f4e55fb97a6767fe31d124daca3f))
+
 ## [4.4.0](https://github.com/sievers-kz/sievers-market-backend/compare/v4.3.0...v4.4.0) (2026-11-22)
 
 
