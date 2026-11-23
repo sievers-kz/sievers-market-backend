@@ -17,6 +17,12 @@ RESTful B2B агромаркетплейс для автоматизации т�
 
 **Витрина:** [market.sievers.kz](https://market.sievers.kz) (Next.js, репозиторий [sievers-market-frontend](https://github.com/sievers-kz/sievers-market-frontend)) работает поверх этого API.
 
+**Живое API:**
+| Окружение | Scalar | Swagger UI |
+|---|---|---|
+| production | [api.market.sievers.kz/scalar](https://api.market.sievers.kz/scalar) | [api.market.sievers.kz/docs](https://api.market.sievers.kz/docs) |
+| staging | [api-test.market.sievers.kz/scalar](https://api-test.market.sievers.kz/scalar) | [api-test.market.sievers.kz/docs](https://api-test.market.sievers.kz/docs) |
+
 ## Целевая архитектурная схема
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/architecture-schema-dark.png" width="688">
